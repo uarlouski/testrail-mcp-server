@@ -30,7 +30,7 @@
     "url": "https://github.com/uarlouski/testrail-mcp-server/issues"
   },
   "homepage": "https://github.com/uarlouski/testrail-mcp-server#readme",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.3",
     "axios": "^1.13.2",
