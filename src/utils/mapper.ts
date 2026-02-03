@@ -61,7 +61,7 @@ export function processCustomFields(
  * Parse dropdown options from field configs.
  * Format: "1, First\n2, Second\n3, Third"
  */
-function parseDropdownOptions(field: CaseField): Map<string, string> {
+export function parseDropdownOptions(field: CaseField): Map<string, string> {
     const options = new Map<string, string>();
 
     for (const config of field.configs) {

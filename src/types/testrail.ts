@@ -71,3 +71,9 @@ export interface CaseFieldConfig {
         items?: string;
     };
 }
+
+export interface Template {
+    id: number;
+    name: string;
+    is_default: boolean;
+}
