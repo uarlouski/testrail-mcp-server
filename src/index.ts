@@ -3,6 +3,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { TestRailClient } from "./client/testrail.js";
 import { getCaseTool } from "./tools/get_case.js";
+import { getCaseFieldsTool } from "./tools/get_case_fields.js";
+import { getTemplatesTool } from "./tools/get_templates.js";
+import { updateCaseTool } from "./tools/update_case.js";
 
 const TESTRAIL_INSTANCE_URL = process.env.TESTRAIL_INSTANCE_URL;
 const TESTRAIL_USERNAME = process.env.TESTRAIL_USERNAME;
@@ -20,14 +23,23 @@ const server = new McpServer({
 
 const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY);
 
-server.registerTool(
-    getCaseTool.name,
-    {
-        description: getCaseTool.description,
-        inputSchema: getCaseTool.parameters,
-    },
-    (args) => getCaseTool.handler(args, client)
-);
+const tools = [
+    getCaseTool,
+    getCaseFieldsTool,
+    getTemplatesTool,
+    updateCaseTool,
+]
+
+for (const tool of tools) {
+    server.registerTool(
+        tool.name,
+        {
+            description: tool.description,
+            inputSchema: tool.parameters,
+        },
+        (args: any) => tool.handler(args, client)
+    );
+}
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
