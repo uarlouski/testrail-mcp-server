@@ -1,4 +1,5 @@
 import { Case, CaseField } from "../types/testrail.js";
+import { sanitizeValue } from "./sanitizer.js";
 
 /**
  * Processes custom fields from a test case, converting system names to human-readable labels
@@ -42,14 +43,15 @@ export function processCustomFields(
         }
 
         const outputKey = fieldNameMap.get(key)!;
+        let finalValue = value;
 
         if (dropdownOptionsMap.has(key)) {
             const options = dropdownOptionsMap.get(key)!;
-            const stringValue = String(value);
-            result[outputKey] = options.get(stringValue) || value;
-        } else {
-            result[outputKey] = value;
+            const optionKey = String(value);
+            finalValue = options.get(optionKey) || value;
         }
+
+        result[outputKey] = sanitizeValue(finalValue);
     }
 
     return result;
