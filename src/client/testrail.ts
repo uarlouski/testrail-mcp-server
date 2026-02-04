@@ -1,11 +1,12 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
-import { Case, Section, Priority, CaseType, CaseField, Template } from "../types/testrail.js";
+import { Case, Section, Priority, CaseType, CaseField, Template, Project } from "../types/testrail.js";
 
 export class TestRailClient {
     private client: AxiosInstance;
     private prioritiesPromise: Promise<Priority[]> | null = null;
     private caseTypesPromise: Promise<CaseType[]> | null = null;
     private caseFieldsPromise: Promise<CaseField[]> | null = null;
+    private projectsPromise: Promise<Project[]> | null = null;
     private templatesPromiseMap: Map<string, Promise<Template[]>> = new Map();
 
     constructor(baseUrl: string, email: string, apiKey: string) {
@@ -67,6 +68,21 @@ export class TestRailClient {
 
     async updateCase(caseId: string, fields: Record<string, any>): Promise<Case> {
         return this.postRequest<Case>(`/index.php?/api/v2/update_case/${caseId}`, fields);
+    }
+
+    async createCase(sectionId: string, fields: Record<string, any>): Promise<Case> {
+        return this.postRequest<Case>(`/index.php?/api/v2/add_case/${sectionId}`, fields);
+    }
+
+    async getSections(projectId: string): Promise<Section[]> {
+        return this.makeRequest<Section[]>(`/index.php?/api/v2/get_sections/${projectId}`);
+    }
+
+    async getProjects(): Promise<Project[]> {
+        if (!this.projectsPromise) {
+            this.projectsPromise = this.makeRequest<Project[]>('/index.php?/api/v2/get_projects');
+        }
+        return this.projectsPromise;
     }
 
     private async makeRequest<T>(url: string): Promise<T> {
