@@ -31,6 +31,14 @@ export class TestRailClient {
         return this.makeRequest<Case>(`/index.php?/api/v2/get_case/${caseId}`);
     }
 
+    async getCases(projectId: string, sectionId?: string): Promise<Case[]> {
+        const url = sectionId
+            ? `/index.php?/api/v2/get_cases/${projectId}&section_id=${sectionId}`
+            : `/index.php?/api/v2/get_cases/${projectId}`;
+        const response = await this.makeRequest<{ cases: Case[] }>(url);
+        return response.cases;
+    }
+
     async getSection(sectionId: string): Promise<Section> {
         return this.makeRequest<Section>(`/index.php?/api/v2/get_section/${sectionId}`);
     }
@@ -75,12 +83,14 @@ export class TestRailClient {
     }
 
     async getSections(projectId: string): Promise<Section[]> {
-        return this.makeRequest<Section[]>(`/index.php?/api/v2/get_sections/${projectId}`);
+        const response = await this.makeRequest<{ sections: Section[] }>(`/index.php?/api/v2/get_sections/${projectId}`);
+        return response.sections;
     }
 
     async getProjects(): Promise<Project[]> {
         if (!this.projectsPromise) {
-            this.projectsPromise = this.makeRequest<Project[]>('/index.php?/api/v2/get_projects');
+            this.projectsPromise = this.makeRequest<{ projects: Project[] }>('/index.php?/api/v2/get_projects')
+                .then(response => response.projects);
         }
         return this.projectsPromise;
     }
