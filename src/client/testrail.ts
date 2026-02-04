@@ -78,6 +78,13 @@ export class TestRailClient {
         return this.postRequest<Case>(`/index.php?/api/v2/update_case/${caseId}`, fields);
     }
 
+    async updateCases(suiteId: string, caseIds: number[], fields: Record<string, any>): Promise<Case[]> {
+        return this.postRequest<Case[]>(`/index.php?/api/v2/update_cases/${suiteId}`, {
+            case_ids: caseIds,
+            ...fields,
+        });
+    }
+
     async createCase(sectionId: string, fields: Record<string, any>): Promise<Case> {
         return this.postRequest<Case>(`/index.php?/api/v2/add_case/${sectionId}`, fields);
     }
