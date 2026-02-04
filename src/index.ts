@@ -6,6 +6,9 @@ import { getCaseTool } from "./tools/get_case.js";
 import { getCaseFieldsTool } from "./tools/get_case_fields.js";
 import { getTemplatesTool } from "./tools/get_templates.js";
 import { updateCaseTool } from "./tools/update_case.js";
+import { createCaseTool } from "./tools/create_case.js";
+import { getSectionsTool } from "./tools/get_sections.js";
+import { getProjectsTool } from "./tools/get_projects.js";
 
 const TESTRAIL_INSTANCE_URL = process.env.TESTRAIL_INSTANCE_URL;
 const TESTRAIL_USERNAME = process.env.TESTRAIL_USERNAME;
@@ -24,10 +27,13 @@ const server = new McpServer({
 const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY);
 
 const tools = [
+    getProjectsTool,
     getCaseTool,
     getCaseFieldsTool,
     getTemplatesTool,
+    getSectionsTool,
     updateCaseTool,
+    createCaseTool,
 ]
 
 for (const tool of tools) {

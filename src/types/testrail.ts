@@ -77,3 +77,11 @@ export interface Template {
     name: string;
     is_default: boolean;
 }
+
+export interface Project {
+    id: number;
+    name: string;
+    announcement: string | null;
+    is_completed: boolean;
+    suite_mode: number;
+}
