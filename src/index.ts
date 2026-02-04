@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { TestRailClient } from "./client/testrail.js";
 import { getCaseTool } from "./tools/get_case.js";
+import { getCasesTool } from "./tools/get_cases.js";
 import { getCaseFieldsTool } from "./tools/get_case_fields.js";
 import { getTemplatesTool } from "./tools/get_templates.js";
 import { updateCaseTool } from "./tools/update_case.js";
@@ -29,6 +30,7 @@ const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TEST
 const tools = [
     getProjectsTool,
     getCaseTool,
+    getCasesTool,
     getCaseFieldsTool,
     getTemplatesTool,
     getSectionsTool,
