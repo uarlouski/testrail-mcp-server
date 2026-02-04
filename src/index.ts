@@ -7,6 +7,7 @@ import { getCasesTool } from "./tools/get_cases.js";
 import { getCaseFieldsTool } from "./tools/get_case_fields.js";
 import { getTemplatesTool } from "./tools/get_templates.js";
 import { updateCaseTool } from "./tools/update_case.js";
+import { updateCasesTool } from "./tools/update_cases.js";
 import { createCaseTool } from "./tools/create_case.js";
 import { getSectionsTool } from "./tools/get_sections.js";
 import { getProjectsTool } from "./tools/get_projects.js";
@@ -35,6 +36,7 @@ const tools = [
     getTemplatesTool,
     getSectionsTool,
     updateCaseTool,
+    updateCasesTool,
     createCaseTool,
 ]
 
