@@ -5,7 +5,7 @@ import { Case } from '../../src/types/testrail.js';
 
 describe('update_cases tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
-    let updateCasesMock: jest.Mock<(suiteId: string, caseIds: number[], fields: Record<string, any>) => Promise<Case[]>>;
+    let updateCasesMock: jest.Mock<(caseIds: number[], fields: Record<string, any>) => Promise<Case[]>>;
 
     const mockUpdatedCases: Case[] = [
         {
@@ -29,7 +29,7 @@ describe('update_cases tool', () => {
     ];
 
     beforeEach(() => {
-        updateCasesMock = jest.fn<(suiteId: string, caseIds: number[], fields: Record<string, any>) => Promise<Case[]>>()
+        updateCasesMock = jest.fn<(caseIds: number[], fields: Record<string, any>) => Promise<Case[]>>()
             .mockResolvedValue(mockUpdatedCases);
 
         mockClient = {
@@ -41,14 +41,13 @@ describe('update_cases tool', () => {
         expect(updateCasesTool.name).toBe('update_cases');
         expect(updateCasesTool.description).toContain('Bulk');
         expect(updateCasesTool.parameters).toBeDefined();
-        expect(updateCasesTool.parameters.suite_id).toBeDefined();
         expect(updateCasesTool.parameters.case_ids).toBeDefined();
         expect(updateCasesTool.parameters.fields).toBeDefined();
     });
 
     test('handler updates cases and returns success response', async () => {
         const result = await updateCasesTool.handler(
-            { suite_id: '1', case_ids: [1, 2, 3], fields: { priority_id: 3 } },
+            { case_ids: [1, 2, 3], fields: { priority_id: 3 } },
             mockClient
         );
 
@@ -62,22 +61,22 @@ describe('update_cases tool', () => {
         expect(parsed.message).toContain('3 test cases');
     });
 
-    test('passes suite_id, case_ids and fields correctly', async () => {
+    test('passes case_ids and fields correctly', async () => {
         const fields = { priority_id: 2, type_id: 1 };
 
         await updateCasesTool.handler(
-            { suite_id: '5', case_ids: [10, 20, 30], fields },
+            { case_ids: [10, 20, 30], fields },
             mockClient
         );
 
-        expect(mockClient.updateCases).toHaveBeenCalledWith('5', [10, 20, 30], fields);
+        expect(mockClient.updateCases).toHaveBeenCalledWith([10, 20, 30], fields);
     });
 
     test('handler returns error on failure', async () => {
         updateCasesMock.mockRejectedValue(new Error('API Error'));
 
         const result = await updateCasesTool.handler(
-            { suite_id: '1', case_ids: [1, 2], fields: { priority_id: 2 } },
+            { case_ids: [1, 2], fields: { priority_id: 2 } },
             mockClient
         );
 

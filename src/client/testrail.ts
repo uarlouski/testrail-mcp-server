@@ -1,6 +1,14 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
 import { Case, Section, Priority, CaseType, CaseField, Template, Project } from "../types/testrail.js";
 
+interface PaginatedCasesResponse {
+    cases: Case[];
+    _links: { next: string | null };
+}
+
+const API_INDEX = '/index.php?';
+const API_BASE_V2 = `${API_INDEX}/api/v2`;
+
 export class TestRailClient {
     private client: AxiosInstance;
     private prioritiesPromise: Promise<Priority[]> | null = null;
@@ -28,38 +36,60 @@ export class TestRailClient {
     }
 
     async getCase(caseId: string): Promise<Case> {
-        return this.makeRequest<Case>(`/index.php?/api/v2/get_case/${caseId}`);
+        return this.makeRequest<Case>(`${API_BASE_V2}/get_case/${caseId}`);
     }
 
-    async getCases(projectId: string, sectionId?: string): Promise<Case[]> {
-        const url = sectionId
-            ? `/index.php?/api/v2/get_cases/${projectId}&section_id=${sectionId}`
-            : `/index.php?/api/v2/get_cases/${projectId}`;
-        const response = await this.makeRequest<{ cases: Case[] }>(url);
-        return response.cases;
+    async getCases(projectId: string, sectionId?: string, filter?: Record<string, string>): Promise<Case[]> {
+        let url = `${API_BASE_V2}/get_cases/${projectId}`;
+
+        if (sectionId) {
+            url += `&section_id=${sectionId}`;
+        }
+
+        if (filter) {
+            for (const [key, value] of Object.entries(filter)) {
+                url += `&${key}=${encodeURIComponent(value)}`;
+            }
+        }
+
+        const allCases: Case[] = [];
+        let nextUrl: string | null = url;
+
+        while (nextUrl) {
+            const response: PaginatedCasesResponse = await this.makeRequest<PaginatedCasesResponse>(nextUrl);
+
+            allCases.push(...response.cases);
+
+            nextUrl = response._links?.next;
+            if (nextUrl) {
+                nextUrl = `${API_INDEX}${nextUrl}`;
+            }
+        }
+
+        return allCases;
     }
 
     async getSection(sectionId: string): Promise<Section> {
-        return this.makeRequest<Section>(`/index.php?/api/v2/get_section/${sectionId}`);
+        return this.makeRequest<Section>(`${API_BASE_V2}/get_section/${sectionId}`);
     }
 
     async getPriorities(): Promise<Priority[]> {
         if (!this.prioritiesPromise) {
-            this.prioritiesPromise = this.makeRequest<Priority[]>('/index.php?/api/v2/get_priorities');
+            this.prioritiesPromise = this.makeRequest<Priority[]>(`${API_BASE_V2}/get_priorities`);
         }
         return this.prioritiesPromise;
     }
 
     async getCaseTypes(): Promise<CaseType[]> {
         if (!this.caseTypesPromise) {
-            this.caseTypesPromise = this.makeRequest<CaseType[]>('/index.php?/api/v2/get_case_types');
+            this.caseTypesPromise = this.makeRequest<CaseType[]>(`${API_BASE_V2}/get_case_types`);
         }
         return this.caseTypesPromise;
     }
 
     async getCaseFields(): Promise<CaseField[]> {
         if (!this.caseFieldsPromise) {
-            this.caseFieldsPromise = this.makeRequest<CaseField[]>('/index.php?/api/v2/get_case_fields');
+            this.caseFieldsPromise = this.makeRequest<CaseField[]>(`${API_BASE_V2}/get_case_fields`);
         }
         return this.caseFieldsPromise;
     }
@@ -68,35 +98,40 @@ export class TestRailClient {
         if (!this.templatesPromiseMap.has(projectId)) {
             this.templatesPromiseMap.set(
                 projectId,
-                this.makeRequest<Template[]>(`/index.php?/api/v2/get_templates/${projectId}`)
+                this.makeRequest<Template[]>(`${API_BASE_V2}/get_templates/${projectId}`)
             );
         }
         return this.templatesPromiseMap.get(projectId)!;
     }
 
     async updateCase(caseId: string, fields: Record<string, any>): Promise<Case> {
-        return this.postRequest<Case>(`/index.php?/api/v2/update_case/${caseId}`, fields);
+        return this.postRequest<Case>(`${API_BASE_V2}/update_case/${caseId}`, fields);
     }
 
-    async updateCases(suiteId: string, caseIds: number[], fields: Record<string, any>): Promise<Case[]> {
-        return this.postRequest<Case[]>(`/index.php?/api/v2/update_cases/${suiteId}`, {
+    async updateCases(caseIds: number[], fields: Record<string, any>): Promise<Case[]> {
+        // Assume the project is operating in single suite mode, get suite_id from the first case
+        const caseData = await this.getCase(String(caseIds[0]));
+
+        const response = await this.postRequest<{ updated_cases: Case[] }>(`${API_BASE_V2}/update_cases/${caseData.suite_id}`, {
             case_ids: caseIds,
             ...fields,
         });
+
+        return response.updated_cases;
     }
 
     async createCase(sectionId: string, fields: Record<string, any>): Promise<Case> {
-        return this.postRequest<Case>(`/index.php?/api/v2/add_case/${sectionId}`, fields);
+        return this.postRequest<Case>(`${API_BASE_V2}/add_case/${sectionId}`, fields);
     }
 
     async getSections(projectId: string): Promise<Section[]> {
-        const response = await this.makeRequest<{ sections: Section[] }>(`/index.php?/api/v2/get_sections/${projectId}`);
+        const response = await this.makeRequest<{ sections: Section[] }>(`${API_BASE_V2}/get_sections/${projectId}`);
         return response.sections;
     }
 
     async getProjects(): Promise<Project[]> {
         if (!this.projectsPromise) {
-            this.projectsPromise = this.makeRequest<{ projects: Project[] }>('/index.php?/api/v2/get_projects')
+            this.projectsPromise = this.makeRequest<{ projects: Project[] }>(`${API_BASE_V2}/get_projects`)
                 .then(response => response.projects);
         }
         return this.projectsPromise;
