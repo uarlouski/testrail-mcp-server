@@ -5,7 +5,7 @@ import { Case } from '../../src/types/testrail.js';
 
 describe('get_cases tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
-    let getCasesMock: jest.Mock<(projectId: string, sectionId?: string) => Promise<Case[]>>;
+    let getCasesMock: jest.Mock<(projectId: string, sectionId?: string, filter?: Record<string, string>) => Promise<Case[]>>;
 
     const mockCases: Case[] = [
         {
@@ -29,7 +29,7 @@ describe('get_cases tool', () => {
     ];
 
     beforeEach(() => {
-        getCasesMock = jest.fn<(projectId: string, sectionId?: string) => Promise<Case[]>>()
+        getCasesMock = jest.fn<(projectId: string, sectionId?: string, filter?: Record<string, string>) => Promise<Case[]>>()
             .mockResolvedValue(mockCases);
 
         mockClient = {
@@ -43,6 +43,7 @@ describe('get_cases tool', () => {
         expect(getCasesTool.parameters).toBeDefined();
         expect(getCasesTool.parameters.project_id).toBeDefined();
         expect(getCasesTool.parameters.section_id).toBeDefined();
+        expect(getCasesTool.parameters.filter).toBeDefined();
         expect(getCasesTool.parameters.fields).toBeDefined();
     });
 
@@ -54,13 +55,20 @@ describe('get_cases tool', () => {
 
         const parsed = JSON.parse(result.content[0].text);
         expect(parsed.cases).toHaveLength(3);
-        expect(mockClient.getCases).toHaveBeenCalledWith('1', undefined);
+        expect(mockClient.getCases).toHaveBeenCalledWith('1', undefined, undefined);
     });
 
     test('passes section_id when provided', async () => {
         await getCasesTool.handler({ project_id: '1', section_id: '2' }, mockClient);
 
-        expect(mockClient.getCases).toHaveBeenCalledWith('1', '2');
+        expect(mockClient.getCases).toHaveBeenCalledWith('1', '2', undefined);
+    });
+
+    test('passes filter when provided', async () => {
+        const filter = { priority_id: '1,2', type_id: '3' };
+        await getCasesTool.handler({ project_id: '1', filter }, mockClient);
+
+        expect(mockClient.getCases).toHaveBeenCalledWith('1', undefined, filter);
     });
 
     test('returns correct case structure', async () => {
@@ -70,11 +78,13 @@ describe('get_cases tool', () => {
         expect(parsed.cases[0]).toEqual({
             id: 1,
             title: 'Login test',
+            suite_id: 1,
         });
 
         expect(parsed.cases[2]).toEqual({
             id: 3,
             title: 'Registration test',
+            suite_id: 1,
         });
     });
 
@@ -88,6 +98,7 @@ describe('get_cases tool', () => {
         expect(parsed.cases[0]).toEqual({
             id: 1,
             title: 'Login test',
+            suite_id: 1,
             priority_id: 2,
             type_id: 1,
             custom_automation_status: 1,
@@ -96,6 +107,7 @@ describe('get_cases tool', () => {
         expect(parsed.cases[1]).toEqual({
             id: 2,
             title: 'Logout test',
+            suite_id: 1,
             priority_id: 3,
             type_id: 1,
             custom_automation_status: 2,
@@ -112,6 +124,7 @@ describe('get_cases tool', () => {
         expect(parsed.cases[0]).toEqual({
             id: 1,
             title: 'Login test',
+            suite_id: 1,
             priority_id: 2,
         });
     });

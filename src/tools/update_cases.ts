@@ -3,7 +3,6 @@ import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition, withErrorHandling } from "../types/custom.js";
 
 const parameters = {
-    suite_id: z.string().describe("The ID of the test suite containing the cases"),
     case_ids: z.array(z.number()).describe("Array of case IDs to update (e.g. [123, 456, 789])"),
     fields: z.record(z.string(), z.any()).describe("Object containing fields to update for ALL specified cases. Use get_case_fields to see available fields. Example: {\"priority_id\": 2, \"type_id\": 1}"),
 };
@@ -12,8 +11,8 @@ export const updateCasesTool: ToolDefinition<typeof parameters, TestRailClient> 
     name: "update_cases",
     description: "Bulk update multiple test cases with the same field values. More efficient than calling update_case multiple times. All cases will receive the same field values.",
     parameters,
-    handler: withErrorHandling<typeof parameters, TestRailClient>(async ({ suite_id, case_ids, fields }, client) => {
-        const updatedCases = await client.updateCases(suite_id, case_ids, fields);
+    handler: withErrorHandling<typeof parameters, TestRailClient>(async ({ case_ids, fields }, client) => {
+        const updatedCases = await client.updateCases(case_ids, fields);
 
         return {
             content: [
