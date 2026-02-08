@@ -10,7 +10,7 @@ const parameters = {
 
 export const createCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "create_case",
-    description: "Create a new test case in TestRail. Requires section_id and title. Use get_case_fields to see all available fields and get_templates to understand template options.",
+    description: "Create a new test case in TestRail. IMPORTANT: Before creating a case, first call get_templates to discover available templates for the project, then use get_case_fields to see which fields are available for the chosen template. Requires section_id and title.",
     parameters,
     handler: withErrorHandling<typeof parameters, TestRailClient>(async ({ section_id, title, fields }, client) => {
         const caseData = {
