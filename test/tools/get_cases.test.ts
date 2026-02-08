@@ -139,4 +139,55 @@ describe('get_cases tool', () => {
             isError: true
         });
     });
+
+    test('filters cases using where clause with single condition', async () => {
+        const result = await getCasesTool.handler(
+            { project_id: '1', where: { custom_automation_status: 1 } },
+            mockClient
+        );
+        const parsed = JSON.parse(result.content[0].text);
+
+        expect(parsed.cases).toHaveLength(1);
+        expect(parsed.cases[0].id).toBe(1);
+        expect(parsed.cases[0].title).toBe('Login test');
+    });
+
+    test('filters cases using where clause with multiple conditions', async () => {
+        const result = await getCasesTool.handler(
+            { project_id: '1', where: { custom_automation_status: 2, priority_id: 3 } },
+            mockClient
+        );
+        const parsed = JSON.parse(result.content[0].text);
+
+        expect(parsed.cases).toHaveLength(1);
+        expect(parsed.cases[0].id).toBe(2);
+        expect(parsed.cases[0].title).toBe('Logout test');
+    });
+
+    test('returns empty array when where clause matches no cases', async () => {
+        const result = await getCasesTool.handler(
+            { project_id: '1', where: { custom_automation_status: 999 } },
+            mockClient
+        );
+        const parsed = JSON.parse(result.content[0].text);
+
+        expect(parsed.cases).toHaveLength(0);
+    });
+
+    test('combines where clause with fields parameter', async () => {
+        const result = await getCasesTool.handler(
+            { project_id: '1', where: { priority_id: 2 }, fields: ['priority_id', 'custom_automation_status'] },
+            mockClient
+        );
+        const parsed = JSON.parse(result.content[0].text);
+
+        expect(parsed.cases).toHaveLength(1);
+        expect(parsed.cases[0]).toEqual({
+            id: 1,
+            title: 'Login test',
+            suite_id: 1,
+            priority_id: 2,
+            custom_automation_status: 1
+        });
+    });
 });

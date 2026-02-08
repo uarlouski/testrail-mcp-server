@@ -135,4 +135,66 @@ describe('get_case tool', () => {
             isError: true
         });
     });
+
+    test('handler returns "Unknown" when caseType is not found', async () => {
+        const mockCase: Case = {
+            id: 123, title: 'My Case', template_id: 1,
+            section_id: 456, type_id: 999, priority_id: 3,
+            milestone_id: null, refs: null, created_by: 1, created_on: 1700000000,
+            updated_by: 1, updated_on: 1700000000, estimate: null, estimate_forecast: null,
+            suite_id: 1, display_order: 1, is_deleted: 0, labels: []
+        };
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 456, name: 'Section', description: null, parent_id: null, depth: 0, display_order: 1, suite_id: 1 });
+        getCaseTypesMock.mockResolvedValue([{ id: 1, name: 'Automated', is_default: false }]);
+        getPrioritiesMock.mockResolvedValue([{ id: 3, name: 'High', priority: 3, short_name: 'High', is_default: false }]);
+
+        const result = await getCaseTool.handler({ case_id: '123' }, mockClient);
+        const parsed = JSON.parse(result.content[0].text);
+
+        expect(parsed.type).toBe('Unknown');
+        expect(parsed.priority).toBe('High');
+    });
+
+    test('handler returns "Unknown" when priority is not found', async () => {
+        const mockCase: Case = {
+            id: 123, title: 'My Case', template_id: 1,
+            section_id: 456, type_id: 1, priority_id: 999,
+            milestone_id: null, refs: null, created_by: 1, created_on: 1700000000,
+            updated_by: 1, updated_on: 1700000000, estimate: null, estimate_forecast: null,
+            suite_id: 1, display_order: 1, is_deleted: 0, labels: []
+        };
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 456, name: 'Section', description: null, parent_id: null, depth: 0, display_order: 1, suite_id: 1 });
+        getCaseTypesMock.mockResolvedValue([{ id: 1, name: 'Automated', is_default: false }]);
+        getPrioritiesMock.mockResolvedValue([{ id: 3, name: 'High', priority: 3, short_name: 'High', is_default: false }]);
+
+        const result = await getCaseTool.handler({ case_id: '123' }, mockClient);
+        const parsed = JSON.parse(result.content[0].text);
+
+        expect(parsed.type).toBe('Automated');
+        expect(parsed.priority).toBe('Unknown');
+    });
+
+    test('handler uses empty array when labels is undefined', async () => {
+        const mockCase: Case = {
+            id: 123, title: 'My Case', template_id: 1,
+            section_id: 456, type_id: 1, priority_id: 3,
+            milestone_id: null, refs: null, created_by: 1, created_on: 1700000000,
+            updated_by: 1, updated_on: 1700000000, estimate: null, estimate_forecast: null,
+            suite_id: 1, display_order: 1, is_deleted: 0, labels: undefined as any
+        };
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 456, name: 'Section', description: null, parent_id: null, depth: 0, display_order: 1, suite_id: 1 });
+        getCaseTypesMock.mockResolvedValue([{ id: 1, name: 'Automated', is_default: false }]);
+        getPrioritiesMock.mockResolvedValue([{ id: 3, name: 'High', priority: 3, short_name: 'High', is_default: false }]);
+
+        const result = await getCaseTool.handler({ case_id: '123' }, mockClient);
+        const parsed = JSON.parse(result.content[0].text);
+
+        expect(parsed.labels).toEqual([]);
+    });
 });

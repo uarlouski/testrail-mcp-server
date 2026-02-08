@@ -87,4 +87,26 @@ describe('processCustomFields', () => {
         const result = processCustomFields(input, mockCaseFields);
         expect(result.custom_unknown_field).toBe('some value'); // Kept as-is with original key
     });
+
+    test('throws error when testCase is null', () => {
+        expect(() => processCustomFields(null as any, mockCaseFields)).toThrow('Test case is undefined or null');
+    });
+
+    test('throws error when testCase is undefined', () => {
+        expect(() => processCustomFields(undefined as any, mockCaseFields)).toThrow('Test case is undefined or null');
+    });
+
+    test('returns original value when dropdown option is not found', () => {
+        const input: Case = {
+            id: 1, title: 'Foo', template_id: 1,
+            section_id: 0, type_id: 0, priority_id: 0,
+            custom_case_automation_priority: 999, // Unknown option ID
+            display_order: 1, suite_id: 1, created_by: 1, created_on: 1, updated_by: 1, updated_on: 1,
+            is_deleted: 0, refs: null, labels: [],
+        } as unknown as Case;
+
+        const result = processCustomFields(input, mockCaseFields);
+        expect(result.automation_priority).toBe(999); // Falls back to original value
+    });
 });
+
