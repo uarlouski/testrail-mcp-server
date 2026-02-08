@@ -149,5 +149,57 @@ describe('get_case_fields tool', () => {
             isError: true
         });
     });
+
+    test('includes template_ids for template-specific fields', async () => {
+        const templateSpecificFields: CaseField[] = [
+            {
+                id: 5,
+                name: 'steps',
+                system_name: 'custom_steps',
+                label: 'Steps',
+                type_id: 3,
+                template_ids: [1, 2],
+                include_all: false,
+                is_active: true,
+                display_order: 5,
+                description: 'Test steps',
+                configs: []
+            }
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(templateSpecificFields);
+
+        const result = await getCaseFieldsTool.handler({}, mockClient);
+        const parsed = JSON.parse(result.content[0].text);
+
+        const stepsField = parsed.fields.find((f: any) => f.system_name === 'custom_steps');
+        expect(stepsField.template_ids).toEqual([1, 2]);
+    });
+
+    test('handles unknown field type gracefully', async () => {
+        const unknownTypeFields: CaseField[] = [
+            {
+                id: 6,
+                name: 'unknown_type',
+                system_name: 'custom_unknown_type',
+                label: 'Unknown Type Field',
+                type_id: 999,
+                template_ids: [],
+                include_all: true,
+                is_active: true,
+                display_order: 6,
+                description: null,
+                configs: []
+            }
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(unknownTypeFields);
+
+        const result = await getCaseFieldsTool.handler({}, mockClient);
+        const parsed = JSON.parse(result.content[0].text);
+
+        const unknownField = parsed.fields.find((f: any) => f.system_name === 'custom_unknown_type');
+        expect(unknownField.type).toBe('Unknown (999)');
+    });
 });
 
