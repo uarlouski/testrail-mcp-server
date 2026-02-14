@@ -11,6 +11,7 @@ import { updateCasesTool } from "./tools/update_cases.js";
 import { createCaseTool } from "./tools/create_case.js";
 import { getSectionsTool } from "./tools/get_sections.js";
 import { getProjectsTool } from "./tools/get_projects.js";
+import { removeNullish } from "./utils/sanitizer.js";
 
 const TESTRAIL_INSTANCE_URL = process.env.TESTRAIL_INSTANCE_URL;
 const TESTRAIL_USERNAME = process.env.TESTRAIL_USERNAME;
@@ -47,7 +48,26 @@ for (const tool of tools) {
             description: tool.description,
             inputSchema: tool.parameters,
         },
-        (args: any) => tool.handler(args, client)
+        async (args: any) => {
+            try {
+                const output: Record<string, any> = await tool.handler(args, client);
+                const sanitized = removeNullish(output);
+
+                return {
+                    content: [
+                        {
+                            type: "text" as const,
+                            text: JSON.stringify(sanitized, null, 2),
+                        },
+                    ],
+                } as any;
+            } catch (error: any) {
+                return {
+                    content: [{ type: "text", text: `Error: ${error.message}` }],
+                    isError: true,
+                };
+            }
+        }
     );
 }
 

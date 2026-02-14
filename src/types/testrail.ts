@@ -1,87 +1,87 @@
-export interface Case {
-    id: number;
-    title: string;
-    section_id: number;
-    template_id: number;
-    type_id: number;
-    priority_id: number;
-    milestone_id: number | null;
-    refs: string | null;
-    created_by: number;
-    created_on: number;
-    updated_by: number;
-    updated_on: number;
-    estimate: string | null;
-    estimate_forecast: string | null;
-    suite_id: number;
-    display_order: number;
-    is_deleted: number;
-    labels: any[];
-    [key: string]: any;
-}
+import { z } from "zod";
 
-export interface Section {
-    id: number;
-    name: string;
-    description: string | null;
-    parent_id: number | null;
-    depth: number;
-    display_order: number;
-    suite_id: number;
-}
+export const CaseFieldConfigSchema = z.object({
+    options: z.object({
+        default_value: z.string().optional(),
+        is_required: z.boolean().optional(),
+        items: z.string().optional(),
+    }),
+});
 
-export interface Priority {
-    id: number;
-    is_default: boolean;
-    name: string;
-    priority: number;
-    short_name: string;
-}
+export type CaseFieldConfig = z.infer<typeof CaseFieldConfigSchema>;
 
-export interface CaseType {
-    id: number;
-    is_default: boolean;
-    name: string;
-}
+export const CaseFieldSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    system_name: z.string(),
+    label: z.string(),
+    type_id: z.number(),
+    template_ids: z.array(z.number()),
+    is_active: z.boolean(),
+    description: z.string().nullable(),
+    include_all: z.boolean(),
+    configs: z.array(CaseFieldConfigSchema),
+});
 
-export interface CaseField {
-    id: number;
-    name: string;
-    system_name: string;
-    label: string;
-    type_id: number;
-    template_ids: number[];
-    is_active: boolean;
-    display_order: number;
-    description: string | null;
-    include_all: boolean;
-    configs: CaseFieldConfig[];
-}
+export type CaseField = z.infer<typeof CaseFieldSchema>;
 
-export interface CaseFieldConfig {
-    context: {
-        is_global: boolean;
-        project_ids: number[] | null;
-    };
-    options: {
-        default_value?: string;
-        format?: string;
-        is_required?: boolean;
-        rows?: string;
-        items?: string;
-    };
-}
+export const CaseSchema = z.object({
+    id: z.number(),
+    title: z.string(),
+    section_id: z.number(),
+    template_id: z.number(),
+    type_id: z.number(),
+    priority_id: z.number(),
+    milestone_id: z.number().nullable(),
+    refs: z.string().nullable(),
+    created_on: z.number(),
+    updated_on: z.number(),
+    estimate: z.string().nullable(),
+    suite_id: z.number(),
+    labels: z.array(z.any()),
+}).loose();
 
-export interface Template {
-    id: number;
-    name: string;
-    is_default: boolean;
-}
+export type Case = z.infer<typeof CaseSchema>;
 
-export interface Project {
-    id: number;
-    name: string;
-    announcement: string | null;
-    is_completed: boolean;
-    suite_mode: number;
-}
+export const SectionSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    description: z.string().nullish(),
+    parent_id: z.number().nullish(),
+    suite_id: z.number(),
+});
+
+export type Section = z.infer<typeof SectionSchema>;
+
+export const PrioritySchema = z.object({
+    id: z.number(),
+    is_default: z.boolean(),
+    name: z.string(),
+});
+
+export type Priority = z.infer<typeof PrioritySchema>;
+
+export const CaseTypeSchema = z.object({
+    id: z.number(),
+    is_default: z.boolean(),
+    name: z.string(),
+});
+
+export type CaseType = z.infer<typeof CaseTypeSchema>;
+
+export const TemplateSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    is_default: z.boolean(),
+});
+
+export type Template = z.infer<typeof TemplateSchema>;
+
+export const ProjectSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    is_completed: z.boolean(),
+    suite_mode: z.number(),
+});
+
+export type Project = z.infer<typeof ProjectSchema>;

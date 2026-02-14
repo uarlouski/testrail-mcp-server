@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TestRailClient } from "../client/testrail.js";
-import { ToolDefinition, withErrorHandling } from "../types/custom.js";
+import { ToolDefinition } from "../types/custom.js";
 import { Case } from "../types/testrail.js";
 
 const parameters = {
@@ -19,7 +19,7 @@ export const getCasesTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_cases",
     description: "Get all test cases for a project. Filter by section, API params (priority, type), or any field including custom fields via 'where'. Returns case IDs, titles, and any additional requested fields.",
     parameters,
-    handler: withErrorHandling<typeof parameters, TestRailClient>(async ({ project_id, section_id, filter, where, fields }, client) => {
+    handler: async ({ project_id, section_id, filter, where, fields }, client) => {
         let cases: Case[] = await client.getCases(project_id, section_id, filter);
 
         // Client-side filtering for custom fields and other unsupported API filters
@@ -55,13 +55,6 @@ export const getCasesTool: ToolDefinition<typeof parameters, TestRailClient> = {
             }),
         };
 
-        return {
-            content: [
-                {
-                    type: "text" as const,
-                    text: JSON.stringify(response, null, 2),
-                },
-            ],
-        };
-    })
+        return response;
+    }
 };
