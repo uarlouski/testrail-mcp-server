@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Migrated from `axios` to native `fetch` API for reduced dependency footprint.
+
 ## [1.1.0] - 2026-02-09
 
 ### Added
