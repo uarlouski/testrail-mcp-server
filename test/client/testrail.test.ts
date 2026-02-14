@@ -1,103 +1,98 @@
-import { jest, describe, test, expect, beforeEach } from '@jest/globals';
+import { jest, describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import { TestRailClient } from '../../src/client/testrail.js';
-import axios, { AxiosInstance, AxiosError } from 'axios';
 
 describe('TestRailClient', () => {
     let client: TestRailClient;
-    let mockAxiosInstance: any;
+    let fetchMock: any;
 
     beforeEach(() => {
-        // Create a simple object mock for AxiosInstance to avoid complex mocking types
-        mockAxiosInstance = {
-            get: jest.fn(),
-            post: jest.fn(),
-            defaults: { headers: { common: {} } },
-            interceptors: { request: { use: jest.fn() }, response: { use: jest.fn() } }
-        };
-
-        // Mock axios.create to return our mock instance - using type casting to bypass TS warnings
-        jest.spyOn(axios, 'create').mockReturnValue(mockAxiosInstance);
-
-        // Pass the mock instance directly to constructor
+        fetchMock = jest.spyOn(global, 'fetch');
         client = new TestRailClient('https://testrail.io/', 'user', 'apikey');
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     test('constructor cleans trailing slash from baseUrl', async () => {
         const mockData = { id: 1, title: 'Test Case', template_id: 1 };
-        mockAxiosInstance.get.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         await client.getCase('1');
 
-        // Verify axios.create was called with cleaned URL (no trailing slash)
-        expect(axios.create).toHaveBeenCalledWith(expect.objectContaining({
-            baseURL: 'https://testrail.io'
-        }));
-    });
-
-    test('validateStatus returns true for 2xx status codes', () => {
-        // Get the config passed to axios.create
-        const createCall = (axios.create as jest.Mock).mock.calls[0][0] as { validateStatus: (status: number) => boolean };
-        const validateStatus = createCall.validateStatus;
-
-        expect(validateStatus(200)).toBe(true);
-        expect(validateStatus(201)).toBe(true);
-        expect(validateStatus(299)).toBe(true);
-    });
-
-    test('validateStatus returns false for non-2xx status codes', () => {
-        // Get the config passed to axios.create
-        const createCall = (axios.create as jest.Mock).mock.calls[0][0] as { validateStatus: (status: number) => boolean };
-        const validateStatus = createCall.validateStatus;
-
-        expect(validateStatus(199)).toBe(false);
-        expect(validateStatus(300)).toBe(false);
-        expect(validateStatus(400)).toBe(false);
-        expect(validateStatus(500)).toBe(false);
+        expect(fetchMock).toHaveBeenCalledWith('https://testrail.io/index.php?/api/v2/get_case/1', expect.any(Object));
     });
 
     test('getCase returns data on success', async () => {
         const mockData = { id: 1, title: 'Test Case', template_id: 1 };
-        mockAxiosInstance.get.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         const result = await client.getCase('1');
         expect(result).toEqual(mockData);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_case/1');
+        expect(fetchMock).toHaveBeenCalledWith('https://testrail.io/index.php?/api/v2/get_case/1', expect.objectContaining({
+            method: 'GET',
+            headers: expect.objectContaining({
+                'Authorization': expect.stringContaining('Basic'),
+                'Content-Type': 'application/json'
+            })
+        }));
     });
 
     test('getCase throws formatted error on API error', async () => {
-        const mockError = {
-            message: 'Request failed',
-            response: {
-                status: 404,
-                statusText: 'Not Found',
-                data: { error: 'Case not found' }
-            },
-            isAxiosError: true,
-            toJSON: () => ({})
-        };
-
-        mockAxiosInstance.get.mockRejectedValue(mockError);
+        const errorResponse = { error: 'Case not found' };
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 404,
+            statusText: 'Not Found',
+            text: async () => JSON.stringify(errorResponse),
+            json: async () => errorResponse
+        });
 
         await expect(client.getCase('999')).rejects.toThrow(
-            'TestRail API error: 404 Not Found - {"error":"Case not found"}'
+            'TestRail: 404 Not Found - {"error":"Case not found"}'
+        );
+    });
+
+    test('getCase throws error containing raw text when response is not JSON', async () => {
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 500,
+            statusText: 'Internal Server Error',
+            text: async () => 'Not JSON Content',
+            json: async () => { throw new Error('Not JSON'); }
+        });
+
+        await expect(client.getCase('1')).rejects.toThrow(
+            'TestRail: 500 Internal Server Error - Not JSON Content'
         );
     });
 
     test('getCases returns cases without pagination', async () => {
         const mockCases = [{ id: 1, title: 'Case 1' }, { id: 2, title: 'Case 2' }];
-        mockAxiosInstance.get.mockResolvedValue({
-            data: { cases: mockCases, _links: { next: null } }
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ cases: mockCases, _links: { next: null } })
         });
 
         const result = await client.getCases('1');
         expect(result).toEqual(mockCases);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_cases/1');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_cases/1',
+            expect.objectContaining({ method: 'GET' })
+        );
     });
 
     test('getCases handles response with undefined _links', async () => {
         const mockCases = [{ id: 1, title: 'Case 1' }];
-        mockAxiosInstance.get.mockResolvedValue({
-            data: { cases: mockCases }
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ cases: mockCases })
         });
 
         const result = await client.getCases('1');
@@ -108,36 +103,52 @@ describe('TestRailClient', () => {
         const page1Cases = [{ id: 1, title: 'Case 1' }];
         const page2Cases = [{ id: 2, title: 'Case 2' }];
 
-        mockAxiosInstance.get
+        fetchMock
             .mockResolvedValueOnce({
-                data: { cases: page1Cases, _links: { next: '/api/v2/get_cases/1&offset=1' } }
+                ok: true,
+                json: async () => ({ cases: page1Cases, _links: { next: '/api/v2/get_cases/1&offset=1' } })
             })
             .mockResolvedValueOnce({
-                data: { cases: page2Cases, _links: { next: null } }
+                ok: true,
+                json: async () => ({ cases: page2Cases, _links: { next: null } })
             });
 
         const result = await client.getCases('1');
         expect(result).toEqual([...page1Cases, ...page2Cases]);
-        expect(mockAxiosInstance.get).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_cases/1',
+            expect.any(Object)
+        );
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_cases/1&offset=1',
+            expect.any(Object)
+        );
     });
 
     test('getCases with sectionId adds section filter', async () => {
-        mockAxiosInstance.get.mockResolvedValue({
-            data: { cases: [], _links: { next: null } }
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ cases: [], _links: { next: null } })
         });
 
         await client.getCases('1', '5');
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_cases/1&section_id=5');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_cases/1&section_id=5',
+            expect.any(Object)
+        );
     });
 
     test('getCases with filter adds query params', async () => {
-        mockAxiosInstance.get.mockResolvedValue({
-            data: { cases: [], _links: { next: null } }
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ cases: [], _links: { next: null } })
         });
 
         await client.getCases('1', undefined, { type_id: '1', priority_id: '2' });
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-            '/index.php?/api/v2/get_cases/1&type_id=1&priority_id=2'
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_cases/1&type_id=1&priority_id=2',
+            expect.any(Object)
         );
     });
 
@@ -151,11 +162,17 @@ describe('TestRailClient', () => {
             display_order: 1,
             suite_id: 1
         };
-        mockAxiosInstance.get.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         const result = await client.getSection('1');
         expect(result).toEqual(mockData);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_section/1');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_section/1',
+            expect.any(Object)
+        );
     });
 
     test('getPriorities returns data on success', async () => {
@@ -166,21 +183,30 @@ describe('TestRailClient', () => {
             priority: 1,
             short_name: 'Low'
         }];
-        mockAxiosInstance.get.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         const result = await client.getPriorities();
         expect(result).toEqual(mockData);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_priorities');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_priorities',
+            expect.any(Object)
+        );
     });
 
     test('getPriorities caches result', async () => {
         const mockData = [{ id: 1, name: 'Low' }];
-        mockAxiosInstance.get.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         await client.getPriorities();
         await client.getPriorities();
 
-        expect(mockAxiosInstance.get).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     test('getCaseTypes returns data on success', async () => {
@@ -189,11 +215,17 @@ describe('TestRailClient', () => {
             is_default: true,
             name: 'Automated'
         }];
-        mockAxiosInstance.get.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         const result = await client.getCaseTypes();
         expect(result).toEqual(mockData);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_case_types');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_case_types',
+            expect.any(Object)
+        );
     });
 
     test('getCaseFields returns data on success', async () => {
@@ -204,55 +236,82 @@ describe('TestRailClient', () => {
             label: 'Custom Field',
             type_id: 1
         }];
-        mockAxiosInstance.get.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         const result = await client.getCaseFields();
         expect(result).toEqual(mockData);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_case_fields');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_case_fields',
+            expect.any(Object)
+        );
     });
 
     test('getCaseFields caches result', async () => {
         const mockData = [{ id: 1, name: 'field' }];
-        mockAxiosInstance.get.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         await client.getCaseFields();
         await client.getCaseFields();
 
-        expect(mockAxiosInstance.get).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     test('getTemplates returns data on success', async () => {
         const mockData = [{ id: 1, name: 'Test Template', is_default: true }];
-        mockAxiosInstance.get.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         const result = await client.getTemplates('1');
         expect(result).toEqual(mockData);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_templates/1');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_templates/1',
+            expect.any(Object)
+        );
     });
 
     test('getTemplates caches result per project', async () => {
         const mockData1 = [{ id: 1, name: 'Template 1' }];
         const mockData2 = [{ id: 2, name: 'Template 2' }];
-        mockAxiosInstance.get
-            .mockResolvedValueOnce({ data: mockData1 })
-            .mockResolvedValueOnce({ data: mockData2 });
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockData1
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockData2
+            });
 
         await client.getTemplates('1');
         await client.getTemplates('1');
         await client.getTemplates('2');
 
-        expect(mockAxiosInstance.get).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     test('updateCase sends POST request', async () => {
         const mockData = { id: 1, title: 'Updated Case' };
-        mockAxiosInstance.post.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         const result = await client.updateCase('1', { title: 'Updated Case' });
         expect(result).toEqual(mockData);
-        expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-            '/index.php?/api/v2/update_case/1',
-            { title: 'Updated Case' }
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/update_case/1',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ title: 'Updated Case' })
+            })
         );
     });
 
@@ -260,98 +319,112 @@ describe('TestRailClient', () => {
         const mockCase = { id: 1, suite_id: 10 };
         const mockUpdated = [{ id: 1, title: 'Updated' }, { id: 2, title: 'Updated' }];
 
-        mockAxiosInstance.get.mockResolvedValue({ data: mockCase });
-        mockAxiosInstance.post.mockResolvedValue({ data: { updated_cases: mockUpdated } });
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockCase
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({ updated_cases: mockUpdated })
+            });
 
         const result = await client.updateCases([1, 2], { title: 'Updated' });
         expect(result).toEqual(mockUpdated);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_case/1');
-        expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-            '/index.php?/api/v2/update_cases/10',
-            { case_ids: [1, 2], title: 'Updated' }
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_case/1',
+            expect.any(Object)
+        );
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/update_cases/10',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ case_ids: [1, 2], title: 'Updated' })
+            })
         );
     });
 
     test('createCase sends POST request', async () => {
         const mockData = { id: 1, title: 'New Case' };
-        mockAxiosInstance.post.mockResolvedValue({ data: mockData });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockData
+        });
 
         const result = await client.createCase('5', { title: 'New Case' });
         expect(result).toEqual(mockData);
-        expect(mockAxiosInstance.post).toHaveBeenCalledWith(
-            '/index.php?/api/v2/add_case/5',
-            { title: 'New Case' }
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/add_case/5',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ title: 'New Case' })
+            })
         );
     });
 
     test('getSections returns sections array', async () => {
         const mockSections = [{ id: 1, name: 'Section 1' }, { id: 2, name: 'Section 2' }];
-        mockAxiosInstance.get.mockResolvedValue({ data: { sections: mockSections } });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ sections: mockSections })
+        });
 
         const result = await client.getSections('1');
         expect(result).toEqual(mockSections);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_sections/1');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_sections/1',
+            expect.any(Object)
+        );
     });
 
     test('getProjects returns projects array', async () => {
         const mockProjects = [{ id: 1, name: 'Project 1' }];
-        mockAxiosInstance.get.mockResolvedValue({ data: { projects: mockProjects } });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ projects: mockProjects })
+        });
 
         const result = await client.getProjects();
         expect(result).toEqual(mockProjects);
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/index.php?/api/v2/get_projects');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_projects',
+            expect.any(Object)
+        );
     });
 
     test('getProjects caches result', async () => {
         const mockProjects = [{ id: 1, name: 'Project 1' }];
-        mockAxiosInstance.get.mockResolvedValue({ data: { projects: mockProjects } });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ projects: mockProjects })
+        });
 
         await client.getProjects();
         await client.getProjects();
 
-        expect(mockAxiosInstance.get).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     test('postRequest throws formatted error on API error', async () => {
-        const mockError = {
-            message: 'Request failed',
-            response: {
-                status: 400,
-                statusText: 'Bad Request',
-                data: { error: 'Invalid field' }
-            },
-            isAxiosError: true,
-            toJSON: () => ({})
-        };
-
-        mockAxiosInstance.post.mockRejectedValue(mockError);
+        const errorResponse = { error: 'Invalid field' };
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 400,
+            statusText: 'Bad Request',
+            text: async () => JSON.stringify(errorResponse),
+            json: async () => errorResponse
+        });
 
         await expect(client.updateCase('1', {})).rejects.toThrow(
-            'TestRail API error: 400 Bad Request - {"error":"Invalid field"}'
+            'TestRail: 400 Bad Request - {"error":"Invalid field"}'
         );
     });
 
-    test('handleError formats error when no response received', async () => {
-        const mockError = {
-            message: 'Network Error',
-            request: {},
-            isAxiosError: true,
-            toJSON: () => ({})
-        };
-
-        mockAxiosInstance.get.mockRejectedValue(mockError);
+    test('handleError formats error when network fails', async () => {
+        fetchMock.mockRejectedValue(new Error('Network Error'));
 
         await expect(client.getCase('1')).rejects.toThrow(
-            'TestRail API error: No response received. Network Error'
-        );
-    });
-
-    test('handleError returns generic message for non-axios errors', async () => {
-        const mockError = new Error('Unknown error');
-        mockAxiosInstance.get.mockRejectedValue(mockError);
-
-        await expect(client.getCase('1')).rejects.toThrow(
-            'TestRail API error: Unknown error'
+            'Network Error'
         );
     });
 });

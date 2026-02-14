@@ -1,4 +1,3 @@
-import axios, { AxiosInstance, AxiosError } from "axios";
 import { Case, Section, Priority, CaseType, CaseField, Template, Project } from "../types/testrail.js";
 
 interface PaginatedCasesResponse {
@@ -10,7 +9,8 @@ const API_INDEX = '/index.php?';
 const API_BASE_V2 = `${API_INDEX}/api/v2`;
 
 export class TestRailClient {
-    private client: AxiosInstance;
+    private baseUrl: string;
+    private headers: HeadersInit;
     private prioritiesPromise: Promise<Priority[]> | null = null;
     private caseTypesPromise: Promise<CaseType[]> | null = null;
     private caseFieldsPromise: Promise<CaseField[]> | null = null;
@@ -18,25 +18,16 @@ export class TestRailClient {
     private templatesPromiseMap: Map<string, Promise<Template[]>> = new Map();
 
     constructor(baseUrl: string, email: string, apiKey: string) {
-        const cleanedBaseUrl = baseUrl.replace(/\/$/, "");
-
-        this.client = axios.create({
-            baseURL: cleanedBaseUrl,
-            headers: {
-                "Content-Type": "application/json",
-            },
-            auth: {
-                username: email,
-                password: apiKey,
-            },
-            validateStatus: (status: number) => {
-                return status >= 200 && status < 300;
-            }
-        });
+        this.baseUrl = baseUrl.replace(/\/$/, "");
+        const auth = Buffer.from(`${email}:${apiKey}`).toString('base64');
+        this.headers = {
+            "Content-Type": "application/json",
+            "Authorization": `Basic ${auth}`,
+        };
     }
 
     async getCase(caseId: string): Promise<Case> {
-        return this.makeRequest<Case>(`${API_BASE_V2}/get_case/${caseId}`);
+        return this.get<Case>(`${API_BASE_V2}/get_case/${caseId}`);
     }
 
     async getCases(projectId: string, sectionId?: string, filter?: Record<string, string>): Promise<Case[]> {
@@ -56,7 +47,7 @@ export class TestRailClient {
         let nextUrl: string | null = url;
 
         while (nextUrl) {
-            const response: PaginatedCasesResponse = await this.makeRequest<PaginatedCasesResponse>(nextUrl);
+            const response: PaginatedCasesResponse = await this.get<PaginatedCasesResponse>(nextUrl);
 
             allCases.push(...response.cases);
 
@@ -70,26 +61,26 @@ export class TestRailClient {
     }
 
     async getSection(sectionId: string): Promise<Section> {
-        return this.makeRequest<Section>(`${API_BASE_V2}/get_section/${sectionId}`);
+        return this.get<Section>(`${API_BASE_V2}/get_section/${sectionId}`);
     }
 
     async getPriorities(): Promise<Priority[]> {
         if (!this.prioritiesPromise) {
-            this.prioritiesPromise = this.makeRequest<Priority[]>(`${API_BASE_V2}/get_priorities`);
+            this.prioritiesPromise = this.get<Priority[]>(`${API_BASE_V2}/get_priorities`);
         }
         return this.prioritiesPromise;
     }
 
     async getCaseTypes(): Promise<CaseType[]> {
         if (!this.caseTypesPromise) {
-            this.caseTypesPromise = this.makeRequest<CaseType[]>(`${API_BASE_V2}/get_case_types`);
+            this.caseTypesPromise = this.get<CaseType[]>(`${API_BASE_V2}/get_case_types`);
         }
         return this.caseTypesPromise;
     }
 
     async getCaseFields(): Promise<CaseField[]> {
         if (!this.caseFieldsPromise) {
-            this.caseFieldsPromise = this.makeRequest<CaseField[]>(`${API_BASE_V2}/get_case_fields`);
+            this.caseFieldsPromise = this.get<CaseField[]>(`${API_BASE_V2}/get_case_fields`);
         }
         return this.caseFieldsPromise;
     }
@@ -98,21 +89,21 @@ export class TestRailClient {
         if (!this.templatesPromiseMap.has(projectId)) {
             this.templatesPromiseMap.set(
                 projectId,
-                this.makeRequest<Template[]>(`${API_BASE_V2}/get_templates/${projectId}`)
+                this.get<Template[]>(`${API_BASE_V2}/get_templates/${projectId}`)
             );
         }
         return this.templatesPromiseMap.get(projectId)!;
     }
 
     async updateCase(caseId: string, fields: Record<string, any>): Promise<Case> {
-        return this.postRequest<Case>(`${API_BASE_V2}/update_case/${caseId}`, fields);
+        return this.post<Case>(`${API_BASE_V2}/update_case/${caseId}`, fields);
     }
 
     async updateCases(caseIds: number[], fields: Record<string, any>): Promise<Case[]> {
         // Assume the project is operating in single suite mode, get suite_id from the first case
         const caseData = await this.getCase(String(caseIds[0]));
 
-        const response = await this.postRequest<{ updated_cases: Case[] }>(`${API_BASE_V2}/update_cases/${caseData.suite_id}`, {
+        const response = await this.post<{ updated_cases: Case[] }>(`${API_BASE_V2}/update_cases/${caseData.suite_id}`, {
             case_ids: caseIds,
             ...fields,
         });
@@ -121,52 +112,50 @@ export class TestRailClient {
     }
 
     async createCase(sectionId: string, fields: Record<string, any>): Promise<Case> {
-        return this.postRequest<Case>(`${API_BASE_V2}/add_case/${sectionId}`, fields);
+        return this.post<Case>(`${API_BASE_V2}/add_case/${sectionId}`, fields);
     }
 
     async getSections(projectId: string): Promise<Section[]> {
-        const response = await this.makeRequest<{ sections: Section[] }>(`${API_BASE_V2}/get_sections/${projectId}`);
+        const response = await this.get<{ sections: Section[] }>(`${API_BASE_V2}/get_sections/${projectId}`);
         return response.sections;
     }
 
     async getProjects(): Promise<Project[]> {
         if (!this.projectsPromise) {
-            this.projectsPromise = this.makeRequest<{ projects: Project[] }>(`${API_BASE_V2}/get_projects`)
+            this.projectsPromise = this.get<{ projects: Project[] }>(`${API_BASE_V2}/get_projects`)
                 .then(response => response.projects);
         }
         return this.projectsPromise;
     }
 
-    private async makeRequest<T>(url: string): Promise<T> {
-        try {
-            const response = await this.client.get<T>(url);
-            return response.data;
-        } catch (error: any) {
-            throw this.handleError(error);
-        }
+    private async get<T>(endpoint: string): Promise<T> {
+        return this.executeRequest<T>('GET', endpoint);
     }
 
-    private async postRequest<T>(url: string, data: Record<string, any>): Promise<T> {
-        try {
-            const response = await this.client.post<T>(url, data);
-            return response.data;
-        } catch (error: any) {
-            throw this.handleError(error);
-        }
+    private async post<T>(endpoint: string, data: Record<string, any>): Promise<T> {
+        return this.executeRequest<T>('POST', endpoint, data);
     }
 
-    private handleError(error: any): Error {
-        let errorMessage = `TestRail API error: ${error.message}`;
+    private async executeRequest<T>(method: 'GET' | 'POST', endpoint: string, data?: Record<string, any>): Promise<T> {
+        const url = `${this.baseUrl}${endpoint}`;
+        const params: RequestInit = {
+            method,
+            headers: this.headers,
+        };
 
-        if (axios.isAxiosError(error)) {
-            const axiosError = error as AxiosError;
-            if (axiosError.response) {
-                errorMessage = `TestRail API error: ${axiosError.response.status} ${axiosError.response.statusText} - ${JSON.stringify(axiosError.response.data)}`;
-            } else if (axiosError.request) {
-                errorMessage = `TestRail API error: No response received. ${axiosError.message}`;
-            }
+        if (data) {
+            params.body = JSON.stringify(data);
         }
 
-        return new Error(errorMessage);
+        const response = await fetch(url, params);
+
+        if (!response.ok) {
+            let errorMessage = `TestRail: ${response.status} ${response.statusText}`;
+            const errorText = await response.text();
+            errorMessage += ` - ${errorText}`;
+            throw new Error(errorMessage);
+        }
+
+        return await response.json() as T;
     }
 }
