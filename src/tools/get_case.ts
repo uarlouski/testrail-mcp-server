@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { processCustomFields } from "../utils/mapper.js";
 import { TestRailClient } from "../client/testrail.js";
-import { TestCaseResponse, ToolDefinition, withErrorHandling } from "../types/custom.js";
+import { TestCaseResponse, ToolDefinition } from "../types/custom.js";
 
 const parameters = {
     case_id: z.string().describe("The ID of the test case (e.g. '123' or 'C123')"),
@@ -11,7 +11,7 @@ export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_case",
     description: "Get a test case from TestRail by ID",
     parameters,
-    handler: withErrorHandling<typeof parameters, TestRailClient>(async ({ case_id }, client) => {
+    handler: async ({ case_id }, client) => {
         const id = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;
         const testCase = await client.getCase(id);
 
@@ -39,13 +39,6 @@ export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
             ...customFields
         };
 
-        return {
-            content: [
-                {
-                    type: "text" as const,
-                    text: JSON.stringify(response, null, 2),
-                },
-            ],
-        };
-    })
+        return response;
+    }
 };

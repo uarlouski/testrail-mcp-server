@@ -4,7 +4,8 @@
 
 ### Changed
 
-- Migrated from `axios` to native `fetch` API for reduced dependency footprint.
+- Optimize MCP call responses by removing non-essential fields and nullish values
+- Migrated from `axios` to native `fetch` API for reduced dependency footprint
 
 ## [1.1.0] - 2026-02-09
 

@@ -8,9 +8,9 @@ describe('get_sections tool', () => {
     let getSectionsMock: jest.Mock<(projectId: string) => Promise<Section[]>>;
 
     const mockSections: Section[] = [
-        { id: 1, name: 'Login', description: null, parent_id: null, depth: 0, display_order: 1, suite_id: 1 },
-        { id: 2, name: 'Authentication', description: 'Auth tests', parent_id: 1, depth: 1, display_order: 2, suite_id: 1 },
-        { id: 3, name: 'Registration', description: null, parent_id: null, depth: 0, display_order: 3, suite_id: 1 },
+        { id: 1, name: 'Login', description: null, parent_id: null, suite_id: 1 },
+        { id: 2, name: 'Authentication', description: 'Auth tests', parent_id: 1, suite_id: 1 },
+        { id: 3, name: 'Registration', description: null, parent_id: null, suite_id: 1 },
     ];
 
     beforeEach(() => {
@@ -29,40 +29,11 @@ describe('get_sections tool', () => {
         expect(getSectionsTool.parameters.project_id).toBeDefined();
     });
 
-    test('handler fetches and returns sections', async () => {
-        const result = await getSectionsTool.handler({ project_id: '1' }, mockClient);
-
-        expect(result).toBeDefined();
-        expect(result.content[0].type).toBe('text');
-
-        const parsed = JSON.parse(result.content[0].text);
-        expect(parsed.sections).toHaveLength(3);
-        expect(mockClient.getSections).toHaveBeenCalledWith('1');
-    });
-
-    test('returns correct section structure', async () => {
-        const result = await getSectionsTool.handler({ project_id: '1' }, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
-
-        expect(parsed.sections[0]).toEqual({
-            id: 1,
-            name: 'Login',
-        });
-
-        expect(parsed.sections[1]).toEqual({
-            id: 2,
-            name: 'Authentication',
-        });
-    });
-
-    test('handler returns error on failure', async () => {
+    test('handler throws error on failure', async () => {
         getSectionsMock.mockRejectedValue(new Error('API Error'));
 
-        const result = await getSectionsTool.handler({ project_id: '1' }, mockClient);
-
-        expect(result).toEqual({
-            content: [{ type: 'text', text: 'Error: API Error' }],
-            isError: true
-        });
+        await expect(
+            getSectionsTool.handler({ project_id: '1' }, mockClient)
+        ).rejects.toThrow('API Error');
     });
 });

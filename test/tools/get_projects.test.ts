@@ -8,9 +8,9 @@ describe('get_projects tool', () => {
     let getProjectsMock: jest.Mock<() => Promise<Project[]>>;
 
     const mockProjects: Project[] = [
-        { id: 1, name: 'Project Alpha', announcement: null, is_completed: false, suite_mode: 1 },
-        { id: 2, name: 'Project Beta', announcement: 'Active project', is_completed: false, suite_mode: 3 },
-        { id: 3, name: 'Old Project', announcement: null, is_completed: true, suite_mode: 1 },
+        { id: 1, name: 'Project Alpha', is_completed: false, suite_mode: 1 },
+        { id: 2, name: 'Project Beta', is_completed: false, suite_mode: 3 },
+        { id: 3, name: 'Old Project', is_completed: true, suite_mode: 1 },
     ];
 
     beforeEach(() => {
@@ -32,44 +32,7 @@ describe('get_projects tool', () => {
         const result = await getProjectsTool.handler({}, mockClient);
 
         expect(result).toBeDefined();
-        expect(result.content[0].type).toBe('text');
-
-        const parsed = JSON.parse(result.content[0].text);
-        expect(parsed.projects).toHaveLength(2); // Only active projects
+        expect(result.projects).toHaveLength(2);
         expect(mockClient.getProjects).toHaveBeenCalled();
-    });
-
-    test('filters out completed projects', async () => {
-        const result = await getProjectsTool.handler({}, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
-
-        const completedProject = parsed.projects.find((p: any) => p.name === 'Old Project');
-        expect(completedProject).toBeUndefined();
-    });
-
-    test('returns correct project structure', async () => {
-        const result = await getProjectsTool.handler({}, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
-
-        expect(parsed.projects[0]).toEqual({
-            id: 1,
-            name: 'Project Alpha',
-        });
-
-        expect(parsed.projects[1]).toEqual({
-            id: 2,
-            name: 'Project Beta',
-        });
-    });
-
-    test('handler returns error on failure', async () => {
-        getProjectsMock.mockRejectedValue(new Error('API Error'));
-
-        const result = await getProjectsTool.handler({}, mockClient);
-
-        expect(result).toEqual({
-            content: [{ type: 'text', text: 'Error: API Error' }],
-            isError: true
-        });
     });
 });

@@ -52,12 +52,9 @@ describe('update_case tool', () => {
         );
 
         expect(result).toBeDefined();
-        expect(result.content[0].type).toBe('text');
-
-        const parsed = JSON.parse(result.content[0].text);
-        expect(parsed.success).toBe(true);
-        expect(parsed.case_id).toBe(123);
-        expect(parsed.message).toContain('C123');
+        expect(result.success).toBe(true);
+        expect(result.case_id).toBe(123);
+        expect(result.message).toContain('C123');
         expect(mockClient.updateCase).toHaveBeenCalledWith('123', { title: 'Updated Title' });
     });
 
@@ -92,17 +89,14 @@ describe('update_case tool', () => {
         expect(mockClient.updateCase).toHaveBeenCalledWith('123', fields);
     });
 
-    test('handler returns error on failure', async () => {
+    test('handler throws error on failure', async () => {
         updateCaseMock.mockRejectedValue(new Error('API Error'));
 
-        const result = await updateCaseTool.handler(
-            { case_id: '123', fields: { title: 'Test' } },
-            mockClient
-        );
-
-        expect(result).toEqual({
-            content: [{ type: 'text', text: 'Error: API Error' }],
-            isError: true
-        });
+        await expect(
+            updateCaseTool.handler(
+                { case_id: '123', fields: { title: 'Test' } },
+                mockClient
+            )
+        ).rejects.toThrow('API Error');
     });
 });

@@ -1,5 +1,5 @@
 import { TestRailClient } from "../client/testrail.js";
-import { ToolDefinition, withErrorHandling } from "../types/custom.js";
+import { ToolDefinition } from "../types/custom.js";
 import { CaseField } from "../types/testrail.js";
 import { parseDropdownOptions } from "../utils/mapper.js";
 
@@ -76,7 +76,7 @@ export const getCaseFieldsTool: ToolDefinition<typeof parameters, TestRailClient
     name: "get_case_fields",
     description: "Get the field schema for test cases. Returns all available fields with their types, descriptions, and options (for dropdown fields). Use this to understand what fields can be set when creating or updating test cases.",
     parameters,
-    handler: withErrorHandling<typeof parameters, TestRailClient>(async (_args, client) => {
+    handler: async (_args, client) => {
         const caseFields = await client.getCaseFields();
 
         const customFieldSchemas = caseFields.filter(field => field.is_active).map(mapToFieldSchema);
@@ -85,13 +85,6 @@ export const getCaseFieldsTool: ToolDefinition<typeof parameters, TestRailClient
             fields: [...SYSTEM_FIELDS, ...customFieldSchemas],
         };
 
-        return {
-            content: [
-                {
-                    type: "text" as const,
-                    text: JSON.stringify(response, null, 2),
-                },
-            ],
-        };
-    })
+        return response;
+    }
 };

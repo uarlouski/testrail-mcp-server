@@ -19,3 +19,32 @@ export function sanitizeValue(value: any): any {
     }
     return value;
 }
+
+/**
+ * Recursively removes null and undefined values from objects and arrays.
+ * For arrays, filters nested object items as well.
+ */
+export function removeNullish(value: any): any {
+    if (value == null) {
+        return value;
+    }
+
+    if (Array.isArray(value)) {
+        return value
+            .map(item => removeNullish(item))
+            .filter(item => item != null);
+    }
+
+    if (typeof value === 'object') {
+        const result: Record<string, any> = {};
+        for (const [key, val] of Object.entries(value)) {
+            const cleanedVal = removeNullish(val);
+            if (cleanedVal != null) {
+                result[key] = cleanedVal;
+            }
+        }
+        return result;
+    }
+
+    return value;
+}

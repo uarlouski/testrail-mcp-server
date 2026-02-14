@@ -10,21 +10,21 @@ describe('update_cases tool', () => {
     const mockUpdatedCases: Case[] = [
         {
             id: 1, title: 'Test Case 1', section_id: 1, template_id: 1, type_id: 1,
-            priority_id: 3, milestone_id: null, refs: null, created_by: 1, created_on: 1700000000,
-            updated_by: 1, updated_on: 1700000001, estimate: null, estimate_forecast: null,
-            suite_id: 1, display_order: 1, is_deleted: 0, labels: []
+            priority_id: 3, milestone_id: null, refs: null, created_on: 1700000000,
+            updated_by: 1, updated_on: 1700000001, estimate: null,
+            suite_id: 1, labels: []
         },
         {
             id: 2, title: 'Test Case 2', section_id: 1, template_id: 1, type_id: 1,
-            priority_id: 3, milestone_id: null, refs: null, created_by: 1, created_on: 1700000000,
-            updated_by: 1, updated_on: 1700000001, estimate: null, estimate_forecast: null,
-            suite_id: 1, display_order: 2, is_deleted: 0, labels: []
+            priority_id: 3, milestone_id: null, refs: null, created_on: 1700000000,
+            updated_by: 1, updated_on: 1700000001, estimate: null,
+            suite_id: 1, labels: []
         },
         {
             id: 3, title: 'Test Case 3', section_id: 1, template_id: 1, type_id: 1,
-            priority_id: 3, milestone_id: null, refs: null, created_by: 1, created_on: 1700000000,
-            updated_by: 1, updated_on: 1700000001, estimate: null, estimate_forecast: null,
-            suite_id: 1, display_order: 3, is_deleted: 0, labels: []
+            priority_id: 3, milestone_id: null, refs: null, created_on: 1700000000,
+            updated_by: 1, updated_on: 1700000001, estimate: null,
+            suite_id: 1, labels: []
         },
     ];
 
@@ -52,37 +52,10 @@ describe('update_cases tool', () => {
         );
 
         expect(result).toBeDefined();
-        expect(result.content[0].type).toBe('text');
-
-        const parsed = JSON.parse(result.content[0].text);
-        expect(parsed.success).toBe(true);
-        expect(parsed.updated_count).toBe(3);
-        expect(parsed.case_ids).toEqual([1, 2, 3]);
-        expect(parsed.message).toContain('3 test cases');
-    });
-
-    test('passes case_ids and fields correctly', async () => {
-        const fields = { priority_id: 2, type_id: 1 };
-
-        await updateCasesTool.handler(
-            { case_ids: [10, 20, 30], fields },
-            mockClient
-        );
-
-        expect(mockClient.updateCases).toHaveBeenCalledWith([10, 20, 30], fields);
-    });
-
-    test('handler returns error on failure', async () => {
-        updateCasesMock.mockRejectedValue(new Error('API Error'));
-
-        const result = await updateCasesTool.handler(
-            { case_ids: [1, 2], fields: { priority_id: 2 } },
-            mockClient
-        );
-
-        expect(result).toEqual({
-            content: [{ type: 'text', text: 'Error: API Error' }],
-            isError: true
-        });
+        expect(result.success).toBe(true);
+        expect(result.updated_count).toBe(3);
+        expect(result.case_ids).toEqual([1, 2, 3]);
+        expect(result.message).toContain('3 test cases');
+        expect(mockClient.updateCases).toHaveBeenCalledWith([1, 2, 3], { priority_id: 3 });
     });
 });

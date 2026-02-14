@@ -53,12 +53,9 @@ describe('create_case tool', () => {
         );
 
         expect(result).toBeDefined();
-        expect(result.content[0].type).toBe('text');
-
-        const parsed = JSON.parse(result.content[0].text);
-        expect(parsed.success).toBe(true);
-        expect(parsed.case_id).toBe(456);
-        expect(parsed.message).toContain('C456');
+        expect(result.success).toBe(true);
+        expect(result.case_id).toBe(456);
+        expect(result.message).toContain('C456');
         expect(mockClient.createCase).toHaveBeenCalledWith('1', { title: 'New Test Case' });
     });
 
@@ -91,17 +88,14 @@ describe('create_case tool', () => {
         expect(mockClient.createCase).toHaveBeenCalledWith('10', { title: 'Simple Test' });
     });
 
-    test('handler returns error on failure', async () => {
+    test('handler throws error on failure', async () => {
         createCaseMock.mockRejectedValue(new Error('API Error'));
 
-        const result = await createCaseTool.handler(
-            { section_id: '1', title: 'Test' },
-            mockClient
-        );
-
-        expect(result).toEqual({
-            content: [{ type: 'text', text: 'Error: API Error' }],
-            isError: true
-        });
+        await expect(
+            createCaseTool.handler(
+                { section_id: '1', title: 'Test' },
+                mockClient
+            )
+        ).rejects.toThrow('API Error');
     });
 });

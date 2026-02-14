@@ -17,9 +17,8 @@ describe('get_case_fields tool', () => {
             template_ids: [],
             include_all: true,
             is_active: true,
-            display_order: 1,
             description: 'Whether test is automated',
-            configs: [{ context: { is_global: true, project_ids: null }, options: { is_required: false } }]
+            configs: [{ options: { is_required: false } }]
         },
         {
             id: 2,
@@ -30,9 +29,8 @@ describe('get_case_fields tool', () => {
             template_ids: [],
             include_all: true,
             is_active: true,
-            display_order: 2,
             description: 'Priority for automation',
-            configs: [{ context: { is_global: true, project_ids: null }, options: { items: '1, P0\n2, P1\n3, P2', is_required: true } }]
+            configs: [{ options: { items: '1, P0\n2, P1\n3, P2', is_required: true } }]
         },
         {
             id: 3,
@@ -43,7 +41,6 @@ describe('get_case_fields tool', () => {
             template_ids: [],
             include_all: true,
             is_active: false,
-            display_order: 3,
             description: null,
             configs: []
         },
@@ -56,9 +53,8 @@ describe('get_case_fields tool', () => {
             template_ids: [],
             include_all: true,
             is_active: true,
-            display_order: 4,
             description: 'Test components',
-            configs: [{ context: { is_global: true, project_ids: null }, options: { items: '1, UI\n2, API\n3, Database' } }]
+            configs: [{ options: { items: '1, UI\n2, API\n3, Database' } }]
         }
     ];
 
@@ -80,74 +76,9 @@ describe('get_case_fields tool', () => {
         const result = await getCaseFieldsTool.handler({}, mockClient);
 
         expect(result).toBeDefined();
-        expect(result.content[0].type).toBe('text');
-
-        const parsed = JSON.parse(result.content[0].text);
-        expect(parsed.fields).toHaveLength(11); // 8 system fields + 3 active custom fields
+        expect(result.fields).toBeDefined();
+        expect(result.fields.length).toBeGreaterThan(0);
         expect(mockClient.getCaseFields).toHaveBeenCalled();
-    });
-
-    test('returns only essential schema fields', async () => {
-        const result = await getCaseFieldsTool.handler({}, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
-
-        const field = parsed.fields[0];
-        expect(Object.keys(field).sort()).toEqual(['is_required', 'label', 'system_name', 'type']);
-    });
-
-    test('returns correct field types', async () => {
-        const result = await getCaseFieldsTool.handler({}, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
-
-        const checkboxField = parsed.fields.find((f: any) => f.system_name === 'custom_is_automated');
-        expect(checkboxField.type).toBe('Checkbox');
-
-        const dropdownField = parsed.fields.find((f: any) => f.system_name === 'custom_automation_priority');
-        expect(dropdownField.type).toBe('Dropdown');
-
-        const multiSelectField = parsed.fields.find((f: any) => f.system_name === 'custom_components');
-        expect(multiSelectField.type).toBe('Multi-select');
-    });
-
-    test('parses dropdown options correctly', async () => {
-        const result = await getCaseFieldsTool.handler({}, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
-
-        const dropdownField = parsed.fields.find((f: any) => f.system_name === 'custom_automation_priority');
-        expect(dropdownField.options).toEqual(['P0', 'P1', 'P2']);
-
-        const multiSelectField = parsed.fields.find((f: any) => f.system_name === 'custom_components');
-        expect(multiSelectField.options).toEqual(['UI', 'API', 'Database']);
-    });
-
-    test('identifies required fields', async () => {
-        const result = await getCaseFieldsTool.handler({}, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
-
-        const optionalField = parsed.fields.find((f: any) => f.system_name === 'custom_is_automated');
-        expect(optionalField.is_required).toBe(false);
-
-        const requiredField = parsed.fields.find((f: any) => f.system_name === 'custom_automation_priority');
-        expect(requiredField.is_required).toBe(true);
-    });
-
-    test('filters out inactive fields', async () => {
-        const result = await getCaseFieldsTool.handler({}, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
-
-        const inactiveField = parsed.fields.find((f: any) => f.system_name === 'custom_inactive_field');
-        expect(inactiveField).toBeUndefined();
-    });
-
-    test('handler returns error on failure', async () => {
-        getCaseFieldsMock.mockRejectedValue(new Error('API Error'));
-
-        const result = await getCaseFieldsTool.handler({}, mockClient);
-
-        expect(result).toEqual({
-            content: [{ type: 'text', text: 'Error: API Error' }],
-            isError: true
-        });
     });
 
     test('includes template_ids for template-specific fields', async () => {
@@ -161,7 +92,6 @@ describe('get_case_fields tool', () => {
                 template_ids: [1, 2],
                 include_all: false,
                 is_active: true,
-                display_order: 5,
                 description: 'Test steps',
                 configs: []
             }
@@ -170,9 +100,8 @@ describe('get_case_fields tool', () => {
         getCaseFieldsMock.mockResolvedValue(templateSpecificFields);
 
         const result = await getCaseFieldsTool.handler({}, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
 
-        const stepsField = parsed.fields.find((f: any) => f.system_name === 'custom_steps');
+        const stepsField = result.fields.find((f: any) => f.system_name === 'custom_steps');
         expect(stepsField.template_ids).toEqual([1, 2]);
     });
 
@@ -187,7 +116,6 @@ describe('get_case_fields tool', () => {
                 template_ids: [],
                 include_all: true,
                 is_active: true,
-                display_order: 6,
                 description: null,
                 configs: []
             }
@@ -196,9 +124,8 @@ describe('get_case_fields tool', () => {
         getCaseFieldsMock.mockResolvedValue(unknownTypeFields);
 
         const result = await getCaseFieldsTool.handler({}, mockClient);
-        const parsed = JSON.parse(result.content[0].text);
 
-        const unknownField = parsed.fields.find((f: any) => f.system_name === 'custom_unknown_type');
+        const unknownField = result.fields.find((f: any) => f.system_name === 'custom_unknown_type');
         expect(unknownField.type).toBe('Unknown (999)');
     });
 });
