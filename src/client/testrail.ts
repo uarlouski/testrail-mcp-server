@@ -1,7 +1,12 @@
-import { Case, Section, Priority, CaseType, CaseField, Template, Project } from "../types/testrail.js";
+import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result } from "../types/testrail.js";
 
 interface PaginatedCasesResponse {
     cases: Case[];
+    _links: { next: string | null };
+}
+
+interface PaginatedTestsResponse {
+    tests: Test[];
     _links: { next: string | null };
 }
 
@@ -14,6 +19,7 @@ export class TestRailClient {
     private prioritiesPromise: Promise<Priority[]> | null = null;
     private caseTypesPromise: Promise<CaseType[]> | null = null;
     private caseFieldsPromise: Promise<CaseField[]> | null = null;
+    private statusesPromise: Promise<Status[]> | null = null;
     private projectsPromise: Promise<Project[]> | null = null;
     private templatesPromiseMap: Map<string, Promise<Template[]>> = new Map();
 
@@ -85,6 +91,13 @@ export class TestRailClient {
         return this.caseFieldsPromise;
     }
 
+    async getStatuses(): Promise<Status[]> {
+        if (!this.statusesPromise) {
+            this.statusesPromise = this.get<Status[]>(`${API_BASE_V2}/get_statuses`);
+        }
+        return this.statusesPromise;
+    }
+
     async getTemplates(projectId: string): Promise<Template[]> {
         if (!this.templatesPromiseMap.has(projectId)) {
             this.templatesPromiseMap.set(
@@ -99,11 +112,8 @@ export class TestRailClient {
         return this.post<Case>(`${API_BASE_V2}/update_case/${caseId}`, fields);
     }
 
-    async updateCases(caseIds: number[], fields: Record<string, any>): Promise<Case[]> {
-        // Assume the project is operating in single suite mode, get suite_id from the first case
-        const caseData = await this.getCase(String(caseIds[0]));
-
-        const response = await this.post<{ updated_cases: Case[] }>(`${API_BASE_V2}/update_cases/${caseData.suite_id}`, {
+    async updateCases(suiteId: number, caseIds: number[], fields: Record<string, any>): Promise<Case[]> {
+        const response = await this.post<{ updated_cases: Case[] }>(`${API_BASE_V2}/update_cases/${suiteId}`, {
             case_ids: caseIds,
             ...fields,
         });
@@ -113,6 +123,10 @@ export class TestRailClient {
 
     async createCase(sectionId: string, fields: Record<string, any>): Promise<Case> {
         return this.post<Case>(`${API_BASE_V2}/add_case/${sectionId}`, fields);
+    }
+
+    async addRun(projectId: string, fields: Record<string, any>): Promise<Run> {
+        return this.post<Run>(`${API_BASE_V2}/add_run/${projectId}`, fields);
     }
 
     async getSections(projectId: string): Promise<Section[]> {
@@ -127,6 +141,36 @@ export class TestRailClient {
         }
         return this.projectsPromise;
     }
+
+
+    async getTests(runId: number, statusId?: number[]): Promise<Test[]> {
+        let url = `${API_BASE_V2}/get_tests/${runId}`;
+
+        if (statusId && statusId.length > 0) {
+            url += `&status_id=${statusId.join(',')}`;
+        }
+
+        const allTests: Test[] = [];
+        let nextUrl: string | null = url;
+
+        while (nextUrl) {
+            const response: PaginatedTestsResponse = await this.get<PaginatedTestsResponse>(nextUrl);
+            allTests.push(...response.tests);
+
+            nextUrl = response._links?.next;
+            if (nextUrl) {
+                nextUrl = `${API_INDEX}${nextUrl}`;
+            }
+        }
+
+        return allTests;
+    }
+
+
+    async addResults(runId: number, results: Array<Record<string, any>>): Promise<Result[]> {
+        return this.post<Result[]>(`${API_BASE_V2}/add_results/${runId}`, { results });
+    }
+
 
     private async get<T>(endpoint: string): Promise<T> {
         return this.executeRequest<T>('GET', endpoint);

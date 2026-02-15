@@ -39,7 +39,7 @@ describe('get_case tool', () => {
 
     test('exports correct tool definition', () => {
         expect(getCaseTool.name).toBe('get_case');
-        expect(getCaseTool.description).toBe('Get a test case from TestRail by ID');
+        expect(getCaseTool.description).toBe('Get detailed information about a test case including its custom fields');
         expect(getCaseTool.parameters).toBeDefined();
     });
 

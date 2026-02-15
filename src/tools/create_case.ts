@@ -3,14 +3,14 @@ import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
 
 const parameters = {
-    section_id: z.string().describe("The ID of the section where the case should be created"),
-    title: z.string().describe("The title of the test case (required)"),
-    fields: z.record(z.string(), z.any()).optional().describe("Optional object containing additional fields. Use get_case_fields to see available fields. Example: {\"priority_id\": 2, \"template_id\": 1, \"custom_automation_priority\": 1}"),
+    section_id: z.string().describe("The ID of the section where the case should be created. Use get_sections to find available sections"),
+    title: z.string().describe("The title of the test case"),
+    fields: z.record(z.string(), z.any()).optional().describe("Optional fields for the test case. First use get_templates to discover available templates, then get_case_fields to see available fields for your template. Example: {\"priority_id\": 2, \"template_id\": 1, \"custom_automation_priority\": 1}"),
 };
 
 export const createCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "create_case",
-    description: "Create a new test case in TestRail. IMPORTANT: Before creating a case, first call get_templates to discover available templates for the project, then use get_case_fields to see which fields are available for the chosen template. Requires section_id and title.",
+    description: "Create a new test case in TestRail",
     parameters,
     handler: async ({ section_id, title, fields }, client) => {
         const caseData = {

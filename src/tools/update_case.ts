@@ -9,7 +9,7 @@ const parameters = {
 
 export const updateCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "update_case",
-    description: "Update a test case in TestRail. Supports partial updates - only specify the fields you want to change. Use get_case_fields to see available fields and their types.",
+    description: "Update a test case in TestRail. Supports partial updates - only specify the fields you want to change",
     parameters,
     handler: async ({ case_id, fields }, client) => {
         const id = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;

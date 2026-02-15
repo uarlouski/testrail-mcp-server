@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Test run and result management tools**
+    - `add_run` - Create a new test run in TestRail
+    - `get_tests` - Get tests for a test run, optionally filtered by status
+    - `add_results` - Add one or more test results to a test run
+    - `get_statuses` - Get all available test statuses (e.g. Passed, Failed, Blocked)
+
 ## [1.2.0] - 2026-02-14
 
 ### Changed
