@@ -9,7 +9,7 @@ const parameters = {
 
 export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_case",
-    description: "Get a test case from TestRail by ID",
+    description: "Get detailed information about a test case including its custom fields",
     parameters,
     handler: async ({ case_id }, client) => {
         const id = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;

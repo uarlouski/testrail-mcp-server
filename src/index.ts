@@ -11,6 +11,10 @@ import { updateCasesTool } from "./tools/update_cases.js";
 import { createCaseTool } from "./tools/create_case.js";
 import { getSectionsTool } from "./tools/get_sections.js";
 import { getProjectsTool } from "./tools/get_projects.js";
+import { addRunTool } from "./tools/add_run.js";
+import { getStatusesTool } from "./tools/get_statuses.js";
+import { getTestsTool } from "./tools/get_tests.js";
+import { addResultsTool } from "./tools/add_results.js";
 import { removeNullish } from "./utils/sanitizer.js";
 
 const TESTRAIL_INSTANCE_URL = process.env.TESTRAIL_INSTANCE_URL;
@@ -39,6 +43,10 @@ const tools = [
     updateCaseTool,
     updateCasesTool,
     createCaseTool,
+    addRunTool,
+    getStatusesTool,
+    getTestsTool,
+    addResultsTool,
 ]
 
 for (const tool of tools) {
@@ -57,7 +65,7 @@ for (const tool of tools) {
                     content: [
                         {
                             type: "text" as const,
-                            text: JSON.stringify(sanitized, null, 2),
+                            text: JSON.stringify(sanitized),
                         },
                     ],
                 } as any;

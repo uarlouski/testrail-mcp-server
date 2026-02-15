@@ -315,26 +315,16 @@ describe('TestRailClient', () => {
         );
     });
 
-    test('updateCases gets suite_id from first case and updates all', async () => {
-        const mockCase = { id: 1, suite_id: 10 };
+    test('updateCases uses passed suiteId', async () => {
         const mockUpdated = [{ id: 1, title: 'Updated' }, { id: 2, title: 'Updated' }];
 
-        fetchMock
-            .mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockCase
-            })
-            .mockResolvedValueOnce({
-                ok: true,
-                json: async () => ({ updated_cases: mockUpdated })
-            });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ updated_cases: mockUpdated })
+        });
 
-        const result = await client.updateCases([1, 2], { title: 'Updated' });
+        const result = await client.updateCases(10, [1, 2], { title: 'Updated' });
         expect(result).toEqual(mockUpdated);
-        expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_case/1',
-            expect.any(Object)
-        );
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/update_cases/10',
             expect.objectContaining({
@@ -420,11 +410,108 @@ describe('TestRailClient', () => {
         );
     });
 
-    test('handleError formats error when network fails', async () => {
-        fetchMock.mockRejectedValue(new Error('Network Error'));
+    test('addRun posts fields directly', async () => {
+        const mockRun = { id: 1, name: 'New Run' };
 
-        await expect(client.getCase('1')).rejects.toThrow(
-            'Network Error'
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockRun
+        });
+
+        const result = await client.addRun('1', { name: 'New Run', suite_id: 20 });
+
+        expect(result).toEqual(mockRun);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/add_run/1',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ name: 'New Run', suite_id: 20 })
+            })
+        );
+    });
+
+    test('getTests handles pagination', async () => {
+        fetchMock
+            .mockImplementationOnce(() => Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    tests: [{ id: 1, case_id: 1, status_id: 1, title: 'Test 1', run_id: 1 }],
+                    _links: { next: '/api/v2/get_tests/1&offset=1' }
+                }),
+            } as Response))
+            .mockImplementationOnce(() => Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    tests: [{ id: 2, case_id: 2, status_id: 1, title: 'Test 2', run_id: 1 }],
+                    _links: { next: null }
+                }),
+            } as Response));
+
+        const tests = await client.getTests(1);
+        expect(tests).toHaveLength(2);
+        expect(tests[0].id).toBe(1);
+        expect(tests[1].id).toBe(2);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    test('getTests with status_id adds filter', async () => {
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                tests: [],
+                _links: { next: null }
+            })
+        } as Response);
+
+        await client.getTests(1, [1, 5]);
+
+        expect(fetchMock).toHaveBeenCalledWith(
+            expect.stringContaining('/get_tests/1&status_id=1,5'),
+            expect.any(Object)
+        );
+    });
+
+    test('getStatuses caches result', async () => {
+        const mockStatuses = [{ id: 1, name: 'passed', label: 'Passed' }];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockStatuses
+        });
+
+        await client.getStatuses();
+        await client.getStatuses();
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('addResults posts results array', async () => {
+        const mockResults = [
+            { id: 1, test_id: 100, status_id: 1, comment: 'Passed', defects: null },
+            { id: 2, test_id: 101, status_id: 5, comment: 'Failed', defects: 'BUG-123' }
+        ];
+
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockResults
+        });
+
+        const results = await client.addResults(50, [
+            { test_id: 100, status_id: 1, comment: 'Passed' },
+            { test_id: 101, status_id: 5, comment: 'Failed', defects: 'BUG-123' }
+        ]);
+
+        expect(results).toEqual(mockResults);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/add_results/50',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({
+                    results: [
+                        { test_id: 100, status_id: 1, comment: 'Passed' },
+                        { test_id: 101, status_id: 5, comment: 'Failed', defects: 'BUG-123' }
+                    ]
+                })
+            })
         );
     });
 });

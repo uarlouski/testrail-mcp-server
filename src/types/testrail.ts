@@ -85,3 +85,50 @@ export const ProjectSchema = z.object({
 });
 
 export type Project = z.infer<typeof ProjectSchema>;
+
+export const RunSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    description: z.string().nullable(),
+    suite_id: z.number().nullable(),
+    project_id: z.number(),
+    is_completed: z.boolean(),
+    passed_count: z.number(),
+    blocked_count: z.number(),
+    untested_count: z.number(),
+    retest_count: z.number(),
+    failed_count: z.number(),
+    url: z.string(),
+});
+
+export type Run = z.infer<typeof RunSchema>;
+
+export const StatusSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    label: z.string(),
+});
+
+export type Status = z.infer<typeof StatusSchema>;
+
+export const TestSchema = z.object({
+    id: z.number(),
+    case_id: z.number(),
+    status_id: z.number(),
+    title: z.string(),
+    run_id: z.number(),
+})
+
+export const TestsSchema = z.array(TestSchema)
+
+export type Test = z.infer<typeof TestSchema>
+
+export const ResultSchema = z.object({
+    id: z.number(),
+    test_id: z.number(),
+    status_id: z.number(),
+    comment: z.string().nullable(),
+    defects: z.string().nullable(),
+});
+
+export type Result = z.infer<typeof ResultSchema>

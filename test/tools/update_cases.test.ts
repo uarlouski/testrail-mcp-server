@@ -33,8 +33,12 @@ describe('update_cases tool', () => {
             .mockResolvedValue(mockUpdatedCases);
 
         mockClient = {
-            updateCases: updateCasesMock
+            updateCases: updateCasesMock,
+            getCase: jest.fn(),
         } as unknown as jest.Mocked<TestRailClient>;
+
+        // Default mock for getCase to avoid failures in unrelated tests
+        (mockClient.getCase as jest.Mock<any>).mockResolvedValue({ suite_id: 1 });
     });
 
     test('exports correct tool definition', () => {
@@ -56,6 +60,30 @@ describe('update_cases tool', () => {
         expect(result.updated_count).toBe(3);
         expect(result.case_ids).toEqual([1, 2, 3]);
         expect(result.message).toContain('3 test cases');
-        expect(mockClient.updateCases).toHaveBeenCalledWith([1, 2, 3], { priority_id: 3 });
+    });
+
+    test('passes case_ids and fields correctly', async () => {
+        const fields = { priority_id: 2, type_id: 1 };
+        const mockCase = { suite_id: 5 } as Case;
+        (mockClient.getCase as jest.Mock<any>).mockResolvedValue(mockCase);
+
+        await updateCasesTool.handler(
+            { case_ids: [10, 20, 30], fields },
+            mockClient
+        );
+
+        expect(mockClient.getCase).toHaveBeenCalledWith('10');
+        expect(mockClient.updateCases).toHaveBeenCalledWith(5, [10, 20, 30], fields);
+    });
+
+    test('handler throws error on failure', async () => {
+        updateCasesMock.mockRejectedValue(new Error('API Error'));
+
+        await expect(
+            updateCasesTool.handler(
+                { case_ids: [1, 2], fields: { priority_id: 2 } },
+                mockClient
+            )
+        ).rejects.toThrow('API Error');
     });
 });
