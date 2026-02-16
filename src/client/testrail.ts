@@ -1,4 +1,6 @@
-import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result } from "../types/testrail.js";
+import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment } from "../types/testrail.js";
+import FormData from "form-data";
+import * as fs from "fs";
 
 interface PaginatedCasesResponse {
     cases: Case[];
@@ -16,6 +18,7 @@ const API_BASE_V2 = `${API_INDEX}/api/v2`;
 export class TestRailClient {
     private baseUrl: string;
     private headers: HeadersInit;
+    private auth: string;
     private prioritiesPromise: Promise<Priority[]> | null = null;
     private caseTypesPromise: Promise<CaseType[]> | null = null;
     private caseFieldsPromise: Promise<CaseField[]> | null = null;
@@ -26,9 +29,10 @@ export class TestRailClient {
     constructor(baseUrl: string, email: string, apiKey: string) {
         this.baseUrl = baseUrl.replace(/\/$/, "");
         const auth = Buffer.from(`${email}:${apiKey}`).toString('base64');
+        this.auth = `Basic ${auth}`;
         this.headers = {
             "Content-Type": "application/json",
-            "Authorization": `Basic ${auth}`,
+            "Authorization": this.auth,
         };
     }
 
@@ -171,6 +175,17 @@ export class TestRailClient {
         return this.post<Result[]>(`${API_BASE_V2}/add_results/${runId}`, { results });
     }
 
+    async addAttachmentToRun(runId: number, filePath: string, filename: string): Promise<Attachment> {
+        const form = new FormData();
+        form.append('attachment', fs.createReadStream(filePath), filename);
+
+        const headers = {
+            'Authorization': this.auth,
+            ...form.getHeaders(),
+        };
+
+        return this._executeRequest<Attachment>('POST', `${API_BASE_V2}/add_attachment_to_run/${runId}`, headers, form as any);
+    }
 
     private async get<T>(endpoint: string): Promise<T> {
         return this.executeRequest<T>('GET', endpoint);
@@ -181,15 +196,21 @@ export class TestRailClient {
     }
 
     private async executeRequest<T>(method: 'GET' | 'POST', endpoint: string, data?: Record<string, any>): Promise<T> {
+        let jsonData = undefined;
+        if (data) {
+            jsonData = JSON.stringify(data);
+        }
+
+        return this._executeRequest<T>(method, endpoint, this.headers, jsonData);
+    }
+
+    private async _executeRequest<T>(method: 'GET' | 'POST', endpoint: string, headers: HeadersInit, body?: any): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
         const params: RequestInit = {
             method,
-            headers: this.headers,
+            headers,
+            body,
         };
-
-        if (data) {
-            params.body = JSON.stringify(data);
-        }
 
         const response = await fetch(url, params);
 

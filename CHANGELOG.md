@@ -9,6 +9,7 @@
     - `get_tests` - Get tests for a test run, optionally filtered by status
     - `add_results` - Add one or more test results to a test run
     - `get_statuses` - Get all available test statuses (e.g. Passed, Failed, Blocked)
+- Add `add_attachment_to_run` tool to attach files to test runs
 
 ## [1.2.0] - 2026-02-14
 

@@ -132,3 +132,9 @@ export const ResultSchema = z.object({
 });
 
 export type Result = z.infer<typeof ResultSchema>
+
+export const AttachmentSchema = z.object({
+    attachment_id: z.number(),
+});
+
+export type Attachment = z.infer<typeof AttachmentSchema>
