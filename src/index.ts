@@ -15,6 +15,7 @@ import { addRunTool } from "./tools/add_run.js";
 import { getStatusesTool } from "./tools/get_statuses.js";
 import { getTestsTool } from "./tools/get_tests.js";
 import { addResultsTool } from "./tools/add_results.js";
+import { addAttachmentToRunTool } from "./tools/add_attachment_to_run.js";
 import { removeNullish } from "./utils/sanitizer.js";
 
 const TESTRAIL_INSTANCE_URL = process.env.TESTRAIL_INSTANCE_URL;
@@ -47,6 +48,7 @@ const tools = [
     getStatusesTool,
     getTestsTool,
     addResultsTool,
+    addAttachmentToRunTool,
 ]
 
 for (const tool of tools) {

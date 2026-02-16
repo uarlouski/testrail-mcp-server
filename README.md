@@ -66,6 +66,7 @@ This MCP server exposes the following tools to the LLM:
 | `add_run` | **Test Execution**: Create a new test run in TestRail. |
 | `get_tests` | **Test Execution**: Get tests for a test run, optionally filtered by status. |
 | `add_results` | **Test Execution**: Add one or more test results to a test run. |
+| `add_attachment_to_run` | **Test Execution**: Add an attachment (file or zipped folder) to a test run. |
 | `get_statuses` | **Metadata**: Get all available test statuses (e.g. Passed, Failed, Blocked). |
 | `get_case_fields` | **Metadata**: Retrieve definitions of custom fields to understand available inputs. |
 | `get_templates` | **Metadata**: List available case templates to ensure correct case creation structure. |
