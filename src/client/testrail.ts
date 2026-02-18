@@ -1,5 +1,5 @@
 import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment } from "../types/testrail.js";
-import FormData from "form-data";
+
 import * as fs from "fs";
 
 interface PaginatedCasesResponse {
@@ -176,15 +176,16 @@ export class TestRailClient {
     }
 
     async addAttachmentToRun(runId: number, filePath: string, filename: string): Promise<Attachment> {
-        const form = new FormData();
-        form.append('attachment', fs.createReadStream(filePath), filename);
+        const fileBuffer = await fs.promises.readFile(filePath);
+        const blob = new Blob([fileBuffer]);
+        const formData = new FormData();
+        formData.append('attachment', blob, filename);
 
-        const headers = {
+        const headers: HeadersInit = {
             'Authorization': this.auth,
-            ...form.getHeaders(),
         };
 
-        return this._executeRequest<Attachment>('POST', `${API_BASE_V2}/add_attachment_to_run/${runId}`, headers, form as any);
+        return this._executeRequest<Attachment>('POST', `${API_BASE_V2}/add_attachment_to_run/${runId}`, headers, formData);
     }
 
     private async get<T>(endpoint: string): Promise<T> {
