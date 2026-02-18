@@ -1,5 +1,6 @@
 import { jest, describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import { TestRailClient } from '../../src/client/testrail.js';
+import * as fs from 'fs';
 
 describe('TestRailClient', () => {
     let client: TestRailClient;
@@ -511,6 +512,33 @@ describe('TestRailClient', () => {
                         { test_id: 101, status_id: 5, comment: 'Failed', defects: 'BUG-123' }
                     ]
                 })
+            })
+        );
+    });
+
+    test('addAttachmentToRun uploads file using FormData', async () => {
+        const mockAttachment = { attachment_id: 443 };
+        const mockFileBuffer = Buffer.from('file content');
+
+        jest.spyOn(fs.promises, 'readFile').mockResolvedValue(mockFileBuffer);
+
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockAttachment
+        });
+
+        const result = await client.addAttachmentToRun(100, '/path/to/file.txt', 'file.txt');
+
+        expect(result).toEqual(mockAttachment);
+        expect(fs.promises.readFile).toHaveBeenCalledWith('/path/to/file.txt');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/add_attachment_to_run/100',
+            expect.objectContaining({
+                method: 'POST',
+                headers: expect.objectContaining({
+                    'Authorization': expect.stringContaining('Basic')
+                }),
+                body: expect.any(FormData)
             })
         );
     });
