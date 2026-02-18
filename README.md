@@ -1,7 +1,12 @@
 # TestRail MCP Server
 
-[![npm version](https://img.shields.io/npm/v/@uarlouski/testrail-mcp-server.svg)](https://www.npmjs.com/package/@uarlouski/testrail-mcp-server)
-[![License](https://img.shields.io/npm/l/@uarlouski/testrail-mcp-server.svg)](https://github.com/uarlouski/testrail-mcp-server/blob/main/LICENSE)
+[![npm version](https://badge.fury.io/js/@uarlouski%2Ftestrail-mcp-server.svg)](https://www.npmjs.com/package/@uarlouski/testrail-mcp-server)
+[![npm downloads](https://img.shields.io/npm/dm/@uarlouski/testrail-mcp-server.svg)](https://www.npmjs.com/package/@uarlouski/testrail-mcp-server)
+[![CI](https://github.com/uarlouski/testrail-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/uarlouski/testrail-mcp-server/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
+[![GitHub stars](https://img.shields.io/github/stars/uarlouski/testrail-mcp-server.svg?style=social&label=Star)](https://github.com/uarlouski/testrail-mcp-server)
+
 
 A powerful **Model Context Protocol (MCP)** server for seamless integration between **Large Language Models (LLMs)** and **TestRail** test case management.
 
