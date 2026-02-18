@@ -30,8 +30,8 @@ describe('get_tests tool', () => {
         const result = await getTestsTool.handler({ run_id: 1 }, mockClient);
 
         expect(result).toBeDefined();
-        expect(result.statuses).toBeDefined();
-        expect(result.statuses).toHaveLength(2);
+        expect(result.tests).toBeDefined();
+        expect(result.tests).toHaveLength(2);
         expect(mockClient.getTests).toHaveBeenCalledWith(1, undefined);
     });
 
