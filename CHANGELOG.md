@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Fix invalid config for distribution packaging
+
 ## [1.3.0] - 2026-02-18
 
 ### Added

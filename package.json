@@ -2,7 +2,13 @@
   "name": "@uarlouski/testrail-mcp-server",
   "version": "1.3.0",
   "description": "Model Context Protocol (MCP) server for TestRail integration, enabling LLMs to fetch test cases and metadata.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "bin": {
+    "testrail-mcp-server": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "scripts": {
     "build": "rimraf dist && tsc",
