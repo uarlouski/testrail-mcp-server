@@ -31,7 +31,7 @@ if (!TESTRAIL_INSTANCE_URL || !TESTRAIL_USERNAME || !TESTRAIL_API_KEY) {
 
 const server = new McpServer({
     name: "TestRail MCP Server",
-    version: "1.3.1",
+    version: "1.4.0",
 });
 
 const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY);
