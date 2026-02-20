@@ -70,7 +70,7 @@ describe('get_case tool', () => {
             custom_goals: null,
             custom_postcondition: null,
             custom_comments: null,
-            labels: ['tag1']
+            labels: [{ title: 'tag1' }]
         };
 
         const mockSection: Section = {
@@ -100,7 +100,7 @@ describe('get_case tool', () => {
             section: 'My Section',
             type: 'Functional',
             priority: 'High',
-            labels: ['tag1'],
+            labels: [{ title: 'tag1' }],
             references: 'JIRA-123',
             updated_on: 1700000000
         });

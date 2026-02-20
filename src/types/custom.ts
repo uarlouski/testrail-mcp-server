@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Label } from "./testrail.js";
 
 export interface TestCaseResponse {
     id: number;
@@ -6,7 +7,7 @@ export interface TestCaseResponse {
     section: string;
     type: string;
     priority: string;
-    labels: string[];
+    labels: Label[];
     references: string | null;
     [key: string]: any;
 }
