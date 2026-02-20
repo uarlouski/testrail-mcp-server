@@ -12,7 +12,8 @@ export const updateCaseTool: ToolDefinition<typeof parameters, TestRailClient> =
     description: "Update a test case in TestRail. Supports partial updates - only specify the fields you want to change",
     parameters,
     handler: async ({ case_id, fields }, client) => {
-        const id = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;
+        const idString = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;
+        const id = Number(idString);
 
         const updatedCase = await client.updateCase(id, fields);
 

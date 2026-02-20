@@ -8,7 +8,7 @@ import archiver from "archiver";
 import { ToolDefinition } from "../types/custom.js";
 
 const parameters = {
-    run_id: z.string().describe("The ID of the test run to attach the file to"),
+    run_id: z.number().describe("The ID of the test run to attach the file to"),
     file_path: z.string().describe("The path to the file or directory to attach. Directories will be automatically zipped."),
 }
 
@@ -51,7 +51,7 @@ export const addAttachmentToRunTool: ToolDefinition<typeof parameters, TestRailC
         }
 
         try {
-            const result = await client.addAttachmentToRun(Number(run_id), uploadPath, filename);
+            const result = await client.addAttachmentToRun(run_id, uploadPath, filename);
             return AttachmentSchema.parse(result);
         } finally {
             if (isTemporary && fs.existsSync(uploadPath)) {

@@ -5,7 +5,7 @@ import { Case } from '../../src/types/testrail.js';
 
 describe('update_case tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
-    let updateCaseMock: jest.Mock<(caseId: string, fields: Record<string, any>) => Promise<Case>>;
+    let updateCaseMock: jest.Mock<(caseId: number, fields: Record<string, any>) => Promise<Case>>;
 
     const mockUpdatedCase: Case = {
         id: 123,
@@ -29,7 +29,7 @@ describe('update_case tool', () => {
     };
 
     beforeEach(() => {
-        updateCaseMock = jest.fn<(caseId: string, fields: Record<string, any>) => Promise<Case>>()
+        updateCaseMock = jest.fn<(caseId: number, fields: Record<string, any>) => Promise<Case>>()
             .mockResolvedValue(mockUpdatedCase);
 
         mockClient = {
@@ -55,7 +55,7 @@ describe('update_case tool', () => {
         expect(result.success).toBe(true);
         expect(result.case_id).toBe(123);
         expect(result.message).toContain('C123');
-        expect(mockClient.updateCase).toHaveBeenCalledWith('123', { title: 'Updated Title' });
+        expect(mockClient.updateCase).toHaveBeenCalledWith(123, { title: 'Updated Title' });
     });
 
     test('strips C prefix from case_id', async () => {
@@ -63,8 +63,7 @@ describe('update_case tool', () => {
             { case_id: 'C456', fields: { title: 'New Title' } },
             mockClient
         );
-
-        expect(mockClient.updateCase).toHaveBeenCalledWith('456', { title: 'New Title' });
+        expect(mockClient.updateCase).toHaveBeenCalledWith(456, { title: 'New Title' });
     });
 
     test('handles lowercase c prefix', async () => {
@@ -72,8 +71,7 @@ describe('update_case tool', () => {
             { case_id: 'c789', fields: { priority_id: 3 } },
             mockClient
         );
-
-        expect(mockClient.updateCase).toHaveBeenCalledWith('789', { priority_id: 3 });
+        expect(mockClient.updateCase).toHaveBeenCalledWith(789, { priority_id: 3 });
     });
 
     test('passes multiple fields correctly', async () => {
@@ -85,8 +83,7 @@ describe('update_case tool', () => {
         };
 
         await updateCaseTool.handler({ case_id: '123', fields }, mockClient);
-
-        expect(mockClient.updateCase).toHaveBeenCalledWith('123', fields);
+        expect(mockClient.updateCase).toHaveBeenCalledWith(123, fields);
     });
 
     test('handler throws error on failure', async () => {

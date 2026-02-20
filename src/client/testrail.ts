@@ -36,19 +36,18 @@ export class TestRailClient {
         };
     }
 
-    async getCase(caseId: string): Promise<Case> {
+    async getCase(caseId: number): Promise<Case> {
         return this.get<Case>(`${API_BASE_V2}/get_case/${caseId}`);
     }
 
-    async getCasesRecursively(projectId: string, sectionId: string, filter?: Record<string, string>, excludedSectionNames?: string[]): Promise<Case[]> {
+    async getCasesRecursively(projectId: number, sectionId: number, filter?: Record<string, string>, excludedSectionNames?: string[]): Promise<Case[]> {
         const sections = await this.getSections(projectId);
 
-        const targetSectionId = parseInt(sectionId);
-        const sectionIds = this.getSubSectionIds(sections, targetSectionId, excludedSectionNames);
+        const sectionIds = this.getSubSectionIds(sections, sectionId, excludedSectionNames);
 
-        sectionIds.push(targetSectionId);
+        sectionIds.push(sectionId);
 
-        const promises = sectionIds.map(id => this.getCases(projectId, id.toString(), filter));
+        const promises = sectionIds.map(id => this.getCases(projectId, id, filter));
         const results = await Promise.all(promises);
 
         return results.flat();
@@ -68,7 +67,7 @@ export class TestRailClient {
         return ids;
     }
 
-    async getCases(projectId: string, sectionId?: string, filter?: Record<string, string>): Promise<Case[]> {
+    async getCases(projectId: number, sectionId?: number, filter?: Record<string, string>): Promise<Case[]> {
         let url = `${API_BASE_V2}/get_cases/${projectId}`;
 
         if (sectionId) {
@@ -98,7 +97,7 @@ export class TestRailClient {
         return allCases;
     }
 
-    async getSection(sectionId: string): Promise<Section> {
+    async getSection(sectionId: number): Promise<Section> {
         return this.get<Section>(`${API_BASE_V2}/get_section/${sectionId}`);
     }
 
@@ -130,17 +129,17 @@ export class TestRailClient {
         return this.statusesPromise;
     }
 
-    async getTemplates(projectId: string): Promise<Template[]> {
-        if (!this.templatesPromiseMap.has(projectId)) {
+    async getTemplates(projectId: number): Promise<Template[]> {
+        if (!this.templatesPromiseMap.has(projectId.toString())) {
             this.templatesPromiseMap.set(
-                projectId,
+                projectId.toString(),
                 this.get<Template[]>(`${API_BASE_V2}/get_templates/${projectId}`)
             );
         }
-        return this.templatesPromiseMap.get(projectId)!;
+        return this.templatesPromiseMap.get(projectId.toString())!;
     }
 
-    async updateCase(caseId: string, fields: Record<string, any>): Promise<Case> {
+    async updateCase(caseId: number, fields: Record<string, any>): Promise<Case> {
         return this.post<Case>(`${API_BASE_V2}/update_case/${caseId}`, fields);
     }
 
@@ -153,15 +152,15 @@ export class TestRailClient {
         return response.updated_cases;
     }
 
-    async createCase(sectionId: string, fields: Record<string, any>): Promise<Case> {
+    async createCase(sectionId: number, fields: Record<string, any>): Promise<Case> {
         return this.post<Case>(`${API_BASE_V2}/add_case/${sectionId}`, fields);
     }
 
-    async addRun(projectId: string, fields: Record<string, any>): Promise<Run> {
+    async addRun(projectId: number, fields: Record<string, any>): Promise<Run> {
         return this.post<Run>(`${API_BASE_V2}/add_run/${projectId}`, fields);
     }
 
-    async getSections(projectId: string): Promise<Section[]> {
+    async getSections(projectId: number): Promise<Section[]> {
         const response = await this.get<{ sections: Section[] }>(`${API_BASE_V2}/get_sections/${projectId}`);
         return response.sections;
     }

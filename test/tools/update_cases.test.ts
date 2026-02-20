@@ -71,8 +71,7 @@ describe('update_cases tool', () => {
             { case_ids: [10, 20, 30], fields },
             mockClient
         );
-
-        expect(mockClient.getCase).toHaveBeenCalledWith('10');
+        expect(mockClient.getCase).toHaveBeenCalledWith(10);
         expect(mockClient.updateCases).toHaveBeenCalledWith(5, [10, 20, 30], fields);
     });
 

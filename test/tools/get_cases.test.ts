@@ -53,38 +53,38 @@ describe('get_cases tool', () => {
     });
 
     test('handler fetches and returns cases', async () => {
-        const result = await getCasesTool.handler({ project_id: '1' }, mockClient);
+        const result = await getCasesTool.handler({ project_id: 1 }, mockClient);
 
         expect(result).toBeDefined();
         expect(result.cases).toHaveLength(3);
-        expect(mockClient.getCases).toHaveBeenCalledWith('1', undefined, undefined);
+        expect(mockClient.getCases).toHaveBeenCalledWith(1, undefined, undefined);
     });
 
     test('handler fetches cases for section', async () => {
-        const result = await getCasesTool.handler({ project_id: '1', section: { id: '5', recursive: false } }, mockClient);
+        const result = await getCasesTool.handler({ project_id: 1, section: { id: 5, recursive: false } }, mockClient);
 
         expect(result).toBeDefined();
-        expect(mockClient.getCases).toHaveBeenCalledWith('1', '5', undefined);
+        expect(mockClient.getCases).toHaveBeenCalledWith(1, 5, undefined);
     });
 
     test('handler fetches cases recursively', async () => {
-        const result = await getCasesTool.handler({ project_id: '1', section: { id: '5', recursive: true } }, mockClient);
+        const result = await getCasesTool.handler({ project_id: 1, section: { id: 5, recursive: true } }, mockClient);
 
         expect(result).toBeDefined();
-        expect(mockClient.getCasesRecursively).toHaveBeenCalledWith('1', '5', undefined, undefined);
+        expect(mockClient.getCasesRecursively).toHaveBeenCalledWith(1, 5, undefined, undefined);
         expect(mockClient.getCases).not.toHaveBeenCalled();
     });
 
     test('handler fetches cases recursively with exclusion', async () => {
-        const result = await getCasesTool.handler({ project_id: '1', section: { id: '5', recursive: true, excludes: ['Skip'] } }, mockClient);
+        const result = await getCasesTool.handler({ project_id: 1, section: { id: 5, recursive: true, excludes: ['Skip'] } }, mockClient);
 
         expect(result).toBeDefined();
-        expect(mockClient.getCasesRecursively).toHaveBeenCalledWith('1', '5', undefined, ['Skip']);
+        expect(mockClient.getCasesRecursively).toHaveBeenCalledWith(1, 5, undefined, ['Skip']);
     });
 
     test('filters cases using where clause with single condition', async () => {
         const result = await getCasesTool.handler(
-            { project_id: '1', where: { custom_automation_status: 1 } },
+            { project_id: 1, where: { custom_automation_status: 1 } },
             mockClient
         );
 
@@ -95,7 +95,7 @@ describe('get_cases tool', () => {
 
     test('filters cases using where clause with multiple conditions', async () => {
         const result = await getCasesTool.handler(
-            { project_id: '1', where: { custom_automation_status: 2, priority_id: 3 } },
+            { project_id: 1, where: { custom_automation_status: 2, priority_id: 3 } },
             mockClient
         );
 
@@ -106,7 +106,7 @@ describe('get_cases tool', () => {
 
     test('returns empty array when where clause matches no cases', async () => {
         const result = await getCasesTool.handler(
-            { project_id: '1', where: { custom_automation_status: 999 } },
+            { project_id: 1, where: { custom_automation_status: 999 } },
             mockClient
         );
 
@@ -115,7 +115,7 @@ describe('get_cases tool', () => {
 
     test('combines where clause with fields parameter', async () => {
         const result = await getCasesTool.handler(
-            { project_id: '1', where: { priority_id: 2 }, fields: ['priority_id', 'custom_automation_status'] },
+            { project_id: 1, where: { priority_id: 2 }, fields: ['priority_id', 'custom_automation_status'] },
             mockClient
         );
 

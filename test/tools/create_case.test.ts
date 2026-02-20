@@ -48,7 +48,7 @@ describe('create_case tool', () => {
 
     test('handler creates case and returns success response', async () => {
         const result = await createCaseTool.handler(
-            { section_id: '1', title: 'New Test Case' },
+            { section_id: 1, title: 'New Test Case' },
             mockClient
         );
 
@@ -56,7 +56,7 @@ describe('create_case tool', () => {
         expect(result.success).toBe(true);
         expect(result.case_id).toBe(456);
         expect(result.message).toContain('C456');
-        expect(mockClient.createCase).toHaveBeenCalledWith('1', { title: 'New Test Case' });
+        expect(mockClient.createCase).toHaveBeenCalledWith(1, { title: 'New Test Case' });
     });
 
     test('passes title and optional fields correctly', async () => {
@@ -67,11 +67,11 @@ describe('create_case tool', () => {
         };
 
         await createCaseTool.handler(
-            { section_id: '5', title: 'My Test', fields },
+            { section_id: 5, title: 'My Test', fields },
             mockClient
         );
 
-        expect(mockClient.createCase).toHaveBeenCalledWith('5', {
+        expect(mockClient.createCase).toHaveBeenCalledWith(5, {
             title: 'My Test',
             priority_id: 2,
             template_id: 1,
@@ -81,11 +81,11 @@ describe('create_case tool', () => {
 
     test('works without optional fields', async () => {
         await createCaseTool.handler(
-            { section_id: '10', title: 'Simple Test' },
+            { section_id: 10, title: 'Simple Test' },
             mockClient
         );
 
-        expect(mockClient.createCase).toHaveBeenCalledWith('10', { title: 'Simple Test' });
+        expect(mockClient.createCase).toHaveBeenCalledWith(10, { title: 'Simple Test' });
     });
 
     test('handler throws error on failure', async () => {
@@ -93,7 +93,7 @@ describe('create_case tool', () => {
 
         await expect(
             createCaseTool.handler(
-                { section_id: '1', title: 'Test' },
+                { section_id: 1, title: 'Test' },
                 mockClient
             )
         ).rejects.toThrow('API Error');

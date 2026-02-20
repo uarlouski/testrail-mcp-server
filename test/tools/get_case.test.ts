@@ -5,8 +5,8 @@ import { Case, Section, CaseType, Priority, CaseField } from '../../src/types/te
 
 describe('get_case tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
-    let getCaseMock: jest.Mock<(id: string) => Promise<Case>>;
-    let getSectionMock: jest.Mock<(id: string) => Promise<Section>>;
+    let getCaseMock: jest.Mock<(id: number) => Promise<Case>>;
+    let getSectionMock: jest.Mock<(id: number) => Promise<Section>>;
     let getCaseTypesMock: jest.Mock<() => Promise<CaseType[]>>;
     let getPrioritiesMock: jest.Mock<() => Promise<Priority[]>>;
     let getCaseFieldsMock: jest.Mock<() => Promise<CaseField[]>>;
@@ -22,8 +22,8 @@ describe('get_case tool', () => {
     ];
 
     beforeEach(() => {
-        getCaseMock = jest.fn<(id: string) => Promise<Case>>();
-        getSectionMock = jest.fn<(id: string) => Promise<Section>>();
+        getCaseMock = jest.fn<(id: number) => Promise<Case>>();
+        getSectionMock = jest.fn<(id: number) => Promise<Section>>();
         getCaseTypesMock = jest.fn<() => Promise<CaseType[]>>();
         getPrioritiesMock = jest.fn<() => Promise<Priority[]>>();
         getCaseFieldsMock = jest.fn<() => Promise<CaseField[]>>().mockResolvedValue(mockCaseFields);
@@ -104,9 +104,8 @@ describe('get_case tool', () => {
             references: 'JIRA-123',
             updated_on: 1700000000
         });
-
-        expect(mockClient.getCase).toHaveBeenCalledWith('123');
-        expect(mockClient.getSection).toHaveBeenCalledWith('456');
+        expect(mockClient.getCase).toHaveBeenCalledWith(123);
+        expect(mockClient.getSection).toHaveBeenCalledWith(456);
         expect(mockClient.getCaseTypes).toHaveBeenCalled();
         expect(mockClient.getPriorities).toHaveBeenCalled();
     });

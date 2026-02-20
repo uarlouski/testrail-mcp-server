@@ -29,10 +29,10 @@ describe('get_templates tool', () => {
     });
 
     test('handler fetches and returns templates', async () => {
-        const result = await getTemplatesTool.handler({ project_id: '1' }, mockClient);
+        const result = await getTemplatesTool.handler({ project_id: 1 }, mockClient);
 
         expect(result).toBeDefined();
         expect(result.templates).toHaveLength(3);
-        expect(mockClient.getTemplates).toHaveBeenCalledWith('1');
+        expect(mockClient.getTemplates).toHaveBeenCalledWith(1);
     });
 });
