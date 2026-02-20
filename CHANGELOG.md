@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Extend get_cases tool to recursively fetch child section cases
+
 ## [1.3.1] - 2026-02-18
 
 ### Fixed

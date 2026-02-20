@@ -6,6 +6,7 @@ import { Case } from '../../src/types/testrail.js';
 describe('get_cases tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
     let getCasesMock: jest.Mock<(projectId: string, sectionId?: string, filter?: Record<string, string>) => Promise<Case[]>>;
+    let getCasesRecursivelyMock: jest.Mock<(projectId: string, sectionId: string, filter?: Record<string, string>, excludedSectionNames?: string[]) => Promise<Case[]>>;
 
     const mockCases: Case[] = [
         {
@@ -32,8 +33,12 @@ describe('get_cases tool', () => {
         getCasesMock = jest.fn<(projectId: string, sectionId?: string, filter?: Record<string, string>) => Promise<Case[]>>()
             .mockResolvedValue(mockCases);
 
+        getCasesRecursivelyMock = jest.fn<(projectId: string, sectionId: string, filter?: Record<string, string>, excludedSectionNames?: string[]) => Promise<Case[]>>()
+            .mockResolvedValue(mockCases);
+
         mockClient = {
-            getCases: getCasesMock
+            getCases: getCasesMock,
+            getCasesRecursively: getCasesRecursivelyMock
         } as unknown as jest.Mocked<TestRailClient>;
     });
 
@@ -42,7 +47,7 @@ describe('get_cases tool', () => {
         expect(getCasesTool.description).toContain('cases');
         expect(getCasesTool.parameters).toBeDefined();
         expect(getCasesTool.parameters.project_id).toBeDefined();
-        expect(getCasesTool.parameters.section_id).toBeDefined();
+        expect(getCasesTool.parameters.section).toBeDefined();
         expect(getCasesTool.parameters.filter).toBeDefined();
         expect(getCasesTool.parameters.fields).toBeDefined();
     });
@@ -53,6 +58,28 @@ describe('get_cases tool', () => {
         expect(result).toBeDefined();
         expect(result.cases).toHaveLength(3);
         expect(mockClient.getCases).toHaveBeenCalledWith('1', undefined, undefined);
+    });
+
+    test('handler fetches cases for section', async () => {
+        const result = await getCasesTool.handler({ project_id: '1', section: { id: '5', recursive: false } }, mockClient);
+
+        expect(result).toBeDefined();
+        expect(mockClient.getCases).toHaveBeenCalledWith('1', '5', undefined);
+    });
+
+    test('handler fetches cases recursively', async () => {
+        const result = await getCasesTool.handler({ project_id: '1', section: { id: '5', recursive: true } }, mockClient);
+
+        expect(result).toBeDefined();
+        expect(mockClient.getCasesRecursively).toHaveBeenCalledWith('1', '5', undefined, undefined);
+        expect(mockClient.getCases).not.toHaveBeenCalled();
+    });
+
+    test('handler fetches cases recursively with exclusion', async () => {
+        const result = await getCasesTool.handler({ project_id: '1', section: { id: '5', recursive: true, excludes: ['Skip'] } }, mockClient);
+
+        expect(result).toBeDefined();
+        expect(mockClient.getCasesRecursively).toHaveBeenCalledWith('1', '5', undefined, ['Skip']);
     });
 
     test('filters cases using where clause with single condition', async () => {
@@ -98,7 +125,7 @@ describe('get_cases tool', () => {
             title: 'Login test',
             suite_id: 1,
             priority_id: 2,
-            custom_automation_status: 1
+            custom_automation_status: 1,
         });
     });
 });

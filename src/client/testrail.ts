@@ -40,6 +40,34 @@ export class TestRailClient {
         return this.get<Case>(`${API_BASE_V2}/get_case/${caseId}`);
     }
 
+    async getCasesRecursively(projectId: string, sectionId: string, filter?: Record<string, string>, excludedSectionNames?: string[]): Promise<Case[]> {
+        const sections = await this.getSections(projectId);
+
+        const targetSectionId = parseInt(sectionId);
+        const sectionIds = this.getSubSectionIds(sections, targetSectionId, excludedSectionNames);
+
+        sectionIds.push(targetSectionId);
+
+        const promises = sectionIds.map(id => this.getCases(projectId, id.toString(), filter));
+        const results = await Promise.all(promises);
+
+        return results.flat();
+    }
+
+    private getSubSectionIds(sections: Section[], parentId: number, excludedSectionNames?: string[]): number[] {
+        const children = sections.filter(s => s.parent_id === parentId);
+
+        const validChildren = children.filter(s => !excludedSectionNames?.includes(s.name));
+
+        let ids = validChildren.map(s => s.id);
+
+        for (const child of validChildren) {
+            ids = ids.concat(this.getSubSectionIds(sections, child.id, excludedSectionNames));
+        }
+
+        return ids;
+    }
+
     async getCases(projectId: string, sectionId?: string, filter?: Record<string, string>): Promise<Case[]> {
         let url = `${API_BASE_V2}/get_cases/${projectId}`;
 

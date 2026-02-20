@@ -1,5 +1,6 @@
 import { jest, describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import { TestRailClient } from '../../src/client/testrail.js';
+import { Section, Case } from '../../src/types/testrail.js';
 import * as fs from 'fs';
 
 describe('TestRailClient', () => {
@@ -541,5 +542,128 @@ describe('TestRailClient', () => {
                 body: expect.any(FormData)
             })
         );
+    });
+
+    test('getCasesRecursively fetches cases from section and all subsections', async () => {
+        // Mock Section Tree:
+        // Section 1 (Root target)
+        // ├── Section 2
+        // │   └── Section 3
+        // └── Section 4
+        // Section 5 (Outside target)
+
+        const mockSections: Section[] = [
+            { id: 1, name: 'Root', parent_id: null, suite_id: 1, description: '' },
+            { id: 2, name: 'Child 1', parent_id: 1, suite_id: 1, description: '' },
+            { id: 3, name: 'Grandchild', parent_id: 2, suite_id: 1, description: '' },
+            { id: 4, name: 'Child 2', parent_id: 1, suite_id: 1, description: '' },
+            { id: 5, name: 'Other', parent_id: null, suite_id: 1, description: '' },
+        ];
+
+        // Mock Cases
+        const casesSection1: Case[] = [{ id: 101, title: 'Case S1', section_id: 1, suite_id: 1 } as Case];
+        const casesSection2: Case[] = [{ id: 102, title: 'Case S2', section_id: 2, suite_id: 1 } as Case];
+        const casesSection3: Case[] = [{ id: 103, title: 'Case S3', section_id: 3, suite_id: 1 } as Case];
+        const casesSection4: Case[] = [];
+        const casesSection5: Case[] = [{ id: 105, title: 'Case S5', section_id: 5, suite_id: 1 } as Case];
+
+        // Setup Mocks
+        // 1. getSections call
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ sections: mockSections })
+        });
+
+        // 2. getCases calls (order might vary depending on Promise.all implementation, so we match by URL)
+        fetchMock.mockImplementation((url: string) => {
+            if (url.includes('/get_sections/1')) { // fallback if calls happen differently
+                return Promise.resolve({
+                    ok: true,
+                    json: async () => ({ sections: mockSections })
+                });
+            }
+            if (url.includes('section_id=1')) return Promise.resolve({ ok: true, json: async () => ({ cases: casesSection1, _links: {} }) });
+            if (url.includes('section_id=2')) return Promise.resolve({ ok: true, json: async () => ({ cases: casesSection2, _links: {} }) });
+            if (url.includes('section_id=3')) return Promise.resolve({ ok: true, json: async () => ({ cases: casesSection3, _links: {} }) });
+            if (url.includes('section_id=4')) return Promise.resolve({ ok: true, json: async () => ({ cases: casesSection4, _links: {} }) });
+
+            return Promise.reject(new Error(`Unexpected URL: ${url}`));
+        });
+
+        const result = await client.getCasesRecursively('1', '1');
+
+        // Check if we got cases from sections 1, 2, 3, 4
+        const resultIds = result.map(c => c.id).sort();
+        expect(resultIds).toEqual([101, 102, 103]);
+
+        // Check that Section 5 was NOT fetched
+        expect(fetchMock).not.toHaveBeenCalledWith(expect.stringContaining('section_id=5'), expect.anything());
+    });
+
+    test('getCasesRecursively passes filter to getCases', async () => {
+        const mockSections: Section[] = [
+            { id: 1, name: 'Root', parent_id: null, suite_id: 1, description: '' },
+            { id: 2, name: 'Child', parent_id: 1, suite_id: 1, description: '' },
+        ];
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ sections: mockSections })
+        });
+
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ cases: [], _links: {} })
+        });
+
+        await client.getCasesRecursively('1', '1', { priority_id: '1' });
+
+        expect(fetchMock).toHaveBeenCalledWith(
+            expect.stringContaining('section_id=1&priority_id=1'),
+            expect.anything()
+        );
+        expect(fetchMock).toHaveBeenCalledWith(
+            expect.stringContaining('section_id=2&priority_id=1'),
+            expect.anything()
+        );
+    });
+
+    test('getCasesRecursively excludes sections by name', async () => {
+        // Mock Section Tree:
+        // Section 1 (Root)
+        // ├── Section 2 (To keep)
+        // ├── Section 3 (To exclude)
+        // │    └── Section 4 (Should be excluded via parent)
+        // └── Section 5 (To keep)
+
+        const mockSections: Section[] = [
+            { id: 1, name: 'Root', parent_id: null, suite_id: 1, description: '' },
+            { id: 2, name: 'Keep 1', parent_id: 1, suite_id: 1, description: '' },
+            { id: 3, name: 'Exclude Me', parent_id: 1, suite_id: 1, description: '' },
+            { id: 4, name: 'Child of Excluded', parent_id: 3, suite_id: 1, description: '' },
+            { id: 5, name: 'Keep 2', parent_id: 1, suite_id: 1, description: '' },
+        ];
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ sections: mockSections })
+        });
+
+        // Mock empty cases for simplicity, we just want to verify calls
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ cases: [], _links: {} })
+        });
+
+        await client.getCasesRecursively('1', '1', undefined, ['Exclude Me']);
+
+        // Should fetch for Root (1), Keep 1 (2), Keep 2 (5)
+        expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('section_id=1'), expect.anything());
+        expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('section_id=2'), expect.anything());
+        expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('section_id=5'), expect.anything());
+
+        // Should NOT fetch for Exclude Me (3) or Child of Excluded (4)
+        expect(fetchMock).not.toHaveBeenCalledWith(expect.stringContaining('section_id=3'), expect.anything());
+        expect(fetchMock).not.toHaveBeenCalledWith(expect.stringContaining('section_id=4'), expect.anything());
     });
 });
