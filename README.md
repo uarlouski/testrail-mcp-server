@@ -1,41 +1,57 @@
-# TestRail MCP Server
+<p align="center">
+  <h1 align="center">TestRail MCP Server</h1>
+  <p align="center">
+    A Model Context Protocol (MCP) server that connects AI assistants to TestRail test management — search, create, update, and execute test cases using natural language.
+  </p>
+</p>
 
-[![npm version](https://badge.fury.io/js/@uarlouski%2Ftestrail-mcp-server.svg)](https://www.npmjs.com/package/@uarlouski/testrail-mcp-server)
-[![npm downloads](https://img.shields.io/npm/dm/@uarlouski/testrail-mcp-server.svg)](https://www.npmjs.com/package/@uarlouski/testrail-mcp-server)
-[![CI](https://github.com/uarlouski/testrail-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/uarlouski/testrail-mcp-server/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
-[![GitHub stars](https://img.shields.io/github/stars/uarlouski/testrail-mcp-server.svg?style=social&label=Star)](https://github.com/uarlouski/testrail-mcp-server)
+<p align="center">
+  <a href="https://www.npmjs.com/package/@uarlouski/testrail-mcp-server"><img src="https://badge.fury.io/js/@uarlouski%2Ftestrail-mcp-server.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@uarlouski/testrail-mcp-server"><img src="https://img.shields.io/npm/dm/@uarlouski/testrail-mcp-server.svg" alt="npm downloads"></a>
+  <a href="https://github.com/uarlouski/testrail-mcp-server/actions/workflows/ci.yml"><img src="https://github.com/uarlouski/testrail-mcp-server/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License"></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.9-blue.svg" alt="TypeScript"></a>
+  <a href="https://github.com/uarlouski/testrail-mcp-server"><img src="https://img.shields.io/github/stars/uarlouski/testrail-mcp-server.svg?style=social&label=Star" alt="GitHub stars"></a>
+</p>
 
+---
 
-A powerful **Model Context Protocol (MCP)** server for seamless integration between **Large Language Models (LLMs)** and **TestRail** test case management.
+## Why TestRail MCP Server?
 
-This MCP server enables AI assistants like **Claude**, **Cursor**, **Windsurf**, and other MCP-compliant clients to interact directly with your TestRail instance. Streamline your QA workflows by allowing your AI to search, retrieve, create, and update test cases, plans, and runs.
+Managing test cases manually is tedious. With the TestRail MCP Server, your AI assistant (Claude, Cursor, Windsurf, or any MCP-compliant client) talks directly to TestRail. Ask it to find test cases, create new ones, kick off test runs, or report results — all through natural conversation.
 
-## 🚀 Features
+**No context switching. No copy-pasting. Just ask.**
 
-- **AI-Powered Test Management**: Bridge the gap between AI and your QA process.
-- **Smart Discovery**: List projects, suites, and sections to help LLMs understand your test organization.
-- **Comprehensive Case Operations**: Fetch, create, and update test cases with full support for custom fields.
-- **Context-Aware**: Designed to provide LLMs with the right context (templates, field options) for accurate test generation.
+## ✨ Features
 
-## ⚙️ Usage
+| Category | Capabilities |
+|----------|-------------|
+| **🔍 Discovery** | Browse projects, suites, and sections to map your test organization |
+| **📋 Case Management** | Fetch, create, update, and bulk-edit test cases with full custom field support |
+| **▶️ Test Execution** | Create runs, record results, attach files, and track test statuses |
+| **🧠 Context-Aware** | Exposes templates, field definitions, priorities, and case types so LLMs generate valid, well-structured test cases |
 
-Configure the server in your MCP client settings (e.g., `claude_desktop_config.json` or Cursor settings).
+## 🚀 Quick Start
 
-### Claude Desktop / General MCP Clients
+### 1. Get Your TestRail API Key
 
-Add the following to your configuration file:
+Navigate to **My Settings → API Keys** in your TestRail instance and generate a new key.
+
+### 2. Configure Your MCP Client
+
+Add the server to your MCP client configuration. Below are examples for popular clients.
+
+<details>
+<summary><strong>Claude Desktop</strong></summary>
+
+Edit your `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "testrail": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@uarlouski/testrail-mcp-server@latest"
-      ],
+      "args": ["-y", "@uarlouski/testrail-mcp-server@latest"],
       "env": {
         "TESTRAIL_INSTANCE_URL": "https://your-instance.testrail.io",
         "TESTRAIL_USERNAME": "your@email.com",
@@ -46,42 +62,156 @@ Add the following to your configuration file:
 }
 ```
 
-### Environment Variables
+</details>
 
-| Variable | Description | Required |
-|----------|-------------|:--------:|
-| `TESTRAIL_INSTANCE_URL` | The URL of your TestRail instance (e.g., `https://example.testrail.io`) | Yes |
-| `TESTRAIL_USERNAME` | Your TestRail email address | Yes |
-| `TESTRAIL_API_KEY` | Your TestRail API key (generate in My Settings > API Keys) | Yes |
+<details>
+<summary><strong>Cursor</strong></summary>
+
+Open **Settings → MCP** and add a new server:
+
+```json
+{
+  "mcpServers": {
+    "testrail": {
+      "command": "npx",
+      "args": ["-y", "@uarlouski/testrail-mcp-server@latest"],
+      "env": {
+        "TESTRAIL_INSTANCE_URL": "https://your-instance.testrail.io",
+        "TESTRAIL_USERNAME": "your@email.com",
+        "TESTRAIL_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Windsurf</strong></summary>
+
+Add to your Windsurf MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "testrail": {
+      "command": "npx",
+      "args": ["-y", "@uarlouski/testrail-mcp-server@latest"],
+      "env": {
+        "TESTRAIL_INSTANCE_URL": "https://your-instance.testrail.io",
+        "TESTRAIL_USERNAME": "your@email.com",
+        "TESTRAIL_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Other MCP Clients</strong></summary>
+
+Any MCP-compliant client can use this server. The configuration pattern is the same — point it at the `npx` command with the required environment variables.
+
+</details>
+
+### 3. Start Using It
+
+Once configured, ask your AI assistant things like:
+
+- *"List all projects in TestRail"*
+- *"Show me the test cases in suite 1 of project 3"*
+- *"Create a test case for login validation with steps"*
+- *"Start a new test run with cases from section 5"*
+- *"Mark test 42 as passed with a comment"*
+
+## ⚙️ Configuration
+
+| Environment Variable | Description | Required |
+|---------------------|-------------|:--------:|
+| `TESTRAIL_INSTANCE_URL` | Your TestRail instance URL (e.g., `https://example.testrail.io`) | ✅ |
+| `TESTRAIL_USERNAME` | Your TestRail email address | ✅ |
+| `TESTRAIL_API_KEY` | Your TestRail API key ([how to get one](https://support.testrail.com/hc/en-us/articles/7077039051412-Accessing-the-TestRail-API)) | ✅ |
 
 ## 🛠️ Available Tools
 
-This MCP server exposes the following tools to the LLM:
+### Discovery
 
 | Tool | Description |
 |------|-------------|
-| `get_projects` | **Discovery**: List all available projects in the TestRail instance to establish context. |
-| `get_suites` | **Discovery**: Retrieve test suites for a given project (if not in single-suite mode). |
-| `get_sections` | **Structure**: navigate the folder/section hierarchy of a test suite. |
-| `get_cases` | **Search**: Query test cases with filtering (priority, template, type, etc.) and pagination. |
-| `get_case` | **Detail**: Fetch comprehensive details of a specific test case, including steps and custom fields. |
-| `create_case` | **Authoring**: Create new test cases. *Tip: The model should check templates and fields first to ensure validity.* |
-| `update_case` | **Maintenance**: Modify existing test case fields, title, or steps. |
-| `update_cases` | **Bulk Edit**: Update multiple cases simultaneously for efficient refactoring. |
-| `add_run` | **Test Execution**: Create a new test run in TestRail. |
-| `get_tests` | **Test Execution**: Get tests for a test run, optionally filtered by status. |
-| `add_results` | **Test Execution**: Add one or more test results to a test run. |
-| `add_attachment_to_run` | **Test Execution**: Add an attachment (file or zipped folder) to a test run. |
-| `get_statuses` | **Metadata**: Get all available test statuses (e.g. Passed, Failed, Blocked). |
-| `get_case_fields` | **Metadata**: Retrieve definitions of custom fields to understand available inputs. |
-| `get_templates` | **Metadata**: List available case templates to ensure correct case creation structure. |
-| `get_priorities` | **Metadata**: List available priority levels. |
-| `get_case_types` | **Metadata**: List available case types (e.g., Automated, Manual). |
+| `get_projects` | List all available projects in your TestRail instance |
+| `get_sections` | Navigate the folder/section hierarchy of a test suite |
+
+### Test Case Management
+
+| Tool | Description |
+|------|-------------|
+| `get_cases` | Query test cases with filtering by priority, template, type, and more — supports pagination and recursive section fetching |
+| `get_case` | Fetch complete details of a specific test case including steps and custom fields |
+| `create_case` | Create a new test case with full custom field support |
+| `update_case` | Modify an existing test case's fields, title, or steps |
+| `update_cases` | Bulk-update multiple test cases simultaneously |
+
+### Test Execution
+
+| Tool | Description |
+|------|-------------|
+| `add_run` | Create a new test run in TestRail |
+| `get_tests` | Get tests for a run, optionally filtered by status |
+| `add_results` | Submit one or more test results to a run |
+| `add_attachment_to_run` | Attach a file or zipped folder to a test run |
+
+### Metadata
+
+| Tool | Description |
+|------|-------------|
+| `get_statuses` | List all available test statuses (Passed, Failed, Blocked, etc.) |
+| `get_case_fields` | Retrieve custom field definitions and dropdown options |
+| `get_templates` | List available case templates for correct case structure |
+
+## 🏗️ Development
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) 18+
+- npm
+
+### Setup
+
+```bash
+git clone https://github.com/uarlouski/testrail-mcp-server.git
+cd testrail-mcp-server
+npm install
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+### Run Tests
+
+```bash
+npm test
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to open an [issue](https://github.com/uarlouski/testrail-mcp-server/issues) or submit a pull request.
 
 ## 📜 License
 
-This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [Apache License 2.0](LICENSE).
 
 ---
 
-*Keywords: TestRail, MCP, Model Context Protocol, LLM, AI, Claude, Cursor, Windsurf, Test Management, QA, Automation, Testing, API*
+<p align="center">
+  <b>TestRail MCP Server</b> · Built with the <a href="https://modelcontextprotocol.io">Model Context Protocol</a>
+</p>
+
+<p align="center">
+  <sub>Keywords: TestRail MCP Server, Model Context Protocol, TestRail API integration, AI test management, LLM testing tools, Claude TestRail, Cursor TestRail, Windsurf TestRail, test case automation, QA AI assistant, MCP server for testing, TestRail plugin, test run management, AI-powered QA</sub>
+</p>
