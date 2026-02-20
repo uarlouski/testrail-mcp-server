@@ -34,10 +34,9 @@ describe('add_run tool', () => {
         const mockCase = { suite_id: 10 };
         (client.getCase as jest.Mock<any>).mockResolvedValue(mockCase);
 
-        const result = await addRunTool.handler({ project_id: '1', name: 'Test Run', case_ids: [1] }, client);
-
-        expect(client.getCase).toHaveBeenCalledWith('1');
-        expect(addRunMock).toHaveBeenCalledWith('1', { name: 'Test Run', case_ids: [1], suite_id: 10, include_all: false });
+        const result = await addRunTool.handler({ project_id: 1, name: 'Test Run', case_ids: [1] }, client);
+        expect(client.getCase).toHaveBeenCalledWith(1);
+        expect(addRunMock).toHaveBeenCalledWith(1, { name: 'Test Run', case_ids: [1], suite_id: 10, include_all: false });
         expect(result).toEqual(run);
     });
 
@@ -62,16 +61,15 @@ describe('add_run tool', () => {
         (client.getCase as jest.Mock<any>).mockResolvedValue(mockCase);
 
         const args = {
-            project_id: '1',
+            project_id: 1,
             name: 'Test Run',
             description: 'Description',
             case_ids: [1, 2, 3]
         };
 
         const result = await addRunTool.handler(args, client);
-
-        expect(client.getCase).toHaveBeenCalledWith('1');
-        expect(addRunMock).toHaveBeenCalledWith('1', {
+        expect(client.getCase).toHaveBeenCalledWith(1);
+        expect(addRunMock).toHaveBeenCalledWith(1, {
             name: 'Test Run',
             description: 'Description',
             case_ids: [1, 2, 3],

@@ -4,9 +4,9 @@ import { ToolDefinition } from "../types/custom.js";
 import { Case } from "../types/testrail.js";
 
 const parameters = {
-    project_id: z.string().describe("The ID of the project. Use get_projects to find available projects"),
+    project_id: z.number().describe("The ID of the project. Use get_projects to find available projects"),
     section: z.object({
-        id: z.string(),
+        id: z.number(),
         recursive: z.boolean().optional().default(false).describe("If true, fetches cases from the section and all its child sections"),
         excludes: z.array(z.string()).optional().describe("List of section names to exclude from the recursive search"),
     }).optional().describe("Section filter configuration. Use get_sections to find available sections"),

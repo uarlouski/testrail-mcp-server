@@ -4,7 +4,7 @@ import { ToolDefinition } from "../types/custom.js";
 import { TemplateSchema } from "../types/testrail.js";
 
 const parameters = {
-    project_id: z.string().describe("The ID of the project. Use get_projects to find available projects"),
+    project_id: z.number().describe("The ID of the project. Use get_projects to find available projects"),
 };
 
 export const getTemplatesTool: ToolDefinition<typeof parameters, TestRailClient> = {

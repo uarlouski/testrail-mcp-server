@@ -12,7 +12,7 @@ export const updateCasesTool: ToolDefinition<typeof parameters, TestRailClient> 
     description: "Bulk update multiple test cases with the same field values. More efficient than calling update_case multiple times",
     parameters,
     handler: async ({ case_ids, fields }, client) => {
-        const caseData = await client.getCase(String(case_ids[0]));
+        const caseData = await client.getCase(case_ids[0]);
         const updatedCases = await client.updateCases(caseData.suite_id, case_ids, fields);
 
         return {

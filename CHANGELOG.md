@@ -6,6 +6,7 @@
 
 - Extend get_cases tool to recursively fetch child section cases
 - Optimize get_case response by removing non-essential fields from labels object
+- Standardized ID parameter typing across MCP server from string to numeric types
 
 ## [1.3.1] - 2026-02-18
 

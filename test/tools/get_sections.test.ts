@@ -33,7 +33,7 @@ describe('get_sections tool', () => {
         getSectionsMock.mockRejectedValue(new Error('API Error'));
 
         await expect(
-            getSectionsTool.handler({ project_id: '1' }, mockClient)
+            getSectionsTool.handler({ project_id: 1 }, mockClient)
         ).rejects.toThrow('API Error');
     });
 });

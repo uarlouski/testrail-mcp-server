@@ -13,11 +13,12 @@ export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     description: "Get detailed information about a test case including its custom fields",
     parameters,
     handler: async ({ case_id }, client) => {
-        const id = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;
+        const idString = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;
+        const id = Number(idString);
         const testCase = await client.getCase(id);
 
         const [section, caseTypes, priorities, caseFields] = await Promise.all([
-            client.getSection(testCase.section_id.toString()),
+            client.getSection(Number(testCase.section_id)),
             client.getCaseTypes(),
             client.getPriorities(),
             client.getCaseFields()

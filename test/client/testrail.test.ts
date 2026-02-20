@@ -23,7 +23,7 @@ describe('TestRailClient', () => {
             json: async () => mockData
         });
 
-        await client.getCase('1');
+        await client.getCase(1);
 
         expect(fetchMock).toHaveBeenCalledWith('https://testrail.io/index.php?/api/v2/get_case/1', expect.any(Object));
     });
@@ -35,7 +35,7 @@ describe('TestRailClient', () => {
             json: async () => mockData
         });
 
-        const result = await client.getCase('1');
+        const result = await client.getCase(1);
         expect(result).toEqual(mockData);
         expect(fetchMock).toHaveBeenCalledWith('https://testrail.io/index.php?/api/v2/get_case/1', expect.objectContaining({
             method: 'GET',
@@ -56,7 +56,7 @@ describe('TestRailClient', () => {
             json: async () => errorResponse
         });
 
-        await expect(client.getCase('999')).rejects.toThrow(
+        await expect(client.getCase(999)).rejects.toThrow(
             'TestRail: 404 Not Found - {"error":"Case not found"}'
         );
     });
@@ -70,7 +70,7 @@ describe('TestRailClient', () => {
             json: async () => { throw new Error('Not JSON'); }
         });
 
-        await expect(client.getCase('1')).rejects.toThrow(
+        await expect(client.getCase(1)).rejects.toThrow(
             'TestRail: 500 Internal Server Error - Not JSON Content'
         );
     });
@@ -82,7 +82,7 @@ describe('TestRailClient', () => {
             json: async () => ({ cases: mockCases, _links: { next: null } })
         });
 
-        const result = await client.getCases('1');
+        const result = await client.getCases(1);
         expect(result).toEqual(mockCases);
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/get_cases/1',
@@ -97,7 +97,7 @@ describe('TestRailClient', () => {
             json: async () => ({ cases: mockCases })
         });
 
-        const result = await client.getCases('1');
+        const result = await client.getCases(1);
         expect(result).toEqual(mockCases);
     });
 
@@ -115,7 +115,7 @@ describe('TestRailClient', () => {
                 json: async () => ({ cases: page2Cases, _links: { next: null } })
             });
 
-        const result = await client.getCases('1');
+        const result = await client.getCases(1);
         expect(result).toEqual([...page1Cases, ...page2Cases]);
         expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(fetchMock).toHaveBeenCalledWith(
@@ -134,7 +134,7 @@ describe('TestRailClient', () => {
             json: async () => ({ cases: [], _links: { next: null } })
         });
 
-        await client.getCases('1', '5');
+        await client.getCases(1, 5);
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/get_cases/1&section_id=5',
             expect.any(Object)
@@ -147,7 +147,7 @@ describe('TestRailClient', () => {
             json: async () => ({ cases: [], _links: { next: null } })
         });
 
-        await client.getCases('1', undefined, { type_id: '1', priority_id: '2' });
+        await client.getCases(1, undefined, { type_id: '1', priority_id: '2' });
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/get_cases/1&type_id=1&priority_id=2',
             expect.any(Object)
@@ -169,7 +169,7 @@ describe('TestRailClient', () => {
             json: async () => mockData
         });
 
-        const result = await client.getSection('1');
+        const result = await client.getSection(1);
         expect(result).toEqual(mockData);
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/get_section/1',
@@ -271,7 +271,7 @@ describe('TestRailClient', () => {
             json: async () => mockData
         });
 
-        const result = await client.getTemplates('1');
+        const result = await client.getTemplates(1);
         expect(result).toEqual(mockData);
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/get_templates/1',
@@ -292,9 +292,9 @@ describe('TestRailClient', () => {
                 json: async () => mockData2
             });
 
-        await client.getTemplates('1');
-        await client.getTemplates('1');
-        await client.getTemplates('2');
+        await client.getTemplates(1);
+        await client.getTemplates(1);
+        await client.getTemplates(2);
 
         expect(fetchMock).toHaveBeenCalledTimes(2);
     });
@@ -306,7 +306,7 @@ describe('TestRailClient', () => {
             json: async () => mockData
         });
 
-        const result = await client.updateCase('1', { title: 'Updated Case' });
+        const result = await client.updateCase(1, { title: 'Updated Case' });
         expect(result).toEqual(mockData);
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/update_case/1',
@@ -343,7 +343,7 @@ describe('TestRailClient', () => {
             json: async () => mockData
         });
 
-        const result = await client.createCase('5', { title: 'New Case' });
+        const result = await client.createCase(5, { title: 'New Case' });
         expect(result).toEqual(mockData);
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/add_case/5',
@@ -361,7 +361,7 @@ describe('TestRailClient', () => {
             json: async () => ({ sections: mockSections })
         });
 
-        const result = await client.getSections('1');
+        const result = await client.getSections(1);
         expect(result).toEqual(mockSections);
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/get_sections/1',
@@ -407,7 +407,7 @@ describe('TestRailClient', () => {
             json: async () => errorResponse
         });
 
-        await expect(client.updateCase('1', {})).rejects.toThrow(
+        await expect(client.updateCase(1, {})).rejects.toThrow(
             'TestRail: 400 Bad Request - {"error":"Invalid field"}'
         );
     });
@@ -420,7 +420,7 @@ describe('TestRailClient', () => {
             json: async () => mockRun
         });
 
-        const result = await client.addRun('1', { name: 'New Run', suite_id: 20 });
+        const result = await client.addRun(1, { name: 'New Run', suite_id: 20 });
 
         expect(result).toEqual(mockRun);
         expect(fetchMock).toHaveBeenCalledWith(
@@ -590,7 +590,7 @@ describe('TestRailClient', () => {
             return Promise.reject(new Error(`Unexpected URL: ${url}`));
         });
 
-        const result = await client.getCasesRecursively('1', '1');
+        const result = await client.getCasesRecursively(1, 1);
 
         // Check if we got cases from sections 1, 2, 3, 4
         const resultIds = result.map(c => c.id).sort();
@@ -616,7 +616,7 @@ describe('TestRailClient', () => {
             json: async () => ({ cases: [], _links: {} })
         });
 
-        await client.getCasesRecursively('1', '1', { priority_id: '1' });
+        await client.getCasesRecursively(1, 1, { priority_id: '1' });
 
         expect(fetchMock).toHaveBeenCalledWith(
             expect.stringContaining('section_id=1&priority_id=1'),
@@ -655,7 +655,7 @@ describe('TestRailClient', () => {
             json: async () => ({ cases: [], _links: {} })
         });
 
-        await client.getCasesRecursively('1', '1', undefined, ['Exclude Me']);
+        await client.getCasesRecursively(1, 1, undefined, ['Exclude Me']);
 
         // Should fetch for Root (1), Keep 1 (2), Keep 2 (5)
         expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('section_id=1'), expect.anything());
