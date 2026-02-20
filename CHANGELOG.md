@@ -5,6 +5,7 @@
 ### Changed
 
 - Extend get_cases tool to recursively fetch child section cases
+- Optimize get_case response by removing non-essential fields from labels object
 
 ## [1.3.1] - 2026-02-18
 

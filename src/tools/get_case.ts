@@ -2,6 +2,7 @@ import { z } from "zod";
 import { processCustomFields } from "../utils/mapper.js";
 import { TestRailClient } from "../client/testrail.js";
 import { TestCaseResponse, ToolDefinition } from "../types/custom.js";
+import { LabelSchema } from "../types/testrail.js";
 
 const parameters = {
     case_id: z.string().describe("The ID of the test case (e.g. '123' or 'C123')"),
@@ -33,7 +34,7 @@ export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
             section: section.name,
             type: caseType ? caseType.name : "Unknown",
             priority: priority ? priority.name : "Unknown",
-            labels: testCase.labels || [],
+            labels: (testCase.labels || []).map((label) => LabelSchema.parse(label)),
             references: testCase.refs,
             updated_on: testCase.updated_on,
             ...customFields

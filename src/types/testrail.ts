@@ -25,6 +25,12 @@ export const CaseFieldSchema = z.object({
 
 export type CaseField = z.infer<typeof CaseFieldSchema>;
 
+export const LabelSchema = z.object({
+    title: z.string(),
+});
+
+export type Label = z.infer<typeof LabelSchema>
+
 export const CaseSchema = z.object({
     id: z.number(),
     title: z.string(),
@@ -38,7 +44,7 @@ export const CaseSchema = z.object({
     updated_on: z.number(),
     estimate: z.string().nullable(),
     suite_id: z.number(),
-    labels: z.array(z.any()),
+    labels: z.array(LabelSchema),
 }).loose();
 
 export type Case = z.infer<typeof CaseSchema>;
