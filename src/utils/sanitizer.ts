@@ -1,5 +1,5 @@
 /**
- * Recursively ыtrips inline style attributes from HTML tags contained in string values
+ * Recursively strips inline style attributes from HTML tags contained in string values
  * in an object or array. Useful for cleaning up TestRail markdown content before sending
  * to LLMs.
  */
