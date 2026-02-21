@@ -3,7 +3,7 @@ import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
 
 const parameters = {
-    case_ids: z.array(z.number()).describe("Array of case IDs to update (e.g. [123, 456, 789])"),
+    case_ids: z.array(z.number()).min(1).describe("Array of case IDs to update (e.g. [123, 456, 789])"),
     fields: z.record(z.string(), z.any()).describe("Object containing fields to update for ALL specified cases. Use get_case_fields to see available fields. Example: {\"priority_id\": 2, \"type_id\": 1}"),
 };
 

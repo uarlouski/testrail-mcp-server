@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Require non-empty case IDs in add_run and update_cases tools
+
 ## [1.4.0] - 2026-02-20
 
 ### Changed
