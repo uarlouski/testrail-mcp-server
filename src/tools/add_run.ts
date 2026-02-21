@@ -7,7 +7,7 @@ const parameters = {
     project_id: z.number().describe("The ID of the project. Use get_projects to find available projects"),
     name: z.string().optional().describe("The name of the test run"),
     description: z.string().optional().describe("The description of the test run"),
-    case_ids: z.array(z.number()).describe("Array of case IDs to include in the run. After creating the run, use get_tests with the returned run_id to retrieve test IDs for result submission")
+    case_ids: z.array(z.number()).min(1).describe("Array of case IDs to include in the run. After creating the run, use get_tests with the returned run_id to retrieve test IDs for result submission")
 }
 
 export const addRunTool: ToolDefinition<typeof parameters, TestRailClient> = {
