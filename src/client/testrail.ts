@@ -240,15 +240,29 @@ export class TestRailClient {
             body,
         };
 
-        const response = await fetch(url, params);
+        console.error(`[TestRailClient] Executing ${method} request to ${endpoint}`);
+        const startTime = Date.now();
 
-        if (!response.ok) {
-            let errorMessage = `TestRail: ${response.status} ${response.statusText}`;
-            const errorText = await response.text();
-            errorMessage += ` - ${errorText}`;
-            throw new Error(errorMessage);
+        try {
+            const response = await fetch(url, params);
+            const duration = Date.now() - startTime;
+
+            console.error(`[TestRailClient] Received ${response.status} ${response.statusText} from ${method} ${endpoint} in ${duration}ms`);
+
+            if (!response.ok) {
+                let errorMessage = `TestRail API Error: ${response.status} ${response.statusText}`;
+                const errorText = await response.text();
+                errorMessage += ` - ${errorText}`;
+                console.error(`[TestRailClient] Error Details: ${errorMessage}`);
+                throw new Error(errorMessage);
+            }
+
+            return await response.json() as T;
+        } catch (error) {
+            if (error instanceof Error && !error.message.startsWith('TestRail API Error')) {
+                console.error(`[TestRailClient] Request Failed: ${method} ${endpoint} - ${error.message}`);
+            }
+            throw error;
         }
-
-        return await response.json() as T;
     }
 }

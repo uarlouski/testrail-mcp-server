@@ -57,7 +57,7 @@ describe('TestRailClient', () => {
         });
 
         await expect(client.getCase(999)).rejects.toThrow(
-            'TestRail: 404 Not Found - {"error":"Case not found"}'
+            'TestRail API Error: 404 Not Found - {"error":"Case not found"}'
         );
     });
 
@@ -71,7 +71,7 @@ describe('TestRailClient', () => {
         });
 
         await expect(client.getCase(1)).rejects.toThrow(
-            'TestRail: 500 Internal Server Error - Not JSON Content'
+            'TestRail API Error: 500 Internal Server Error - Not JSON Content'
         );
     });
 
@@ -408,7 +408,7 @@ describe('TestRailClient', () => {
         });
 
         await expect(client.updateCase(1, {})).rejects.toThrow(
-            'TestRail: 400 Bad Request - {"error":"Invalid field"}'
+            'TestRail API Error: 400 Bad Request - {"error":"Invalid field"}'
         );
     });
 
