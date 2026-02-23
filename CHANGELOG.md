@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add logging for TestRail client requests
+
 ### Fixed
 
 - Require non-empty case IDs in add_run and update_cases tools
