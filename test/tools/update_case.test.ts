@@ -33,7 +33,8 @@ describe('update_case tool', () => {
             .mockResolvedValue(mockUpdatedCase);
 
         mockClient = {
-            updateCase: updateCaseMock
+            updateCase: updateCaseMock,
+            getCaseFields: (jest.fn() as unknown as any).mockResolvedValue([{ system_name: 'priority_id', is_active: true, configs: [], include_all: true, template_ids: [] }, { system_name: 'custom_automation_priority', is_active: true, configs: [], include_all: true, template_ids: [] }])
         } as unknown as jest.Mocked<TestRailClient>;
     });
 

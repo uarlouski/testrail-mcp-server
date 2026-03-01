@@ -5,7 +5,7 @@ import { parseDropdownOptions } from "../utils/mapper.js";
 
 const parameters = {};
 
-interface FieldSchema {
+export interface FieldSchema {
     system_name: string;
     label: string;
     type: string;
@@ -42,7 +42,7 @@ function isFieldRequired(field: CaseField): boolean {
     return field.configs.some(config => config.options?.is_required === true);
 }
 
-function mapToFieldSchema(field: CaseField): FieldSchema {
+export function mapToFieldSchema(field: CaseField): FieldSchema {
     const schema: FieldSchema = {
         system_name: field.system_name,
         label: field.label,
@@ -61,7 +61,7 @@ function mapToFieldSchema(field: CaseField): FieldSchema {
     return schema;
 }
 
-const SYSTEM_FIELDS: FieldSchema[] = [
+export const SYSTEM_FIELDS: FieldSchema[] = [
     { system_name: "title", label: "Title", type: "String", is_required: true },
     { system_name: "section_id", label: "Section", type: "Integer", is_required: true },
     { system_name: "template_id", label: "Template", type: "Integer", is_required: false },

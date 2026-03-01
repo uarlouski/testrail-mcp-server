@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
+import { validateCaseFields } from "../utils/validator.js";
 
 const parameters = {
     case_ids: z.array(z.number()).min(1).describe("Array of case IDs to update (e.g. [123, 456, 789])"),
@@ -12,6 +13,8 @@ export const updateCasesTool: ToolDefinition<typeof parameters, TestRailClient> 
     description: "Bulk update multiple test cases with the same field values. More efficient than calling update_case multiple times",
     parameters,
     handler: async ({ case_ids, fields }, client) => {
+        validateCaseFields(fields, await client.getCaseFields());
+
         const caseData = await client.getCase(case_ids[0]);
         const updatedCases = await client.updateCases(caseData.suite_id, case_ids, fields);
 

@@ -38,7 +38,8 @@ describe('get_cases tool', () => {
 
         mockClient = {
             getCases: getCasesMock,
-            getCasesRecursively: getCasesRecursivelyMock
+            getCasesRecursively: getCasesRecursivelyMock,
+            getCaseFields: (jest.fn() as unknown as any).mockResolvedValue([{ system_name: 'priority_id', is_active: true, configs: [], include_all: true, template_ids: [] }, { system_name: 'custom_automation_status', is_active: true, configs: [], include_all: true, template_ids: [] }])
         } as unknown as jest.Mocked<TestRailClient>;
     });
 

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
+import { validateCaseFields } from "../utils/validator.js";
 
 const parameters = {
     section_id: z.number().describe("The ID of the section where the case should be created. Use get_sections to find available sections"),
@@ -13,6 +14,10 @@ export const createCaseTool: ToolDefinition<typeof parameters, TestRailClient> =
     description: "Create a new test case in TestRail",
     parameters,
     handler: async ({ section_id, title, fields }, client) => {
+        if (fields) {
+            validateCaseFields(fields, await client.getCaseFields());
+        }
+
         const caseData = {
             title,
             ...fields,
