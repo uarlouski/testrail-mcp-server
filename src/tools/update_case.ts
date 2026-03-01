@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
+import { validateCaseFields } from "../utils/validator.js";
 
 const parameters = {
     case_id: z.string().describe("The ID of the test case to update (e.g. '123' or 'C123')"),
@@ -12,6 +13,8 @@ export const updateCaseTool: ToolDefinition<typeof parameters, TestRailClient> =
     description: "Update a test case in TestRail. Supports partial updates - only specify the fields you want to change",
     parameters,
     handler: async ({ case_id, fields }, client) => {
+        validateCaseFields(fields, await client.getCaseFields());
+
         const idString = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;
         const id = Number(idString);
 

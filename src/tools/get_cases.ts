@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
 import { Case } from "../types/testrail.js";
+import { validateCaseFields } from "../utils/validator.js";
 
 const parameters = {
     project_id: z.number().describe("The ID of the project. Use get_projects to find available projects"),
@@ -24,6 +25,15 @@ export const getCasesTool: ToolDefinition<typeof parameters, TestRailClient> = {
     description: "Get all test cases for a project. Filter by section, API params (priority, type), or any field including custom fields via 'where'. Returns case IDs, titles, and any additional requested fields.",
     parameters,
     handler: async ({ project_id, section, filter, where, fields }, client) => {
+        const caseFields = await client.getCaseFields();
+        if (fields) {
+            validateCaseFields(fields, caseFields);
+        }
+
+        if (where) {
+            validateCaseFields(Object.keys(where), caseFields);
+        }
+
         let cases: Case[];
 
         if (section?.recursive) {
