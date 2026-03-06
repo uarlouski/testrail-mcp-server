@@ -5,6 +5,7 @@
 ### Added
 
 - Add requested fields validation against available schema
+- Add paginated section fetching
 
 ## [1.5.0] - 2026-02-23
 

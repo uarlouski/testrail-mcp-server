@@ -12,6 +12,11 @@ interface PaginatedTestsResponse {
     _links: { next: string | null };
 }
 
+interface PaginatedSectionsResponse {
+    sections: Section[];
+    _links?: { next: string | null };
+}
+
 const API_INDEX = '/index.php?';
 const API_BASE_V2 = `${API_INDEX}/api/v2`;
 
@@ -161,8 +166,22 @@ export class TestRailClient {
     }
 
     async getSections(projectId: number): Promise<Section[]> {
-        const response = await this.get<{ sections: Section[] }>(`${API_BASE_V2}/get_sections/${projectId}`);
-        return response.sections;
+        const url = `${API_BASE_V2}/get_sections/${projectId}`;
+
+        const allSections: Section[] = [];
+        let nextUrl: string | null = url;
+
+        while (nextUrl) {
+            const pageData: PaginatedSectionsResponse = await this.get<PaginatedSectionsResponse>(nextUrl);
+            allSections.push(...pageData.sections);
+
+            nextUrl = pageData._links?.next || null;
+            if (nextUrl) {
+                nextUrl = `${API_INDEX}${nextUrl}`;
+            }
+        }
+
+        return allSections;
     }
 
     async getProjects(): Promise<Project[]> {
