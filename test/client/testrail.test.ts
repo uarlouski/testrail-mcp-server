@@ -75,6 +75,18 @@ describe('TestRailClient', () => {
         );
     });
 
+    test('logs error for non-API errors', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const error = new Error('Network timeout');
+        fetchMock.mockRejectedValueOnce(error);
+
+        // Using getCases as an example, as any client method would call executeRequest
+        await expect(client.getCases(1)).rejects.toThrow('Network timeout');
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[TestRailClient] Request Failed: GET /index.php?/api/v2/get_cases/1 - Network timeout'));
+
+        consoleSpy.mockRestore();
+    });
+
     test('getCases returns cases without pagination', async () => {
         const mockCases = [{ id: 1, title: 'Case 1' }, { id: 2, title: 'Case 2' }];
         fetchMock.mockResolvedValue({
@@ -457,6 +469,41 @@ describe('TestRailClient', () => {
                 body: JSON.stringify({ name: 'New Run', suite_id: 20 })
             })
         );
+    });
+
+    test('handles pagination where dataKey array is missing', async () => {
+        const projectId = 1;
+        const mockFirstPage = {
+            // Notice: no 'cases' array here
+            _links: {
+                next: `/api/v2/get_cases/${projectId}&limit=250&offset=250`
+            }
+        };
+        const mockSecondPage = {
+            cases: [{ id: 1, title: 'Case 1' }],
+            _links: {
+                next: null
+            }
+        };
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => mockFirstPage
+        } as any);
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => mockSecondPage
+        } as any);
+
+        const cases = await client.getCases(projectId);
+
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(cases).toEqual(mockSecondPage.cases);
     });
 
     test('getTests handles pagination', async () => {

@@ -85,21 +85,7 @@ export class TestRailClient {
             }
         }
 
-        const allCases: Case[] = [];
-        let nextUrl: string | null = url;
-
-        while (nextUrl) {
-            const response: PaginatedCasesResponse = await this.get<PaginatedCasesResponse>(nextUrl);
-
-            allCases.push(...response.cases);
-
-            nextUrl = response._links?.next;
-            if (nextUrl) {
-                nextUrl = `${API_INDEX}${nextUrl}`;
-            }
-        }
-
-        return allCases;
+        return this.paginateAll<Case>(url, 'cases');
     }
 
     async getSection(sectionId: number): Promise<Section> {
@@ -167,21 +153,7 @@ export class TestRailClient {
 
     async getSections(projectId: number): Promise<Section[]> {
         const url = `${API_BASE_V2}/get_sections/${projectId}`;
-
-        const allSections: Section[] = [];
-        let nextUrl: string | null = url;
-
-        while (nextUrl) {
-            const pageData: PaginatedSectionsResponse = await this.get<PaginatedSectionsResponse>(nextUrl);
-            allSections.push(...pageData.sections);
-
-            nextUrl = pageData._links?.next || null;
-            if (nextUrl) {
-                nextUrl = `${API_INDEX}${nextUrl}`;
-            }
-        }
-
-        return allSections;
+        return this.paginateAll<Section>(url, 'sections');
     }
 
     async getProjects(): Promise<Project[]> {
@@ -200,20 +172,7 @@ export class TestRailClient {
             url += `&status_id=${statusId.join(',')}`;
         }
 
-        const allTests: Test[] = [];
-        let nextUrl: string | null = url;
-
-        while (nextUrl) {
-            const response: PaginatedTestsResponse = await this.get<PaginatedTestsResponse>(nextUrl);
-            allTests.push(...response.tests);
-
-            nextUrl = response._links?.next;
-            if (nextUrl) {
-                nextUrl = `${API_INDEX}${nextUrl}`;
-            }
-        }
-
-        return allTests;
+        return this.paginateAll<Test>(url, 'tests');
     }
 
 
@@ -232,6 +191,25 @@ export class TestRailClient {
         };
 
         return this._executeRequest<Attachment>('POST', `${API_BASE_V2}/add_attachment_to_run/${runId}`, headers, formData);
+    }
+
+    private async paginateAll<T>(url: string, dataKey: string): Promise<T[]> {
+        const allItems: T[] = [];
+        let nextUrl: string | null = url;
+
+        while (nextUrl) {
+            const response: any = await this.get<any>(nextUrl);
+            if (response[dataKey] && Array.isArray(response[dataKey])) {
+                allItems.push(...response[dataKey]);
+            }
+
+            nextUrl = response._links?.next || null;
+            if (nextUrl) {
+                nextUrl = `${API_INDEX}${nextUrl}`;
+            }
+        }
+
+        return allItems;
     }
 
     private async get<T>(endpoint: string): Promise<T> {
