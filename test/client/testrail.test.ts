@@ -369,6 +369,33 @@ describe('TestRailClient', () => {
         );
     });
 
+    test('getSections handles pagination', async () => {
+        const page1Sections = [{ id: 1, name: 'Section 1' }];
+        const page2Sections = [{ id: 2, name: 'Section 2' }];
+
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({ sections: page1Sections, _links: { next: '/api/v2/get_sections/1&offset=1' } })
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({ sections: page2Sections, _links: { next: null } })
+            });
+
+        const result = await client.getSections(1);
+        expect(result).toEqual([...page1Sections, ...page2Sections]);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_sections/1',
+            expect.any(Object)
+        );
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_sections/1&offset=1',
+            expect.any(Object)
+        );
+    });
+
     test('getProjects returns projects array', async () => {
         const mockProjects = [{ id: 1, name: 'Project 1' }];
         fetchMock.mockResolvedValue({
