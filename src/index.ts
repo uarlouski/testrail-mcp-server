@@ -19,15 +19,24 @@ import { getTestsTool } from "./tools/get_tests.js";
 import { addResultsTool } from "./tools/add_results.js";
 import { addAttachmentToRunTool } from "./tools/add_attachment_to_run.js";
 import { removeNullish } from "./utils/sanitizer.js";
+import z from "zod";
 
-const TESTRAIL_INSTANCE_URL = process.env.TESTRAIL_INSTANCE_URL;
-const TESTRAIL_USERNAME = process.env.TESTRAIL_USERNAME;
-const TESTRAIL_API_KEY = process.env.TESTRAIL_API_KEY;
+const EnvSchema = z.object({
+    TESTRAIL_INSTANCE_URL: z.url('Must be a valid TestRail URL'),
+    TESTRAIL_USERNAME: z.email('Must be a valid email address'),
+    TESTRAIL_API_KEY: z.string().min(1, 'API key is required')
+});
 
-if (!TESTRAIL_INSTANCE_URL || !TESTRAIL_USERNAME || !TESTRAIL_API_KEY) {
-    console.error("Error: TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, and TESTRAIL_API_KEY environment variables are required.");
+const parseResult = EnvSchema.safeParse(process.env);
+
+if (!parseResult.success) {
+    console.error(
+        "Invalid TestRail environment configuration:",
+        JSON.stringify(z.treeifyError(parseResult.error), null, 2));
     process.exit(1);
 }
+
+const { TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY } = parseResult.data;
 
 const server = new McpServer({
     name: "TestRail MCP Server",
