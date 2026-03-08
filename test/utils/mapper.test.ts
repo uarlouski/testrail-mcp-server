@@ -88,6 +88,21 @@ describe('processCustomFields', () => {
         expect(result.custom_unknown_field).toBe('some value'); // Kept as-is with original key
     });
 
+    test('ignores null or undefined custom fields', () => {
+        const input: Case = {
+            id: 1, title: 'Foo', template_id: 1,
+            custom_steps: null,
+            custom_expected: undefined,
+            section_id: 0, type_id: 0, priority_id: 0,
+            display_order: 1, suite_id: 1, created_on: 1, updated_on: 1,
+            is_deleted: 0, refs: null, labels: [],
+        } as unknown as Case;
+
+        const result = processCustomFields(input, mockCaseFields);
+        expect(result.steps).toBeUndefined();
+        expect(result.expected).toBeUndefined();
+    });
+
     test('throws error when testCase is null', () => {
         expect(() => processCustomFields(null as any, mockCaseFields)).toThrow('Test case is undefined or null');
     });

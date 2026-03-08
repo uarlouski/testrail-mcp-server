@@ -64,27 +64,116 @@ describe('TestRailClient', () => {
     test('getCase throws error containing raw text when response is not JSON', async () => {
         fetchMock.mockResolvedValue({
             ok: false,
-            status: 500,
-            statusText: 'Internal Server Error',
+            status: 400,
+            statusText: 'Bad Request',
             text: async () => 'Not JSON Content',
             json: async () => { throw new Error('Not JSON'); }
         });
 
         await expect(client.getCase(1)).rejects.toThrow(
-            'TestRail API Error: 500 Internal Server Error - Not JSON Content'
+            'TestRail API Error: 400 Bad Request - Not JSON Content'
         );
     });
 
     test('logs error for non-API errors', async () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const delaySpy = jest.spyOn(client as any, 'delay').mockResolvedValue(undefined);
         const error = new Error('Network timeout');
-        fetchMock.mockRejectedValueOnce(error);
+        fetchMock.mockRejectedValue(error); // Mock rejecting continuously
 
-        // Using getCases as an example, as any client method would call executeRequest
-        await expect(client.getCases(1)).rejects.toThrow('Network timeout');
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[TestRailClient] Request Failed: GET /index.php?/api/v2/get_cases/1 - Network timeout'));
+        await expect(client.getCase(1)).rejects.toThrow('Network timeout');
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[TestRailClient] Request Failed: GET /index.php?/api/v2/get_case/1 - Network timeout'));
 
+        expect(fetchMock).toHaveBeenCalledTimes(4); // 1 initial + 3 retries
         consoleSpy.mockRestore();
+        delaySpy.mockRestore();
+    });
+
+    test('retries on 429 Too Many Requests and finally succeeds', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const delaySpy = jest.spyOn(client as any, 'delay').mockResolvedValue(undefined);
+        const mockCase = { id: 1, title: 'Case 1' };
+
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: false,
+                status: 429,
+                statusText: 'Too Many Requests',
+                headers: { get: () => null } // No Retry-After
+            } as any)
+            .mockResolvedValueOnce({
+                ok: false,
+                status: 500,
+                statusText: 'Internal Server Error',
+                headers: { get: () => null }
+            } as any)
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                headers: { get: () => null },
+                json: async () => mockCase
+            } as any);
+
+        const result = await client.getCase(1);
+
+        expect(result).toEqual(mockCase);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+        consoleSpy.mockRestore();
+        delaySpy.mockRestore();
+    });
+
+    test('respects Retry-After header on 429', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const delaySpy = jest.spyOn(client as any, 'delay').mockResolvedValue(undefined);
+        const mockCase = { id: 1, title: 'Case 1' };
+
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: false,
+                status: 429,
+                statusText: 'Too Many Requests',
+                headers: { get: (name: string) => name === 'Retry-After' ? '1' : null }
+            } as any)
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                headers: { get: () => null },
+                json: async () => mockCase
+            } as any);
+
+        const result = await client.getCase(1);
+
+        expect(result).toEqual(mockCase);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(delaySpy).toHaveBeenCalledWith(1000); // 1 second translated to ms
+        consoleSpy.mockRestore();
+        delaySpy.mockRestore();
+    });
+
+    test('throws error after max retries exceeded', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const delaySpy = jest.spyOn(client as any, 'delay').mockResolvedValue(undefined);
+
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 502,
+            statusText: 'Bad Gateway',
+            headers: { get: () => null },
+            text: async () => 'Gateway Error'
+        } as any);
+
+        await expect(client.getCase(1)).rejects.toThrow('TestRail API Error: 502 Bad Gateway - Gateway Error');
+
+        expect(fetchMock).toHaveBeenCalledTimes(4); // 1 initial + 3 retries
+        consoleSpy.mockRestore();
+        delaySpy.mockRestore();
+    });
+
+    test('delay actually waits for specified ms', async () => {
+        const start = Date.now();
+        await (client as any).delay(10);
+        const end = Date.now();
+        expect(end - start).toBeGreaterThanOrEqual(9); // Account for JS timer slop
     });
 
     test('getCases returns cases without pagination', async () => {
