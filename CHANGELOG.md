@@ -1,8 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## [1.6.1] - 2026-03-08
+
+### Added
+
+- Add server config for MCP Registry
 
 ## [1.6.0] - 2026-03-08
+
+### Added
 
 - Add requested fields validation against available schema
 - Add paginated section fetching
