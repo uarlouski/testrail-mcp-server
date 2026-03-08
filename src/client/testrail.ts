@@ -237,29 +237,67 @@ export class TestRailClient {
             body,
         };
 
-        console.error(`[TestRailClient] Executing ${method} request to ${endpoint}`);
-        const startTime = Date.now();
+        const maxRetries = 3;
+        const baseDelayMs = 1000;
+        let attempt = 0;
 
-        try {
-            const response = await fetch(url, params);
-            const duration = Date.now() - startTime;
+        while (attempt <= maxRetries) {
+            console.error(`[TestRailClient] Executing ${method} request to ${endpoint}${attempt > 0 ? ` (Attempt ${attempt + 1})` : ''}`);
+            const startTime = Date.now();
 
-            console.error(`[TestRailClient] Received ${response.status} ${response.statusText} from ${method} ${endpoint} in ${duration}ms`);
+            try {
+                const response = await fetch(url, params);
+                const duration = Date.now() - startTime;
 
-            if (!response.ok) {
-                let errorMessage = `TestRail API Error: ${response.status} ${response.statusText}`;
-                const errorText = await response.text();
-                errorMessage += ` - ${errorText}`;
-                console.error(`[TestRailClient] Error Details: ${errorMessage}`);
-                throw new Error(errorMessage);
+                console.error(`[TestRailClient] Received ${response.status} ${response.statusText} from ${method} ${endpoint} in ${duration}ms`);
+
+                if (!response.ok) {
+                    if ([429, 500, 502, 503, 504].includes(response.status) && attempt < maxRetries) {
+                        let delayMs = baseDelayMs * Math.pow(2, attempt);
+
+                        const retryAfter = response.headers.get('Retry-After');
+                        if (retryAfter) {
+                            const retryAfterSeconds = parseInt(retryAfter);
+                            if (!isNaN(retryAfterSeconds)) {
+                                delayMs = retryAfterSeconds * 1000;
+                            }
+                        }
+
+                        console.error(`[TestRailClient] Rate limited or server error (${response.status}). Retrying in ${delayMs}ms...`);
+                        await this.delay(delayMs);
+                        attempt++;
+                        continue;
+                    }
+
+                    let errorMessage = `TestRail API Error: ${response.status} ${response.statusText}`;
+                    const errorText = await response.text();
+                    errorMessage += ` - ${errorText}`;
+                    console.error(`[TestRailClient] Error Details: ${errorMessage}`);
+                    throw new Error(errorMessage);
+                }
+
+                return await response.json() as T;
+            } catch (error) {
+                const networkError = error instanceof Error && !error.message.startsWith('TestRail API Error');
+                if (networkError && attempt < maxRetries) {
+                    const delayMs = baseDelayMs * Math.pow(2, attempt);
+                    console.error(`[TestRailClient] Network error (${error.message}). Retrying in ${delayMs}ms...`);
+                    await this.delay(delayMs);
+                    attempt++;
+                    continue;
+                }
+
+                if (networkError) {
+                    console.error(`[TestRailClient] Request Failed: ${method} ${endpoint} - ${error.message}`);
+                }
+                throw error;
             }
-
-            return await response.json() as T;
-        } catch (error) {
-            if (error instanceof Error && !error.message.startsWith('TestRail API Error')) {
-                console.error(`[TestRailClient] Request Failed: ${method} ${endpoint} - ${error.message}`);
-            }
-            throw error;
         }
+
+        throw new Error(`[TestRailClient] Max retries (${maxRetries}) exceeded for ${method} ${endpoint}`);
+    }
+
+    private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }

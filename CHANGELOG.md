@@ -7,6 +7,7 @@
 - Add requested fields validation against available schema
 - Add paginated section fetching
 - Improve validation of testrail config variables
+- Add retry logic for network and API errors
 
 ## [1.5.0] - 2026-02-23
 
