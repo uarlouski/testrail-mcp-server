@@ -1,6 +1,7 @@
 {
   "name": "@uarlouski/testrail-mcp-server",
   "version": "1.6.0",
+  "mcpName": "io.github.uarlouski/testrail-mcp-server",
   "description": "Model Context Protocol (MCP) server for TestRail integration, enabling LLMs to fetch test cases and metadata.",
   "main": "dist/index.js",
   "bin": {

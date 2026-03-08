@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.uarlouski/testrail-mcp-server",
+  "description": "Model Context Protocol (MCP) server for TestRail platform, enabling LLMs to manage test artifacts.",
+  "repository": {
+    "url": "https://github.com/uarlouski/testrail-mcp-server",
+    "source": "github"
+  },
+  "version": "1.6.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@uarlouski/testrail-mcp-server",
+      "version": "1.6.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Base URL of your TestRail instance (e.g. https://example.testrail.io)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false,
+          "name": "TESTRAIL_INSTANCE_URL"
+        },
+        {
+          "description": "Email address used to authenticate with TestRail",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false,
+          "name": "TESTRAIL_USERNAME"
+        },
+        {
+          "description": "API key for authenticating with the TestRail API",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true,
+          "name": "TESTRAIL_API_KEY"
+        }
+      ]
+    }
+  ]
+}
