@@ -40,7 +40,7 @@ const { TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY } = parseResu
 
 const server = new McpServer({
     name: "TestRail MCP Server",
-    version: "1.5.0",
+    version: "1.6.0",
 });
 
 const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY);
