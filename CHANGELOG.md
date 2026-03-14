@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unchanged]
+
+### Added
+
+- Add server config for MCP Registry
+
 ## [1.6.1] - 2026-03-08
 
 ### Added

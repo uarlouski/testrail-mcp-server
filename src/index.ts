@@ -15,6 +15,7 @@ import { getSectionsTool } from "./tools/get_sections.js";
 import { getProjectsTool } from "./tools/get_projects.js";
 import { addRunTool } from "./tools/add_run.js";
 import { getStatusesTool } from "./tools/get_statuses.js";
+import { getPrioritiesTool } from "./tools/get_priorities.js";
 import { getTestsTool } from "./tools/get_tests.js";
 import { addResultsTool } from "./tools/add_results.js";
 import { addAttachmentToRunTool } from "./tools/add_attachment_to_run.js";
@@ -57,6 +58,7 @@ const tools = [
     createCaseTool,
     addRunTool,
     getStatusesTool,
+    getPrioritiesTool,
     getTestsTool,
     addResultsTool,
     addAttachmentToRunTool,
