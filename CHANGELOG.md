@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Add `get_priorities` tool
+
 ## [1.6.1] - 2026-03-08
 
 ### Added
