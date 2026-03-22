@@ -12,6 +12,7 @@ export interface FieldSchema {
     is_required: boolean;
     template_ids?: number[];
     options?: string[];
+    comment?: string;
 }
 
 interface CaseFieldsResponse {
@@ -32,6 +33,7 @@ const FIELD_TYPE_NAMES: Record<number, string> = {
     11: "Step Results",
     12: "Multi-select",
     13: "Scenarios",
+    14: "List",
 };
 
 function getFieldTypeName(typeId: number): string {
@@ -70,6 +72,7 @@ export const SYSTEM_FIELDS: FieldSchema[] = [
     { system_name: "estimate", label: "Estimate", type: "String", is_required: false },
     { system_name: "milestone_id", label: "Milestone", type: "Integer", is_required: false },
     { system_name: "refs", label: "References", type: "String", is_required: false },
+    { system_name: "labels", label: "Labels", type: "List", is_required: false, comment: "Use get_labels tool to get available labels/tags." },
 ];
 
 export const getCaseFieldsTool: ToolDefinition<typeof parameters, TestRailClient> = {

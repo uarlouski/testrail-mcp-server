@@ -525,6 +525,21 @@ describe('TestRailClient', () => {
         expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
+    test('getLabels returns labels array', async () => {
+        const mockLabels = [{ id: 1, title: 'Label 1' }];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ labels: mockLabels })
+        });
+
+        const result = await client.getLabels(1);
+        expect(result).toEqual(mockLabels);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_labels/1',
+            expect.any(Object)
+        );
+    });
+
     test('postRequest throws formatted error on API error', async () => {
         const errorResponse = { error: 'Invalid field' };
         fetchMock.mockResolvedValue({

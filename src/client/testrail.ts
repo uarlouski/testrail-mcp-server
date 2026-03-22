@@ -1,4 +1,4 @@
-import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment } from "../types/testrail.js";
+import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label } from "../types/testrail.js";
 
 import * as fs from "fs";
 
@@ -164,6 +164,10 @@ export class TestRailClient {
         return this.projectsPromise;
     }
 
+    async getLabels(projectId: number): Promise<Label[]> {
+        const url = `${API_BASE_V2}/get_labels/${projectId}`;
+        return this.paginateAll<Label>(url, 'labels');
+    }
 
     async getTests(runId: number, statusId?: number[]): Promise<Test[]> {
         let url = `${API_BASE_V2}/get_tests/${runId}`;

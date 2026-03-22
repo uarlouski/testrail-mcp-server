@@ -26,6 +26,7 @@ export const CaseFieldSchema = z.object({
 export type CaseField = z.infer<typeof CaseFieldSchema>;
 
 export const LabelSchema = z.object({
+    id: z.number(),
     title: z.string(),
 });
 
