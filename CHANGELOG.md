@@ -5,6 +5,7 @@
 ### Added
 
 - Add `get_priorities` tool
+- Add `add_results_for_cases` tool
 
 ## [1.6.1] - 2026-03-08
 
