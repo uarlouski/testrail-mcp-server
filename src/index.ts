@@ -19,6 +19,7 @@ import { getPrioritiesTool } from "./tools/get_priorities.js";
 import { getTestsTool } from "./tools/get_tests.js";
 import { addResultsTool } from "./tools/add_results.js";
 import { addAttachmentToRunTool } from "./tools/add_attachment_to_run.js";
+import { addResultsForCasesTool } from "./tools/add_results_for_cases.js";
 import { removeNullish } from "./utils/sanitizer.js";
 import z from "zod";
 
@@ -61,6 +62,7 @@ const tools = [
     getPrioritiesTool,
     getTestsTool,
     addResultsTool,
+    addResultsForCasesTool,
     addAttachmentToRunTool,
 ]
 

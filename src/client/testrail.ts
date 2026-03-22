@@ -180,6 +180,10 @@ export class TestRailClient {
         return this.post<Result[]>(`${API_BASE_V2}/add_results/${runId}`, { results });
     }
 
+    async addResultsForCases(runId: number, results: Array<Record<string, any>>): Promise<Result[]> {
+        return this.post<Result[]>(`${API_BASE_V2}/add_results_for_cases/${runId}`, { results });
+    }
+
     async addAttachmentToRun(runId: number, filePath: string, filename: string): Promise<Attachment> {
         const fileBuffer = await fs.promises.readFile(filePath);
         const blob = new Blob([fileBuffer]);
