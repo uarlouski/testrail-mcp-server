@@ -7,6 +7,15 @@
 - Add `get_priorities` tool
 - Add `add_results_for_cases` tool
 
+### Changed
+
+- Bump `@modelcontextprotocol/sdk` from `1.25.3` to `1.27.1`
+- Bump `@types/node` from `25.0.9` to `25.5.0`
+- Bump `dotenv` from `17.2.3` to `17.3.1`
+- Bump `jest` from `30.2.0` to `30.3.0`
+- Bump `rimraf` from `6.1.2` to `6.1.3`
+- Bump `zod` from `4.3.5` to `4.3.6`
+
 ## [1.6.1] - 2026-03-08
 
 ### Added
