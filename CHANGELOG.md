@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Add `get_labels` tool
+
 ## [1.7.0]
 
 ### Added
