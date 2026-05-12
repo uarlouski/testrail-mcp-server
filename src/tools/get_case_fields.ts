@@ -5,6 +5,13 @@ import { parseDropdownOptions } from "../utils/mapper.js";
 
 const parameters = {};
 
+export const CASE_FIELDS_PARAM_DESCRIPTION = `
+Must use system_name values from get_case_fields.
+Call get_case_fields first if field names are not already known.
+Using an unknown field name (e.g. 'label_ids') will result in an error.
+Example: {"priority_id": 2, "template_id": 1, "labels": [1, 2]}
+`;
+
 export interface FieldSchema {
     system_name: string;
     label: string;
