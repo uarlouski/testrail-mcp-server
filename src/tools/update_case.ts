@@ -2,15 +2,22 @@ import { z } from "zod";
 import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
 import { validateCaseFields } from "../utils/validator.js";
+import { CASE_FIELDS_PARAM_DESCRIPTION } from "./get_case_fields.js";
 
 const parameters = {
     case_id: z.string().describe("The ID of the test case to update (e.g. '123' or 'C123')"),
-    fields: z.record(z.string(), z.any()).describe("Object containing fields to update. Use get_case_fields to see available fields. Example: {\"title\": \"New title\", \"priority_id\": 2, \"custom_automation_priority\": 1}"),
+    fields: z.record(z.string(), z.any()).describe(CASE_FIELDS_PARAM_DESCRIPTION),
 };
+
+const description = `
+Update a test case in TestRail.
+The update operation requires knowing valid field names that are returned by get_case_fields tool.
+Supports partial updates — only specify the fields you want to change.
+`;
 
 export const updateCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "update_case",
-    description: "Update a test case in TestRail. Supports partial updates - only specify the fields you want to change",
+    description: description.trim(),
     parameters,
     handler: async ({ case_id, fields }, client) => {
         validateCaseFields(fields, await client.getCaseFields());

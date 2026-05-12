@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Improve fields selection guidance for `create_case`, `update_case`, and `update_cases` tools to prevent invalid fields in requests.
+
 ## [1.8.0]
 
 ### Added
