@@ -169,7 +169,7 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 |------|-------------|
 | `get_statuses` | Systematically list all configured test statuses (Passed, Failed, Blocked, Retest, etc.). |
 | `get_priorities` | Retrieve priority levels configured within your instance structure. |
-| `get_case_fields` | Discover custom field definitions, formats, and UI dropdown options. |
+| `get_case_fields` | Discover custom field definitions, formats, and UI dropdown options. Supports filtering by `project_id`. |
 | `get_templates` | Identify available case templates to mandate correct AI structuring. |
 
 ---

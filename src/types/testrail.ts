@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 export const CaseFieldConfigSchema = z.object({
+    context: z.object({
+        is_global: z.boolean(),
+        project_ids: z.array(z.number()),
+    }).optional(),
     options: z.object({
         default_value: z.string().optional(),
         is_required: z.boolean().optional(),
