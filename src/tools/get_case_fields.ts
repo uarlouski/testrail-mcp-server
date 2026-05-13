@@ -1,13 +1,18 @@
+import { z } from "zod";
 import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
 import { CaseField } from "../types/testrail.js";
 import { parseDropdownOptions } from "../utils/mapper.js";
 
-const parameters = {};
+// Field remains optional for backward compatibility with previous implementation.
+// However, it is recommended to always provide project_id to get fields applicable to the project.
+const parameters = {
+    project_id: z.number().optional().describe("The project ID to get fields for. This is the primary way to use this tool, as it returns only the fields relevant to your current project. If omitted, returns all fields across all projects."),
+};
 
 export const CASE_FIELDS_PARAM_DESCRIPTION = `
 Must use system_name values from get_case_fields.
-Call get_case_fields first if field names are not already known.
+Call get_case_fields with project_id first if field names are not already known.
 Using an unknown field name (e.g. 'label_ids') will result in an error.
 Example: {"priority_id": 2, "template_id": 1, "labels": [1, 2]}
 `;
@@ -20,6 +25,7 @@ export interface FieldSchema {
     template_ids?: number[];
     options?: string[];
     comment?: string;
+    project_scope?: { scope: "global" } | { scope: "projects"; project_ids: number[] };
 }
 
 interface CaseFieldsResponse {
@@ -52,6 +58,7 @@ function isFieldRequired(field: CaseField): boolean {
 }
 
 export function mapToFieldSchema(field: CaseField): FieldSchema {
+
     const schema: FieldSchema = {
         system_name: field.system_name,
         label: field.label,
@@ -67,34 +74,64 @@ export function mapToFieldSchema(field: CaseField): FieldSchema {
         schema.options = Array.from(parseDropdownOptions(field).values());
     }
 
+    const contexts = field.configs.map(c => c.context).filter(Boolean) as { is_global: boolean; project_ids: number[] }[];
+    if (contexts.length > 0) {
+        const isGlobal = contexts.some(ctx => ctx.is_global);
+        if (isGlobal) {
+            schema.project_scope = { scope: "global" };
+        } else {
+            const projectIds = [...new Set(contexts.flatMap(ctx => ctx.project_ids))];
+            schema.project_scope = { scope: "projects", project_ids: projectIds };
+        }
+    }
+
     return schema;
 }
 
+function isFieldForProject(field: CaseField, projectId: number): boolean {
+    const contexts = field.configs.map(c => c.context).filter(Boolean) as { is_global: boolean; project_ids: number[] }[];
+    if (contexts.length === 0) return true;
+    return contexts.some(ctx => ctx.is_global || ctx.project_ids.includes(projectId));
+}
+
 export const SYSTEM_FIELDS: FieldSchema[] = [
-    { system_name: "title", label: "Title", type: "String", is_required: true },
-    { system_name: "section_id", label: "Section", type: "Integer", is_required: true },
-    { system_name: "template_id", label: "Template", type: "Integer", is_required: false },
-    { system_name: "type_id", label: "Type", type: "Integer", is_required: false },
-    { system_name: "priority_id", label: "Priority", type: "Integer", is_required: false },
-    { system_name: "estimate", label: "Estimate", type: "String", is_required: false },
-    { system_name: "milestone_id", label: "Milestone", type: "Integer", is_required: false },
-    { system_name: "refs", label: "References", type: "String", is_required: false },
-    { system_name: "labels", label: "Labels", type: "List", is_required: false, comment: "Use get_labels tool to get available labels/tags." },
+    { system_name: "title", label: "Title", type: "String", is_required: true, project_scope: { scope: "global" } },
+    { system_name: "section_id", label: "Section", type: "Integer", is_required: true, project_scope: { scope: "global" } },
+    { system_name: "template_id", label: "Template", type: "Integer", is_required: false, project_scope: { scope: "global" } },
+    { system_name: "type_id", label: "Type", type: "Integer", is_required: false, project_scope: { scope: "global" } },
+    { system_name: "priority_id", label: "Priority", type: "Integer", is_required: false, project_scope: { scope: "global" } },
+    { system_name: "estimate", label: "Estimate", type: "String", is_required: false, project_scope: { scope: "global" } },
+    { system_name: "milestone_id", label: "Milestone", type: "Integer", is_required: false, project_scope: { scope: "global" } },
+    { system_name: "refs", label: "References", type: "String", is_required: false, project_scope: { scope: "global" } },
+    { system_name: "labels", label: "Labels", type: "List", is_required: false, project_scope: { scope: "global" }, comment: "Use get_labels tool to get available labels/tags." },
 ];
+
+const description = `
+Get the field schema for test cases for a specific project.
+You should normally provide project_id to get fields applicable to your project.
+If you truly need all fields across all projects, you may omit project_id, but this is rarely what you want.
+Returns available fields with their types and options (for dropdown fields).
+`;
 
 export const getCaseFieldsTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_case_fields",
-    description: "Get the field schema for test cases. Returns all available fields with their types, descriptions, and options (for dropdown fields). Use this to understand what fields can be set when creating or updating test cases.",
+    description: description.trim(),
     parameters,
-    handler: async (_args, client) => {
+    handler: async ({ project_id }, client) => {
         const caseFields = await client.getCaseFields();
 
-        const customFieldSchemas = caseFields.filter(field => field.is_active).map(mapToFieldSchema);
+        const activeFields = caseFields.filter(field => field.is_active);
+        const filtered = project_id !== undefined
+            ? activeFields.filter(field => isFieldForProject(field, project_id))
+            : activeFields;
 
-        const response: CaseFieldsResponse = {
-            fields: [...SYSTEM_FIELDS, ...customFieldSchemas],
-        };
+        const customFieldSchemas = filtered.map(mapToFieldSchema);
 
-        return response;
+        const allFields = [...SYSTEM_FIELDS, ...customFieldSchemas];
+        const fields = project_id !== undefined
+            ? allFields.map(({ project_scope: _, ...rest }) => rest)
+            : allFields;
+
+        return { fields };
     }
 };

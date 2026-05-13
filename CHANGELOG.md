@@ -5,6 +5,7 @@
 ### Changed
 
 - Improve fields selection guidance for `create_case`, `update_case`, and `update_cases` tools to prevent invalid fields in requests.
+- Add `project_id` parameter to `get_case_fields` tool to return fields applicable to specific project.
 
 ## [1.8.0]
 
