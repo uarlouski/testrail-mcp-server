@@ -21,13 +21,20 @@ import { addResultsTool } from "./tools/add_results.js";
 import { addAttachmentToRunTool } from "./tools/add_attachment_to_run.js";
 import { addResultsForCasesTool } from "./tools/add_results_for_cases.js";
 import { getLabelsTool } from "./tools/get_labels.js";
+import { getSharedStepsTool } from "./tools/shared_steps/get_shared_steps.js";
+import { getSharedStepTool } from "./tools/shared_steps/get_shared_step.js";
+import { getSharedStepHistoryTool } from "./tools/shared_steps/get_shared_step_history.js";
+import { addSharedStepTool } from "./tools/shared_steps/add_shared_step.js";
+import { updateSharedStepTool } from "./tools/shared_steps/update_shared_step.js";
+import { deleteSharedStepTool } from "./tools/shared_steps/delete_shared_step.js";
 import { removeNullish } from "./utils/sanitizer.js";
 import z from "zod";
 
 const EnvSchema = z.object({
     TESTRAIL_INSTANCE_URL: z.url('Must be a valid TestRail URL'),
     TESTRAIL_USERNAME: z.email('Must be a valid email address'),
-    TESTRAIL_API_KEY: z.string().min(1, 'API key is required')
+    TESTRAIL_API_KEY: z.string().min(1, 'API key is required'),
+    TESTRAIL_ENABLE_SHARED_STEPS: z.string().optional().transform(val => val === 'true')
 });
 
 const parseResult = EnvSchema.safeParse(process.env);
@@ -39,7 +46,7 @@ if (!parseResult.success) {
     process.exit(1);
 }
 
-const { TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY } = parseResult.data;
+const { TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY, TESTRAIL_ENABLE_SHARED_STEPS } = parseResult.data;
 
 const server = new McpServer({
     name: "TestRail MCP Server",
@@ -67,6 +74,15 @@ const tools = [
     addAttachmentToRunTool,
     getLabelsTool,
 ]
+
+if (TESTRAIL_ENABLE_SHARED_STEPS) {
+    tools.push(getSharedStepsTool as any);
+    tools.push(getSharedStepTool as any);
+    tools.push(getSharedStepHistoryTool as any);
+    tools.push(addSharedStepTool as any);
+    tools.push(updateSharedStepTool as any);
+    tools.push(deleteSharedStepTool as any);
+}
 
 for (const tool of tools) {
     server.registerTool(

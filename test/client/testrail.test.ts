@@ -695,6 +695,36 @@ describe('TestRailClient', () => {
         );
     });
 
+    test('addResultsForCases posts results array', async () => {
+        const mockResults = [
+            { id: 1, test_id: 100, status_id: 1, comment: 'Passed', defects: null }
+        ];
+
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => mockResults
+        });
+
+        const results = await client.addResultsForCases(50, [
+            { case_id: 100, status_id: 1, comment: 'Passed' }
+        ]);
+
+        expect(results).toEqual(mockResults);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/add_results_for_cases/50',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({
+                    results: [
+                        { case_id: 100, status_id: 1, comment: 'Passed' }
+                    ]
+                })
+            })
+        );
+    });
+
     test('addAttachmentToRun uploads file using FormData', async () => {
         const mockAttachment = { attachment_id: 443 };
         const mockFileBuffer = Buffer.from('file content');
@@ -803,6 +833,113 @@ describe('TestRailClient', () => {
         expect(fetchMock).toHaveBeenCalledWith(
             expect.stringContaining('section_id=2&priority_id=1'),
             expect.anything()
+        );
+    });
+
+    test('getSharedSteps returns steps array with options', async () => {
+        const mockSteps = [{ id: 1, title: 'Step 1' }];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => ({ shared_steps: mockSteps })
+        });
+
+        const result = await client.getSharedSteps(1, { refs: 'R1' });
+        expect(result).toEqual(mockSteps);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_shared_steps/1&refs=R1',
+            expect.any(Object)
+        );
+    });
+
+    test('getSharedStep returns data on success', async () => {
+        const mockData = { id: 1, title: 'Step 1' };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => mockData
+        });
+
+        const result = await client.getSharedStep(1);
+        expect(result).toEqual(mockData);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_shared_step/1',
+            expect.any(Object)
+        );
+    });
+
+    test('getSharedStepHistory returns history array', async () => {
+        const mockHistory = [{ id: 1, title: 'Step 1 v1' }];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => mockHistory
+        });
+
+        const result = await client.getSharedStepHistory(1);
+        expect(result).toEqual(mockHistory);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_shared_step_history/1',
+            expect.any(Object)
+        );
+    });
+
+    test('addSharedStep sends POST request', async () => {
+        const mockData = { id: 1, title: 'New Step' };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => mockData
+        });
+
+        const result = await client.addSharedStep(5, { title: 'New Step' });
+        expect(result).toEqual(mockData);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/add_shared_step/5',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ title: 'New Step' })
+            })
+        );
+    });
+
+    test('updateSharedStep sends POST request', async () => {
+        const mockData = { id: 1, title: 'Updated' };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => mockData
+        });
+
+        const result = await client.updateSharedStep(1, { title: 'Updated' });
+        expect(result).toEqual(mockData);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/update_shared_step/1',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ title: 'Updated' })
+            })
+        );
+    });
+
+    test('deleteSharedStep sends POST request', async () => {
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => ({}),
+            text: async () => ''
+        });
+
+        await client.deleteSharedStep(1);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/delete_shared_step/1',
+            expect.objectContaining({ method: 'POST' })
         );
     });
 

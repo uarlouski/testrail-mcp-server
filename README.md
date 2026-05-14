@@ -56,7 +56,8 @@ Add this to your `claude_desktop_config.json`:
       "env": {
         "TESTRAIL_INSTANCE_URL": "https://your-instance.testrail.io",
         "TESTRAIL_USERNAME": "your@email.com",
-        "TESTRAIL_API_KEY": "your-api-key"
+        "TESTRAIL_API_KEY": "your-api-key",
+        "TESTRAIL_ENABLE_SHARED_STEPS": "true"
       }
     }
   }
@@ -133,6 +134,7 @@ Once configured, turbo-charge your QA workflow by asking your AI assistant:
 | `TESTRAIL_INSTANCE_URL` | Your TestRail instance URL (e.g., `https://example.testrail.io`) | ✅ |
 | `TESTRAIL_USERNAME` | Your TestRail user email address | ✅ |
 | `TESTRAIL_API_KEY` | Your TestRail API key ([Guide](https://support.testrail.com/hc/en-us/articles/7077039051412-Accessing-the-TestRail-API)) | ✅ |
+| `TESTRAIL_ENABLE_SHARED_STEPS` | Set to `true` to enable Shared Steps management tools | |
 
 ---
 
@@ -163,6 +165,16 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 | `add_results` | Submit test results to a test run using the specific `test_id`. |
 | `add_results_for_cases` | Submits results to a run mapping directly to `case_id`s, streamlining automation workflows. |
 | `add_attachment_to_run` | Attach logs, files, or zipped artifacts directly to an ongoing test run. |
+
+### 🔗 Shared Steps (Optional)
+| Tool | Functionality |
+|------|-------------|
+| `get_shared_steps` | List shared test steps for a project with optional reference filtering. |
+| `get_shared_step` | Retrieve precise details of a specific shared test step set. |
+| `get_shared_step_history` | View the complete audit trail and version history of a shared step set. |
+| `add_shared_step` | Create a new reusable set of shared test steps. |
+| `update_shared_step` | Modify an existing shared step set (changes propagate to all linked test cases). |
+| `delete_shared_step` | Securely delete a shared step entity. |
 
 ### 🧠 System Metadata
 | Tool | Functionality |

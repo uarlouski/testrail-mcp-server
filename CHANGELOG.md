@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+- Add shared steps tools:
+    - `get_shared_steps`
+    - `get_shared_step`
+    - `get_shared_step_history`
+    - `add_shared_step`
+    - `update_shared_step`
+    - `delete_shared_step`
+- Add `TESTRAIL_ENABLE_SHARED_STEPS` environment variable to toggle shared steps tools.
+
 ### Changed
 
 - Improve fields selection guidance for `create_case`, `update_case`, and `update_cases` tools to prevent invalid fields in requests.

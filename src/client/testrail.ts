@@ -1,4 +1,4 @@
-import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label } from "../types/testrail.js";
+import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label, SharedStep, SharedStepHistory } from "../types/testrail.js";
 
 import * as fs from "fs";
 
@@ -201,6 +201,36 @@ export class TestRailClient {
         return this._executeRequest<Attachment>('POST', `${API_BASE_V2}/add_attachment_to_run/${runId}`, headers, formData);
     }
 
+    async getSharedSteps(projectId: number, options?: { refs?: string }): Promise<SharedStep[]> {
+        let url = `${API_BASE_V2}/get_shared_steps/${projectId}`;
+
+        if (options?.refs) {
+            url += `&refs=${options.refs}`;
+        }
+
+        return this.paginateAll<SharedStep>(url, 'shared_steps');
+    }
+
+    async getSharedStep(sharedStepId: number): Promise<SharedStep> {
+        return this.get<SharedStep>(`${API_BASE_V2}/get_shared_step/${sharedStepId}`);
+    }
+
+    async getSharedStepHistory(sharedStepId: number): Promise<SharedStepHistory[]> {
+        return this.get<SharedStepHistory[]>(`${API_BASE_V2}/get_shared_step_history/${sharedStepId}`);
+    }
+
+    async addSharedStep(projectId: number, data: Record<string, any>): Promise<SharedStep> {
+        return this.post<SharedStep>(`${API_BASE_V2}/add_shared_step/${projectId}`, data);
+    }
+
+    async updateSharedStep(sharedStepId: number, data: Record<string, any>): Promise<SharedStep> {
+        return this.post<SharedStep>(`${API_BASE_V2}/update_shared_step/${sharedStepId}`, data);
+    }
+
+    async deleteSharedStep(sharedStepId: number): Promise<void> {
+        return this._executeRequest<void>('POST', `${API_BASE_V2}/delete_shared_step/${sharedStepId}`, this.headers, JSON.stringify({}), false);
+    }
+
     private async paginateAll<T>(url: string, dataKey: string): Promise<T[]> {
         const allItems: T[] = [];
         let nextUrl: string | null = url;
@@ -237,7 +267,7 @@ export class TestRailClient {
         return this._executeRequest<T>(method, endpoint, this.headers, jsonData);
     }
 
-    private async _executeRequest<T>(method: 'GET' | 'POST', endpoint: string, headers: HeadersInit, body?: any): Promise<T> {
+    private async _executeRequest<T>(method: 'GET' | 'POST', endpoint: string, headers: HeadersInit, body?: any, parseBody: boolean = true): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
         const params: RequestInit = {
             method,
@@ -284,7 +314,11 @@ export class TestRailClient {
                     throw new Error(errorMessage);
                 }
 
-                return await response.json() as T;
+                if (parseBody) {
+                    return await response.json() as T;
+                }
+
+                return await response.text() as T;
             } catch (error) {
                 const networkError = error instanceof Error && !error.message.startsWith('TestRail API Error');
                 if (networkError && attempt < maxRetries) {
