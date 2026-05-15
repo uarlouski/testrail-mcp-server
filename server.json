@@ -36,6 +36,13 @@
           "format": "string",
           "isSecret": true,
           "name": "TESTRAIL_API_KEY"
+        },
+        {
+          "description": "Enable shared steps management",
+          "isRequired": false,
+          "format": "boolean",
+          "isSecret": false,
+          "name": "TESTRAIL_ENABLE_SHARED_STEPS"
         }
       ]
     }
