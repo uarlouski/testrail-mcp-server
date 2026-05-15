@@ -9,7 +9,7 @@ const parameters = {
 
 export const getSectionsTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_sections",
-    description: "Get all sections for a project. Returns section IDs and names that can be used with create_case",
+    description: "Get all sections for a project. Returns section IDs and names that can be used with add_case",
     parameters,
     handler: async ({ project_id }, client) => {
         const sections = await client.getSections(project_id);

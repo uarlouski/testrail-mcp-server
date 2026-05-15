@@ -14,8 +14,9 @@
 
 ### Changed
 
-- Improve fields selection guidance for `create_case`, `update_case`, and `update_cases` tools to prevent invalid fields in requests.
+- Improve fields selection guidance for `add_case`, `update_case`, and `update_cases` tools to prevent invalid fields in requests.
 - Add `project_id` parameter to `get_case_fields` tool to return fields applicable to specific project.
+- Rename `create_case` tool to `add_case` to follow TestRail API semantics.
 
 ## [1.8.0]
 
@@ -112,5 +113,5 @@
     - `get_case_fields` - Explore available fields and dropdown options
     - `get_templates` - List project templates to understand case structures
     - `get_sections` - Navigate the test case hierarchy
-    - `create_case` - Create new test cases with full custom field support
+    - `add_case` - Create new test cases with full custom field support
     - `update_case` / `update_cases` - Modify single or bulk update cases

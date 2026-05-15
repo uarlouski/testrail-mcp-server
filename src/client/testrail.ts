@@ -143,7 +143,7 @@ export class TestRailClient {
         return response.updated_cases;
     }
 
-    async createCase(sectionId: number, fields: Record<string, any>): Promise<Case> {
+    async addCase(sectionId: number, fields: Record<string, any>): Promise<Case> {
         return this.post<Case>(`${API_BASE_V2}/add_case/${sectionId}`, fields);
     }
 

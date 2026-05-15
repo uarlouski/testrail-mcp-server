@@ -10,7 +10,7 @@ import { getCaseFieldsTool } from "./tools/get_case_fields.js";
 import { getTemplatesTool } from "./tools/get_templates.js";
 import { updateCaseTool } from "./tools/update_case.js";
 import { updateCasesTool } from "./tools/update_cases.js";
-import { createCaseTool } from "./tools/create_case.js";
+import { addCaseTool } from "./tools/add_case.js";
 import { getSectionsTool } from "./tools/get_sections.js";
 import { getProjectsTool } from "./tools/get_projects.js";
 import { addRunTool } from "./tools/add_run.js";
@@ -64,7 +64,7 @@ const tools = [
     getSectionsTool,
     updateCaseTool,
     updateCasesTool,
-    createCaseTool,
+    addCaseTool,
     addRunTool,
     getStatusesTool,
     getPrioritiesTool,

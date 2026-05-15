@@ -1,11 +1,11 @@
 import { jest, describe, test, expect, beforeEach } from '@jest/globals';
-import { createCaseTool } from '../../src/tools/create_case.js';
+import { addCaseTool } from '../../src/tools/add_case.js';
 import { TestRailClient } from '../../src/client/testrail.js';
 import { Case } from '../../src/types/testrail.js';
 
-describe('create_case tool', () => {
+describe('add_case tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
-    let createCaseMock: jest.Mock<(sectionId: string, fields: Record<string, any>) => Promise<Case>>;
+    let addCaseMock: jest.Mock<(sectionId: string, fields: Record<string, any>) => Promise<Case>>;
 
     const mockCreatedCase: Case = {
         id: 456,
@@ -29,26 +29,26 @@ describe('create_case tool', () => {
     };
 
     beforeEach(() => {
-        createCaseMock = jest.fn<(sectionId: string, fields: Record<string, any>) => Promise<Case>>()
+        addCaseMock = jest.fn<(sectionId: string, fields: Record<string, any>) => Promise<Case>>()
             .mockResolvedValue(mockCreatedCase);
 
         mockClient = {
-            createCase: createCaseMock,
+            addCase: addCaseMock,
             getCaseFields: (jest.fn() as unknown as any).mockResolvedValue([{ system_name: 'priority_id', is_active: true, configs: [], include_all: true, template_ids: [] }, { system_name: 'template_id', is_active: true, configs: [], include_all: true, template_ids: [] }, { system_name: 'custom_automation_priority', is_active: true, configs: [], include_all: true, template_ids: [] }])
         } as unknown as jest.Mocked<TestRailClient>;
     });
 
     test('exports correct tool definition', () => {
-        expect(createCaseTool.name).toBe('create_case');
-        expect(createCaseTool.description).toContain('Create');
-        expect(createCaseTool.parameters).toBeDefined();
-        expect(createCaseTool.parameters.section_id).toBeDefined();
-        expect(createCaseTool.parameters.title).toBeDefined();
-        expect(createCaseTool.parameters.fields).toBeDefined();
+        expect(addCaseTool.name).toBe('add_case');
+        expect(addCaseTool.description).toContain('Create');
+        expect(addCaseTool.parameters).toBeDefined();
+        expect(addCaseTool.parameters.section_id).toBeDefined();
+        expect(addCaseTool.parameters.title).toBeDefined();
+        expect(addCaseTool.parameters.fields).toBeDefined();
     });
 
     test('handler creates case and returns success response', async () => {
-        const result = await createCaseTool.handler(
+        const result = await addCaseTool.handler(
             { section_id: 1, title: 'New Test Case' },
             mockClient
         );
@@ -57,7 +57,7 @@ describe('create_case tool', () => {
         expect(result.success).toBe(true);
         expect(result.case_id).toBe(456);
         expect(result.message).toContain('C456');
-        expect(mockClient.createCase).toHaveBeenCalledWith(1, { title: 'New Test Case' });
+        expect(mockClient.addCase).toHaveBeenCalledWith(1, { title: 'New Test Case' });
     });
 
     test('passes title and optional fields correctly', async () => {
@@ -67,12 +67,12 @@ describe('create_case tool', () => {
             custom_automation_priority: 1,
         };
 
-        await createCaseTool.handler(
+        await addCaseTool.handler(
             { section_id: 5, title: 'My Test', fields },
             mockClient
         );
 
-        expect(mockClient.createCase).toHaveBeenCalledWith(5, {
+        expect(mockClient.addCase).toHaveBeenCalledWith(5, {
             title: 'My Test',
             priority_id: 2,
             template_id: 1,
@@ -81,19 +81,19 @@ describe('create_case tool', () => {
     });
 
     test('works without optional fields', async () => {
-        await createCaseTool.handler(
+        await addCaseTool.handler(
             { section_id: 10, title: 'Simple Test' },
             mockClient
         );
 
-        expect(mockClient.createCase).toHaveBeenCalledWith(10, { title: 'Simple Test' });
+        expect(mockClient.addCase).toHaveBeenCalledWith(10, { title: 'Simple Test' });
     });
 
     test('handler throws error on failure', async () => {
-        createCaseMock.mockRejectedValue(new Error('API Error'));
+        addCaseMock.mockRejectedValue(new Error('API Error'));
 
         await expect(
-            createCaseTool.handler(
+            addCaseTool.handler(
                 { section_id: 1, title: 'Test' },
                 mockClient
             )

@@ -444,7 +444,7 @@ describe('TestRailClient', () => {
             json: async () => mockData
         });
 
-        const result = await client.createCase(5, { title: 'New Case' });
+        const result = await client.addCase(5, { title: 'New Case' });
         expect(result).toEqual(mockData);
         expect(fetchMock).toHaveBeenCalledWith(
             'https://testrail.io/index.php?/api/v2/add_case/5',
