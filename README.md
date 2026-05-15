@@ -1,8 +1,10 @@
 <div align="center">
   <h1>🚀 TestRail MCP Server</h1>
   <p>
-    <strong>A high-performance Model Context Protocol (MCP) server connecting AI assistants (Claude, Cursor, Windsurf) directly to TestRail.</strong><br>
-    <em>Seamlessly search, create, update, and execute test cases using natural language.</em>
+    <strong>An open-source Model Context Protocol (MCP) server that connects Claude, Cursor, Windsurf, and other AI assistants directly to TestRail.</strong>
+  </p>
+  <p>
+    Manage TestRail projects, search and create test cases, kick off test runs, record results, and attach files — all through natural-language conversation with your AI assistant. Built for QA engineers and AI-assisted test automation.
   </p>
 </div>
 
@@ -14,6 +16,16 @@
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.9-blue.svg" alt="TypeScript"></a>
   <a href="https://github.com/uarlouski/testrail-mcp-server"><img src="https://img.shields.io/github/stars/uarlouski/testrail-mcp-server.svg?style=social&label=Star" alt="GitHub stars"></a>
 </p>
+
+<p align="center">
+  <strong>Compatible with:</strong>
+  <img src="https://img.shields.io/badge/Claude%20Desktop-D97757?logo=anthropic&logoColor=white" alt="Claude Desktop">
+  <img src="https://img.shields.io/badge/Cursor-000000?logo=cursor&logoColor=white" alt="Cursor">
+  <img src="https://img.shields.io/badge/Windsurf-19A1BC?logo=codeium&logoColor=white" alt="Windsurf">
+  <img src="https://img.shields.io/badge/VS%20Code-007ACC?logo=visualstudiocode&logoColor=white" alt="VS Code">
+</p>
+
+<!-- TODO: insert demo.gif — short screencast of asking "create a test case" in Claude or Cursor and seeing the case appear in TestRail -->
 
 ---
 
@@ -40,10 +52,9 @@ Navigate to **My Settings → API Keys** in your TestRail platform and generate 
 
 ### 2. Configure Your MCP Client
 
-Add the server to your chosen MCP client configuration. Below are examples for popular AI IDEs and assistants:
+Add the server to your chosen MCP client configuration. The Claude Desktop example is shown below; Cursor, Windsurf, and other clients use the same pattern (see the collapsible sections further down).
 
-<details>
-<summary><strong>🤖 Claude Desktop</strong></summary>
+#### 🤖 Claude Desktop
 
 Add this to your `claude_desktop_config.json`:
 
@@ -63,7 +74,6 @@ Add this to your `claude_desktop_config.json`:
   }
 }
 ```
-</details>
 
 <details>
 <summary><strong>⌨️ Cursor</strong></summary>
@@ -197,12 +207,3 @@ This project is securely licensed under the [Apache License 2.0](LICENSE).
 <p align="center">
   <b>TestRail MCP Server</b> · Engineered with the <a href="https://modelcontextprotocol.io">Model Context Protocol</a>
 </p>
-
-<!-- SEO Keywords -->
-<div align="center">
-  <p>
-    <small>
-      <b>Keywords:</b> TestRail MCP Server, Model Context Protocol, TestRail API Integration, AI Test Management, LLM Testing Tools, Claude TestRail Plugin, Cursor TestRail, Windsurf QA Tool, Test Case Automation, QA AI Assistant, MCP Server Developer Tools, Prompt Engineering TestRail, Test Run Tracking, QA Productivity Automation.
-    </small>
-  </p>
-</div>
