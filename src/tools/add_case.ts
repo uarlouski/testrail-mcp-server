@@ -15,8 +15,8 @@ Create a new test case in TestRail.
 The create operation requires knowing valid field names that are returned by get_case_fields tool.
 `;
 
-export const createCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
-    name: "create_case",
+export const addCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
+    name: "add_case",
     description: description.trim(),
     parameters,
     handler: async ({ section_id, title, fields }, client) => {
@@ -28,7 +28,7 @@ export const createCaseTool: ToolDefinition<typeof parameters, TestRailClient> =
             title,
             ...fields,
         };
-        const createdCase = await client.createCase(section_id, caseData);
+        const createdCase = await client.addCase(section_id, caseData);
 
         return {
             success: true,

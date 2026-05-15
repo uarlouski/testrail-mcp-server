@@ -153,7 +153,7 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 |------|-------------|
 | `get_cases` | Query test cases with advanced filtering (priority, template, type, etc.) and pagination. |
 | `get_case` | Fetch complete, structured details of a specific test case, including custom steps and fields. |
-| `create_case` | Seamlessly create a new test case equipped with robust custom field validation. |
+| `add_case` | Seamlessly create a new test case equipped with robust custom field validation. |
 | `update_case` | Modify an existing test case's steps, metadata, or titles. |
 | `update_cases` | Execute bulk-updates on multiple test cases simultaneously to save time. |
 
