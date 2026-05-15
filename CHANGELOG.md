@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.9.0]
 
 ### Added
 - Add shared steps tools:
