@@ -15,6 +15,7 @@
   <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License"></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.9-blue.svg" alt="TypeScript"></a>
   <a href="https://github.com/uarlouski/testrail-mcp-server"><img src="https://img.shields.io/github/stars/uarlouski/testrail-mcp-server.svg?style=social&label=Star" alt="GitHub stars"></a>
+  <a href="https://glama.ai/mcp/servers/uarlouski/testrail-mcp-server"><img src="https://glama.ai/mcp/servers/uarlouski/testrail-mcp-server/badges/score.svg" alt="Score Badge"></a>
 </p>
 
 <p align="center">
