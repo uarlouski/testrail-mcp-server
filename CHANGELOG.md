@@ -5,6 +5,12 @@
 ### Added
 - Add `output_file` parameter to `get_cases` and `get_sections` tools to allow directly saving large API responses to the local filesystem and bypassing LLM context window limits.
 
+### Changed
+
+- Bump `@modelcontextprotocol/sdk` from `1.27.1` to `1.29.0`
+- Bump `dotenv` from `17.3.1` to `17.4.2`
+- Bump `zod` from `4.3.6` to `4.4.3`
+
 ## [1.9.0]
 
 ### Added
