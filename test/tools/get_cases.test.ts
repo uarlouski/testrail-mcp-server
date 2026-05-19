@@ -2,6 +2,7 @@ import { jest, describe, test, expect, beforeEach } from '@jest/globals';
 import { getCasesTool } from '../../src/tools/get_cases.js';
 import { TestRailClient } from '../../src/client/testrail.js';
 import { Case } from '../../src/types/testrail.js';
+import fs from 'fs';
 
 describe('get_cases tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
@@ -30,6 +31,8 @@ describe('get_cases tool', () => {
     ];
 
     beforeEach(() => {
+        jest.spyOn(fs.promises, 'writeFile').mockResolvedValue(undefined);
+
         getCasesMock = jest.fn<(projectId: string, sectionId?: string, filter?: Record<string, string>) => Promise<Case[]>>()
             .mockResolvedValue(mockCases);
 
@@ -128,5 +131,29 @@ describe('get_cases tool', () => {
             priority_id: 2,
             custom_automation_status: 1,
         });
+    });
+
+    test('saves output to file if output_file is provided', async () => {
+        const result = await getCasesTool.handler(
+            { project_id: 1, output_file: '/tmp/test_cases.json' },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        expect(result.file).toBe('/tmp/test_cases.json');
+        expect(result.message).toContain('3 cases');
+        expect(result.cases).toBeUndefined();
+        
+        expect(fs.promises.writeFile).toHaveBeenCalledWith(
+            '/tmp/test_cases.json',
+            expect.any(String),
+            'utf-8'
+        );
+        
+        // Verify JSON string contains the data
+        const writtenJson = (fs.promises.writeFile as jest.Mock).mock.calls[0][1] as string;
+        const parsed = JSON.parse(writtenJson);
+        expect(parsed.cases).toHaveLength(3);
+        expect(parsed.cases[0].title).toBe('Login test');
     });
 });

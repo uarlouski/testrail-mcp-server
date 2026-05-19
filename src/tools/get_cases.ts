@@ -1,4 +1,5 @@
 import { z } from "zod";
+import fs from "fs";
 import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
 import { Case } from "../types/testrail.js";
@@ -14,6 +15,7 @@ const parameters = {
     filter: z.record(z.string(), z.string()).optional().describe("Optional API-side filters (more efficient for large datasets). Supported: priority_id, type_id, created_by, updated_by, milestone_id, refs, created_after, created_before, updated_after, updated_before. Use comma-separated values for IDs. Example: {\"priority_id\": \"1,2\", \"type_id\": \"3\"}"),
     where: z.record(z.string(), z.any()).optional().describe("Optional client-side filter for any field including custom fields (filters after fetching all cases). Supports exact value matching. Example: {\"custom_automation_status\": 1, \"priority_id\": 2}"),
     fields: z.array(z.string()).optional().describe("Additional fields to include in response beyond id, title, and suite_id. Use get_case_fields to see available fields. Example: [\"priority_id\", \"type_id\", \"custom_automation_status\"]"),
+    output_file: z.string().optional().describe("Absolute file path to save the JSON response to. Use this for large datasets to avoid blowing up context limits."),
 };
 
 interface CasesResponse {
@@ -24,7 +26,7 @@ export const getCasesTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_cases",
     description: "Get all test cases for a project. Filter by section, API params (priority, type), or any field including custom fields via 'where'. Returns case IDs, titles, and any additional requested fields.",
     parameters,
-    handler: async ({ project_id, section, filter, where, fields }, client) => {
+    handler: async ({ project_id, section, filter, where, fields, output_file }, client) => {
         const caseFields = await client.getCaseFields();
         if (fields) {
             validateCaseFields(fields, caseFields);
@@ -74,6 +76,15 @@ export const getCasesTool: ToolDefinition<typeof parameters, TestRailClient> = {
                 return result;
             }),
         };
+
+        if (output_file) {
+            await fs.promises.writeFile(output_file, JSON.stringify(response), "utf-8");
+            return {
+                success: true,
+                message: `Successfully exported ${response.cases.length} cases to ${output_file}`,
+                file: output_file
+            };
+        }
 
         return response;
     }
