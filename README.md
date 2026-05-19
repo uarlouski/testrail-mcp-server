@@ -153,6 +153,9 @@ Once configured, turbo-charge your QA workflow by asking your AI assistant:
 
 The TestRail MCP Server provides heavily typed, descriptive tools designed specifically for LLM interaction:
 
+> **💡 Pro Tip: Handling Large Data Sets**
+> For list-based tools like `get_cases` and `get_sections`, you can supply the `output_file` parameter with an absolute file path. The server will bypass the LLM context window by writing the raw JSON directly to disk and returning a concise summary, allowing you to run external scripts against the export!
+
 ### 🔭 Discovery & Navigation
 | Tool | Functionality |
 |------|-------------|
