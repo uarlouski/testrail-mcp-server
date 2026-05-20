@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.10.0]
 
 ### Added
 - Add `output_file` parameter to `get_cases` and `get_sections` tools to allow directly saving large API responses to the local filesystem and bypassing LLM context window limits.
