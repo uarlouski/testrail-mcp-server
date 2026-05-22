@@ -12,10 +12,11 @@ const parameters = {
 };
 
 export const CASE_FIELDS_PARAM_DESCRIPTION = `
+A flat key-value map of case fields. The server merges all entries directly into the root of the TestRail API request body — there is no nested "fields" key in the API call.
 Must use system_name values from get_case_fields.
+Example: {"priority_id": 2, "template_id": 1, "labels": [1, 2]}
 Call get_case_fields with project_id first if field names are not already known.
 Using an unknown field name (e.g. 'label_ids') will result in an error.
-Example: {"priority_id": 2, "template_id": 1, "labels": [1, 2]}
 `;
 
 export interface FieldSchema {
