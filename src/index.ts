@@ -51,7 +51,7 @@ const { TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY, TESTRAIL_ENA
 
 const server = new McpServer({
     name: "TestRail MCP Server",
-    version: "1.10.0",
+    version: "1.11.0",
 });
 
 const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY);
