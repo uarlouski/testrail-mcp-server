@@ -175,3 +175,12 @@ export const SharedStepHistorySchema = z.object({
 });
 
 export type SharedStepHistory = z.infer<typeof SharedStepHistorySchema>;
+
+export const UserSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    email: z.string(),
+});
+
+export type User = z.infer<typeof UserSchema>;
+

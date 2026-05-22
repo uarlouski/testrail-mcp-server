@@ -1,5 +1,5 @@
 import { describe, test, expect } from '@jest/globals';
-import { sanitizeValue, removeNullish } from '../../src/utils/sanitizer.js';
+import { sanitizeValue, removeNullish, isActive } from '../../src/utils/sanitizer.js';
 
 describe('sanitizeValue', () => {
     test('strips style attributes from string values', () => {
@@ -139,5 +139,33 @@ describe('removeNullish', () => {
     test('handles empty objects and arrays', () => {
         expect(removeNullish({})).toEqual({});
         expect(removeNullish([])).toEqual([]);
+    });
+});
+
+describe('isActive', () => {
+    test('returns true for truthy values (1, true, "1", "true")', () => {
+        expect(isActive(1)).toBe(true);
+        expect(isActive(true)).toBe(true);
+        expect(isActive('1')).toBe(true);
+        expect(isActive('true')).toBe(true);
+    });
+
+    test('returns false for falsy values (0, false, "0", "false", null, undefined, other strings)', () => {
+        expect(isActive(0)).toBe(false);
+        expect(isActive(false)).toBe(false);
+        expect(isActive('0')).toBe(false);
+        expect(isActive('false')).toBe(false);
+        expect(isActive(null)).toBe(false);
+        expect(isActive(undefined)).toBe(false);
+        expect(isActive('active')).toBe(false);
+    });
+
+    test('supports passing the parent object directly', () => {
+        expect(isActive({ id: 1, is_active: 1 })).toBe(true);
+        expect(isActive({ id: 2, is_active: true })).toBe(true);
+        expect(isActive({ id: 3, is_active: 0 })).toBe(false);
+        expect(isActive({ id: 4, is_active: false })).toBe(false);
+        expect(isActive({ id: 5 })).toBe(false);
+        expect(isActive({})).toBe(false);
     });
 });

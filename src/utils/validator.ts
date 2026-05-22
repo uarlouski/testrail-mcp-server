@@ -1,5 +1,6 @@
 import { CaseField } from "../types/testrail.js";
 import { SYSTEM_FIELDS, mapToFieldSchema } from "../tools/get_case_fields.js";
+import { isActive } from "./sanitizer.js";
 
 /**
  * Validates that the provided fields exist in the TestRail case schema.
@@ -15,7 +16,7 @@ export function validateCaseFields(fields: Record<string, any> | string[], caseF
         return;
     }
 
-    const customFieldSchemas = caseFields.filter(field => field.is_active).map(mapToFieldSchema);
+    const customFieldSchemas = caseFields.filter(isActive).map(mapToFieldSchema);
 
     const validFieldNames = new Set(
         [...SYSTEM_FIELDS, ...customFieldSchemas].map(f => f.system_name)

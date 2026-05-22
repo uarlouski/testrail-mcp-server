@@ -131,6 +131,7 @@ Any MCP-compliant client can utilize this server. The pattern is universal—poi
 Once configured, turbo-charge your QA workflow by asking your AI assistant:
 
 - *"List all projects in TestRail to find the latest active project."*
+- *"Show me all active users in the project to find the right assignee."*
 - *"Show me all test cases in section 5 of project 3."*
 - *"Create a comprehensive test case for 'Login Validation' with detailed steps."*
 - *"Start a new test run containing cases from section 5."*
@@ -153,14 +154,16 @@ Once configured, turbo-charge your QA workflow by asking your AI assistant:
 
 The TestRail MCP Server provides heavily typed, descriptive tools designed specifically for LLM interaction:
 
-> **💡 Pro Tip: Handling Large Data Sets**
-> For list-based tools like `get_cases` and `get_sections`, you can supply the `output_file` parameter with an absolute file path. The server will bypass the LLM context window by writing the raw JSON directly to disk and returning a concise summary, allowing you to run external scripts against the export!
+> **💡 Pro Tip: Handling Large Data Sets & Permissions**
+> - **Large Data Sets**: For list-based tools like `get_cases` and `get_sections`, you can supply the `output_file` parameter with an absolute file path. The server will bypass the LLM context window by writing the raw JSON directly to disk and returning a concise summary, allowing you to run external scripts against the export!
+> - **Intelligent User Fallback**: When fetching users using `get_users` without admin rights, TestRail denies access globally. The server dynamically catches this permission restriction and falls back to polling all active projects in parallel, retrieving and deduplicating active users so assignees and reviewers can always be mapped.
 
 ### 🔭 Discovery & Navigation
 | Tool | Functionality |
 |------|-------------|
 | `get_projects` | List all available active and completed projects in your instance. |
 | `get_sections` | Navigate the precise folder/section hierarchy of any test suite. |
+| `get_users` | Retrieve active users. Handles per-project filtering and automatic fallback polling for non-admin accounts. |
 
 ### 📋 Test Case Management
 | Tool | Functionality |

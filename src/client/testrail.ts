@@ -1,4 +1,5 @@
-import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label, SharedStep, SharedStepHistory } from "../types/testrail.js";
+import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label, SharedStep, SharedStepHistory, User } from "../types/testrail.js";
+import { isActive } from "../utils/sanitizer.js";
 
 import * as fs from "fs";
 
@@ -229,6 +230,14 @@ export class TestRailClient {
 
     async deleteSharedStep(sharedStepId: number): Promise<void> {
         return this._executeRequest<void>('POST', `${API_BASE_V2}/delete_shared_step/${sharedStepId}`, this.headers, JSON.stringify({}), false);
+    }
+
+    async getUsers(projectId?: number): Promise<User[]> {
+        const url = projectId
+            ? `${API_BASE_V2}/get_users/${projectId}`
+            : `${API_BASE_V2}/get_users`;
+        const allUsers = await this.paginateAll<User>(url, 'users');
+        return allUsers.filter(isActive);
     }
 
     private async paginateAll<T>(url: string, dataKey: string): Promise<T[]> {
