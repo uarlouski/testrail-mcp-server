@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- Clarify `fields` parameter description in `add_case`, `update_case`, and `update_cases` tools to explicitly state that field entries are merged into the root API request body
+
 ## [1.11.0]
 
 ### Added
