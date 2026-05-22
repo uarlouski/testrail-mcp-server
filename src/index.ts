@@ -21,6 +21,7 @@ import { addResultsTool } from "./tools/add_results.js";
 import { addAttachmentToRunTool } from "./tools/add_attachment_to_run.js";
 import { addResultsForCasesTool } from "./tools/add_results_for_cases.js";
 import { getLabelsTool } from "./tools/get_labels.js";
+import { getUsersTool } from "./tools/get_users.js";
 import { getSharedStepsTool } from "./tools/shared_steps/get_shared_steps.js";
 import { getSharedStepTool } from "./tools/shared_steps/get_shared_step.js";
 import { getSharedStepHistoryTool } from "./tools/shared_steps/get_shared_step_history.js";
@@ -73,6 +74,7 @@ const tools = [
     addResultsForCasesTool,
     addAttachmentToRunTool,
     getLabelsTool,
+    getUsersTool,
 ]
 
 if (TESTRAIL_ENABLE_SHARED_STEPS) {

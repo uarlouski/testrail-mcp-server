@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Add `get_users` tool allowing AI assistants to retrieve active TestRail users to streamline assignee or reviewer lookups
+
 ## [1.10.0]
 
 ### Added

@@ -48,3 +48,15 @@ export function removeNullish(value: any): any {
 
     return value;
 }
+
+/**
+ * Checks if an entity is active by checking its active flag.
+ * Supports passing either the direct primitive value or the parent object containing `.is_active`.
+ */
+export function isActive(value: any): boolean {
+    if (value == null) {
+        return false;
+    }
+    const activeFlag = (typeof value === 'object') ? value.is_active : value;
+    return activeFlag === 1 || activeFlag === true || activeFlag === '1' || activeFlag === 'true';
+}

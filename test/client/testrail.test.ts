@@ -981,4 +981,65 @@ describe('TestRailClient', () => {
         expect(fetchMock).not.toHaveBeenCalledWith(expect.stringContaining('section_id=3'), expect.anything());
         expect(fetchMock).not.toHaveBeenCalledWith(expect.stringContaining('section_id=4'), expect.anything());
     });
+
+    test('getUsers returns global users and filters active-only', async () => {
+        const mockUsersResponse = {
+            users: [
+                { id: 1, name: 'Alice Cooper', email: 'alice@rock.com', is_active: 1 },
+                { id: 2, name: 'Bob Dylan', email: 'bob@folk.com', is_active: true },
+                { id: 3, name: 'Inactive User', email: 'inactive@inactive.com', is_active: 0 },
+                { id: 4, name: 'Inactive User 2', email: 'inactive2@inactive.com', is_active: false }
+            ],
+            _links: { next: null }
+        };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockUsersResponse
+        });
+
+        const result = await client.getUsers();
+        expect(result).toHaveLength(2);
+        expect(result[0].id).toBe(1);
+        expect(result[1].id).toBe(2);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_users',
+            expect.any(Object)
+        );
+    });
+
+    test('getUsers with project_id returns project users with pagination', async () => {
+        const mockUsersPage1 = {
+            users: [{ id: 2, name: 'Bob Dylan', email: 'bob@folk.com', is_active: true }],
+            _links: { next: '/api/v2/get_users/5&offset=1' }
+        };
+        const mockUsersPage2 = {
+            users: [{ id: 4, name: 'Johnny Cash', email: 'johnny@country.com', is_active: true }],
+            _links: { next: null }
+        };
+
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockUsersPage1
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockUsersPage2
+            });
+
+        const result = await client.getUsers(5);
+        expect(result).toHaveLength(2);
+        expect(result[0].id).toBe(2);
+        expect(result[1].id).toBe(4);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_users/5',
+            expect.any(Object)
+        );
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_users/5&offset=1',
+            expect.any(Object)
+        );
+    });
 });
+

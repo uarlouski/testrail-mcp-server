@@ -3,6 +3,7 @@ import { TestRailClient } from "../client/testrail.js";
 import { ToolDefinition } from "../types/custom.js";
 import { CaseField } from "../types/testrail.js";
 import { parseDropdownOptions } from "../utils/mapper.js";
+import { isActive } from "../utils/sanitizer.js";
 
 // Field remains optional for backward compatibility with previous implementation.
 // However, it is recommended to always provide project_id to get fields applicable to the project.
@@ -120,7 +121,7 @@ export const getCaseFieldsTool: ToolDefinition<typeof parameters, TestRailClient
     handler: async ({ project_id }, client) => {
         const caseFields = await client.getCaseFields();
 
-        const activeFields = caseFields.filter(field => field.is_active);
+        const activeFields = caseFields.filter(isActive);
         const filtered = project_id !== undefined
             ? activeFields.filter(field => isFieldForProject(field, project_id))
             : activeFields;
