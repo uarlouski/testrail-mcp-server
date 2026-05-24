@@ -19,6 +19,7 @@ Updates are propagated automatically to all test cases using these steps.
 
 export const updateSharedStepTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "update_shared_step",
+    mode: "update",
     description: description.trim(),
     parameters,
     handler: async (args, client) => {

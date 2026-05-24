@@ -17,6 +17,7 @@ The create operation requires knowing valid field names that are returned by get
 
 export const addCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "add_case",
+    mode: "create",
     description: description.trim(),
     parameters,
     handler: async ({ section_id, title, fields }, client) => {

@@ -10,6 +10,7 @@ const parameters = {
 
 export const getSharedStepsTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_shared_steps",
+    mode: "read",
     description: "Returns a list of shared test steps for a specified project.",
     parameters,
     handler: async (args, client) => {

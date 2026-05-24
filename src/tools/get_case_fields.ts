@@ -117,6 +117,7 @@ Returns available fields with their types and options (for dropdown fields).
 
 export const getCaseFieldsTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_case_fields",
+    mode: "read",
     description: description.trim(),
     parameters,
     handler: async ({ project_id }, client) => {

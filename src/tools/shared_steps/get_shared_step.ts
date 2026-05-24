@@ -9,6 +9,7 @@ const parameters = {
 
 export const getSharedStepTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_shared_step",
+    mode: "read",
     description: "Returns the details of a specific shared test step.",
     parameters,
     handler: async (args, client) => {

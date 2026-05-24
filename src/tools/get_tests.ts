@@ -10,6 +10,7 @@ const parameters = {
 
 export const getTestsTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_tests",
+    mode: "read",
     description: "Get tests for a test run, optionally filtered by status",
     parameters,
     handler: async ({ run_id, status_id }, client: TestRailClient) => {

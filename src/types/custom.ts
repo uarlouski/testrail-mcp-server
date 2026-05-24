@@ -12,9 +12,12 @@ export interface TestCaseResponse {
     [key: string]: any;
 }
 
+export type ToolMode = 'create' | 'read' | 'update' | 'delete';
+
 export interface ToolDefinition<T extends z.ZodRawShape, Context = any> {
     name: string;
     description: string;
     parameters: T;
+    mode: ToolMode;
     handler: (args: z.infer<z.ZodObject<T>>, context: Context) => Promise<Record<string, any>>;
 }

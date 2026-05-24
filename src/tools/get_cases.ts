@@ -24,6 +24,7 @@ interface CasesResponse {
 
 export const getCasesTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_cases",
+    mode: "read",
     description: "Get all test cases for a project. Filter by section, API params (priority, type), or any field including custom fields via 'where'. Returns case IDs, titles, and any additional requested fields.",
     parameters,
     handler: async ({ project_id, section, filter, where, fields, output_file }, client) => {

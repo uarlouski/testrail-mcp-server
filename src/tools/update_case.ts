@@ -17,6 +17,7 @@ Supports partial updates — only specify the fields you want to change.
 
 export const updateCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "update_case",
+    mode: "update",
     description: description.trim(),
     parameters,
     handler: async ({ case_id, fields }, client) => {

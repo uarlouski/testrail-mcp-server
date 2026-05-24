@@ -9,6 +9,7 @@ const parameters = {
 
 export const getTemplatesTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_templates",
+    mode: "read",
     description: "Get available test case templates for a project. Template IDs determine which fields are available when creating or updating test cases",
     parameters,
     handler: async ({ project_id }, client) => {

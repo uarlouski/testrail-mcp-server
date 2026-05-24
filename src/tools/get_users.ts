@@ -29,6 +29,7 @@ async function getUsersFallbackAllProjects(client: TestRailClient): Promise<any[
 
 export const getUsersTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_users",
+    mode: "read",
     description: "Get active users from TestRail. Resolves active users globally or per-project. If global fetch is forbidden (for non-admin accounts), falls back to merging users across all active projects so users referenced as reviewers or assignees can be resolved.",
     parameters,
     handler: async ({ project_id, fallback_all_projects }, client) => {

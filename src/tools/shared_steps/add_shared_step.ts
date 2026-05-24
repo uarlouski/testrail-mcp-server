@@ -14,6 +14,7 @@ const parameters = {
 
 export const addSharedStepTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "add_shared_step",
+    mode: "create",
     description: "Creates a new set of shared test steps.",
     parameters,
     handler: async (args, client) => {
