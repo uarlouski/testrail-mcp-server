@@ -15,6 +15,7 @@ const parameters = {
 
 export const addResultsForCasesTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "add_results_for_cases",
+    mode: "create",
     description: "Add one or more test results to a test run using case IDs instead of test IDs",
     parameters,
     handler: async ({ run_id, results }, client: TestRailClient) => {

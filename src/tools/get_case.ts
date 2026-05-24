@@ -10,6 +10,7 @@ const parameters = {
 
 export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_case",
+    mode: "read",
     description: "Get detailed information about a test case including its custom fields",
     parameters,
     handler: async ({ case_id }, client) => {

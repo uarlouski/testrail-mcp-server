@@ -7,6 +7,7 @@ const parameters = {};
 
 export const getStatusesTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_statuses",
+    mode: "read",
     description: "Get all available test statuses (e.g. Passed, Failed, Blocked). Returns status IDs and names that can be used with add_result and get_tests",
     parameters,
     handler: async (args: any, client: TestRailClient) => {

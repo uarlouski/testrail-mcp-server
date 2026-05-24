@@ -12,6 +12,7 @@ const parameters = {
 
 export const addRunTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "add_run",
+    mode: "create",
     description: "Create a new test run in TestRail",
     parameters,
     handler: async ({ project_id, ...fields }, client: TestRailClient) => {

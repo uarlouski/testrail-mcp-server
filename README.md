@@ -139,14 +139,18 @@ Once configured, turbo-charge your QA workflow by asking your AI assistant:
 
 ---
 
-## ⚙️ Environment Variables
+## ⚙️ Environment Variables & Security Controls
 
-| Variable | Description | Required |
-|----------|-------------|:--------:|
-| `TESTRAIL_INSTANCE_URL` | Your TestRail instance URL (e.g., `https://example.testrail.io`) | ✅ |
-| `TESTRAIL_USERNAME` | Your TestRail user email address | ✅ |
-| `TESTRAIL_API_KEY` | Your TestRail API key ([Guide](https://support.testrail.com/hc/en-us/articles/7077039051412-Accessing-the-TestRail-API)) | ✅ |
-| `TESTRAIL_ENABLE_SHARED_STEPS` | Set to `true` to enable Shared Steps management tools | |
+| Variable | Description | Required | Default |
+|----------|-------------|:--------:|:-------:|
+| `TESTRAIL_INSTANCE_URL` | Your TestRail instance URL (e.g., `https://example.testrail.io`) | ✅ | |
+| `TESTRAIL_USERNAME` | Your TestRail user email address | ✅ | |
+| `TESTRAIL_API_KEY` | Your TestRail API key ([Guide](https://support.testrail.com/hc/en-us/articles/7077039051412-Accessing-the-TestRail-API)) | ✅ | |
+| `TESTRAIL_ENABLE_SHARED_STEPS` | Set to `true` to enable Shared Steps management tools | | `false` |
+| `TESTRAIL_ALLOW_CREATE_OPERATIONS` | Allow create operations (e.g. adding test cases, test runs, results) | | `true` |
+| `TESTRAIL_ALLOW_READ_OPERATIONS` | Allow read operations (e.g. retrieving projects, test cases, templates) | | `true` |
+| `TESTRAIL_ALLOW_UPDATE_OPERATIONS` | Allow update operations (e.g. updating test cases, shared steps) | | `true` |
+| `TESTRAIL_ALLOW_DELETE_OPERATIONS` | Allow delete operations (e.g. deleting shared steps). Enabled strictly via true. | | `false` |
 
 ---
 

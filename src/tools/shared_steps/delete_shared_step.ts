@@ -13,6 +13,7 @@ By default, this removes the shared step entity but keeps the steps in the test 
 
 export const deleteSharedStepTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "delete_shared_step",
+    mode: "delete",
     description: description.trim(),
     parameters,
     handler: async (args, client) => {

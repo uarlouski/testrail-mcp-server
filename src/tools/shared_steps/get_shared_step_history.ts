@@ -9,6 +9,7 @@ const parameters = {
 
 export const getSharedStepHistoryTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_shared_step_history",
+    mode: "read",
     description: "Returns the change history of a set of shared test steps.",
     parameters,
     handler: async (args, client) => {

@@ -15,6 +15,7 @@ const parameters = {
 
 export const addResultsTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "add_results",
+    mode: "create",
     description: "Add one or more test results to a test run",
     parameters,
     handler: async ({ run_id, results }, client: TestRailClient) => {

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Breaking
+- **Tool Permission Restrictions**: Delete operations are now disabled by default for security. The `delete_shared_step` tool will no longer be registered unless `TESTRAIL_ALLOW_DELETE_OPERATIONS` is explicitly set to `true` in your environment.
+
+### Added
+- Introduce tool permission security controls based on CRUD modes
+    - `TESTRAIL_ALLOW_CREATE_OPERATIONS` (default: `true`)
+    - `TESTRAIL_ALLOW_READ_OPERATIONS` (default: `true`)
+    - `TESTRAIL_ALLOW_UPDATE_OPERATIONS` (default: `true`)
+    - `TESTRAIL_ALLOW_DELETE_OPERATIONS` (default: `false`)
+
 ### Changed
 - Clarify `fields` parameter description in `add_case`, `update_case`, and `update_cases` tools to explicitly state that field entries are merged into the root API request body
 
