@@ -157,6 +157,10 @@ export class TestRailClient {
         return this.paginateAll<Section>(url, 'sections');
     }
 
+    async addSection(projectId: number, data: Record<string, any>): Promise<Section> {
+        return this.post<Section>(`${API_BASE_V2}/add_section/${projectId}`, data);
+    }
+
     async getProject(projectId: number): Promise<Project> {
         return this.get<Project>(`${API_BASE_V2}/get_project/${projectId}`);
     }

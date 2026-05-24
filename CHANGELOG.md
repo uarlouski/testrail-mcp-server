@@ -12,6 +12,7 @@
     - `TESTRAIL_ALLOW_UPDATE_OPERATIONS` (default: `true`)
     - `TESTRAIL_ALLOW_DELETE_OPERATIONS` (default: `false`)
 - Add `get_project` tool to allow AI assistants to retrieve a specific project by ID
+- Add `add_section` tool to create new sections in a project
 
 ### Changed
 - Clarify `fields` parameter description in `add_case`, `update_case`, and `update_cases` tools to explicitly state that field entries are merged into the root API request body

@@ -6,8 +6,8 @@ import { getTemplatesTool } from "./get_templates.js";
 import { updateCaseTool } from "./update_case.js";
 import { updateCasesTool } from "./update_cases.js";
 import { addCaseTool } from "./add_case.js";
-import { getSectionsTool } from "./get_sections.js";
 import { projectsTools } from "./projects/index.js";
+import { sectionsTools } from "./sections/index.js";
 import { addRunTool } from "./add_run.js";
 import { getStatusesTool } from "./get_statuses.js";
 import { getPrioritiesTool } from "./get_priorities.js";
@@ -35,7 +35,7 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
         getCasesTool,
         getCaseFieldsTool,
         getTemplatesTool,
-        getSectionsTool,
+        ...sectionsTools,
         updateCaseTool,
         updateCasesTool,
         addCaseTool,

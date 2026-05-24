@@ -12,18 +12,18 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
         expect(toolsDefault).toBeDefined();
         expect(Array.isArray(toolsDefault)).toBe(true);
-        expect(toolsDefault.length).toBe(19); // 19 default tools
+        expect(toolsDefault.length).toBe(20); // 20 default tools
 
         expect(toolsFalse).toBeDefined();
         expect(Array.isArray(toolsFalse)).toBe(true);
-        expect(toolsFalse.length).toBe(19);
+        expect(toolsFalse.length).toBe(20);
 
         // Check a few default tool names are present
         const names = toolsDefault.map(t => t.name);
         expect(names).toContain('get_projects');
         expect(names).toContain('get_case');
         expect(names).toContain('add_run');
-        
+
         // Ensure shared steps tools are NOT present
         expect(names).not.toContain('get_shared_steps');
         expect(names).not.toContain('add_shared_step');
@@ -34,12 +34,12 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
         expect(tools).toBeDefined();
         expect(Array.isArray(tools)).toBe(true);
-        expect(tools.length).toBe(25); // 19 default + 6 shared steps tools
+        expect(tools.length).toBe(26); // 20 default + 6 shared steps tools
 
         const names = tools.map(t => t.name);
         expect(names).toContain('get_projects');
         expect(names).toContain('get_case');
-        
+
         // Ensure shared steps tools ARE present
         expect(names).toContain('get_shared_steps');
         expect(names).toContain('get_shared_step');
@@ -51,7 +51,7 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
     test('excludes delete tools by default', () => {
         const tools = getToolsToRegister({ enableSharedSteps: true });
-        expect(tools.length).toBe(24); // delete_shared_step is excluded by default
+        expect(tools.length).toBe(25); // delete_shared_step is excluded by default
         const names = tools.map(t => t.name);
         expect(names).not.toContain('delete_shared_step');
     });
@@ -59,17 +59,17 @@ describe('Tools Registry (getToolsToRegister)', () => {
     test('filters tools based on allowCreate, allowRead, allowUpdate permissions', () => {
         // Test allowCreate: false
         const noCreate = getToolsToRegister({ allowCreate: false });
-        expect(noCreate.length).toBe(14); // 19 - 5 create tools
+        expect(noCreate.length).toBe(14); // 20 - 6 create tools
         expect(noCreate.every(t => t.mode !== 'create')).toBe(true);
 
         // Test allowRead: false
         const noRead = getToolsToRegister({ allowRead: false });
-        expect(noRead.length).toBe(7); // 19 - 12 read tools
+        expect(noRead.length).toBe(8); // 20 - 12 read tools
         expect(noRead.every(t => t.mode !== 'read')).toBe(true);
 
         // Test allowUpdate: false
         const noUpdate = getToolsToRegister({ allowUpdate: false });
-        expect(noUpdate.length).toBe(17); // 19 - 2 update tools
+        expect(noUpdate.length).toBe(18); // 20 - 2 update tools
         expect(noUpdate.every(t => t.mode !== 'update')).toBe(true);
     });
 
