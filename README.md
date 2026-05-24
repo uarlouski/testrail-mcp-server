@@ -147,9 +147,8 @@ Once configured, turbo-charge your QA workflow by asking your AI assistant:
 | `TESTRAIL_USERNAME` | Your TestRail user email address | ✅ | |
 | `TESTRAIL_API_KEY` | Your TestRail API key ([Guide](https://support.testrail.com/hc/en-us/articles/7077039051412-Accessing-the-TestRail-API)) | ✅ | |
 | `TESTRAIL_ENABLE_SHARED_STEPS` | Set to `true` to enable Shared Steps management tools | | `false` |
-| `TESTRAIL_ALLOW_CREATE_OPERATIONS` | Allow create operations (e.g. adding test cases, test runs, results) | | `true` |
+| `TESTRAIL_ALLOW_WRITE_OPERATIONS` | Allow write operations (e.g. adding/updating test cases, test runs, sections) | | `true` |
 | `TESTRAIL_ALLOW_READ_OPERATIONS` | Allow read operations (e.g. retrieving projects, test cases, templates) | | `true` |
-| `TESTRAIL_ALLOW_UPDATE_OPERATIONS` | Allow update operations (e.g. updating test cases, shared steps) | | `true` |
 | `TESTRAIL_ALLOW_DELETE_OPERATIONS` | Allow delete operations (e.g. deleting shared steps). Enabled strictly via true. | | `false` |
 
 ---
@@ -168,7 +167,7 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 | `get_projects` | List all available active and completed projects in your instance. |
 | `get_project` | Retrieve specific details for a single project by ID. |
 | `get_sections` | Navigate the precise folder/section hierarchy of any test suite. |
-| `add_section` | Create a new section within a project. |
+| `mutate_section` | Create a new section or update an existing section in TestRail. |
 | `get_users` | Retrieve active users. Handles per-project filtering and automatic fallback polling for non-admin accounts. |
 
 ### 📋 Test Case Management

@@ -17,7 +17,7 @@ More efficient than calling update_case multiple times.
 
 export const updateCasesTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "update_cases",
-    mode: "update",
+    mode: "write",
     description: description.trim(),
     parameters,
     handler: async ({ case_ids, fields }, client) => {

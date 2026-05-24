@@ -12,7 +12,7 @@ export interface TestCaseResponse {
     [key: string]: any;
 }
 
-export type ToolMode = 'create' | 'read' | 'update' | 'delete';
+export type ToolMode = 'write' | 'read' | 'delete';
 
 export interface ToolDefinition<T extends z.ZodRawShape, Context = any> {
     name: string;
