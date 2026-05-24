@@ -1,7 +1,7 @@
 import { jest, describe, test, expect, beforeEach } from '@jest/globals';
-import { getSectionsTool } from '../../src/tools/get_sections.js';
-import { TestRailClient } from '../../src/client/testrail.js';
-import { Section } from '../../src/types/testrail.js';
+import { getSectionsTool } from '../../../src/tools/sections/get_sections.js';
+import { TestRailClient } from '../../../src/client/testrail.js';
+import { Section } from '../../../src/types/testrail.js';
 import fs from 'fs';
 
 describe('get_sections tool', () => {

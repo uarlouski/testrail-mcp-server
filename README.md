@@ -168,6 +168,7 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 | `get_projects` | List all available active and completed projects in your instance. |
 | `get_project` | Retrieve specific details for a single project by ID. |
 | `get_sections` | Navigate the precise folder/section hierarchy of any test suite. |
+| `add_section` | Create a new section within a project. |
 | `get_users` | Retrieve active users. Handles per-project filtering and automatic fallback polling for non-admin accounts. |
 
 ### 📋 Test Case Management
