@@ -1,7 +1,7 @@
 import { jest, describe, test, expect, beforeEach } from '@jest/globals';
-import { getProjectsTool } from '../../src/tools/get_projects.js';
-import { TestRailClient } from '../../src/client/testrail.js';
-import { Project } from '../../src/types/testrail.js';
+import { getProjectsTool } from '../../../src/tools/projects/get_projects.js';
+import { TestRailClient } from '../../../src/client/testrail.js';
+import { Project } from '../../../src/types/testrail.js';
 
 describe('get_projects tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;

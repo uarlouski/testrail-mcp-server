@@ -157,6 +157,10 @@ export class TestRailClient {
         return this.paginateAll<Section>(url, 'sections');
     }
 
+    async getProject(projectId: number): Promise<Project> {
+        return this.get<Project>(`${API_BASE_V2}/get_project/${projectId}`);
+    }
+
     async getProjects(): Promise<Project[]> {
         if (!this.projectsPromise) {
             this.projectsPromise = this.get<{ projects: Project[] }>(`${API_BASE_V2}/get_projects`)

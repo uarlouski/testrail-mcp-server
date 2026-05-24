@@ -7,7 +7,7 @@ import { updateCaseTool } from "./update_case.js";
 import { updateCasesTool } from "./update_cases.js";
 import { addCaseTool } from "./add_case.js";
 import { getSectionsTool } from "./get_sections.js";
-import { getProjectsTool } from "./get_projects.js";
+import { projectsTools } from "./projects/index.js";
 import { addRunTool } from "./add_run.js";
 import { getStatusesTool } from "./get_statuses.js";
 import { getPrioritiesTool } from "./get_priorities.js";
@@ -17,12 +17,8 @@ import { addAttachmentToRunTool } from "./add_attachment_to_run.js";
 import { addResultsForCasesTool } from "./add_results_for_cases.js";
 import { getLabelsTool } from "./get_labels.js";
 import { getUsersTool } from "./get_users.js";
-import { getSharedStepsTool } from "./shared_steps/get_shared_steps.js";
-import { getSharedStepTool } from "./shared_steps/get_shared_step.js";
-import { getSharedStepHistoryTool } from "./shared_steps/get_shared_step_history.js";
-import { addSharedStepTool } from "./shared_steps/add_shared_step.js";
-import { updateSharedStepTool } from "./shared_steps/update_shared_step.js";
-import { deleteSharedStepTool } from "./shared_steps/delete_shared_step.js";
+import { sharedStepsTools } from "./shared_steps/index.js";
+
 
 export interface ToolRegistrationConfig {
     enableSharedSteps?: boolean;
@@ -34,7 +30,7 @@ export interface ToolRegistrationConfig {
 
 export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefinition<any, any>[] {
     const tools: ToolDefinition<any, any>[] = [
-        getProjectsTool,
+        ...projectsTools,
         getCaseTool,
         getCasesTool,
         getCaseFieldsTool,
@@ -55,14 +51,7 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
     ];
 
     if (config.enableSharedSteps) {
-        tools.push(
-            getSharedStepsTool as any,
-            getSharedStepTool as any,
-            getSharedStepHistoryTool as any,
-            addSharedStepTool as any,
-            updateSharedStepTool as any,
-            deleteSharedStepTool as any
-        );
+        tools.push(...sharedStepsTools);
     }
 
     const allowCreate = config.allowCreate !== false;

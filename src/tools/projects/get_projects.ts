@@ -1,6 +1,6 @@
-import { TestRailClient } from "../client/testrail.js";
-import { ToolDefinition } from "../types/custom.js";
-import { ProjectSchema } from "../types/testrail.js";
+import { TestRailClient } from "../../client/testrail.js";
+import { ToolDefinition } from "../../types/custom.js";
+import { ProjectSchema } from "../../types/testrail.js";
 
 const parameters = {};
 
