@@ -14,7 +14,7 @@ const parameters = {
 
 export const addAttachmentToRunTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "add_attachment_to_run",
-    mode: "create",
+    mode: "write",
     description: "Add an attachment to a test run in TestRail. If the file_path points to a directory, it will be automatically zipped before uploading. Maximum upload size is 256MB.",
     parameters,
     handler: async ({ run_id, file_path }, client: TestRailClient) => {

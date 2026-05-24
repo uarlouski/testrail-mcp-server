@@ -56,21 +56,16 @@ describe('Tools Registry (getToolsToRegister)', () => {
         expect(names).not.toContain('delete_shared_step');
     });
 
-    test('filters tools based on allowCreate, allowRead, allowUpdate permissions', () => {
-        // Test allowCreate: false
-        const noCreate = getToolsToRegister({ allowCreate: false });
-        expect(noCreate.length).toBe(14); // 20 - 6 create tools
-        expect(noCreate.every(t => t.mode !== 'create')).toBe(true);
+    test('filters tools based on allowWrite and allowRead permissions', () => {
+        // Test allowWrite: false
+        const noWrite = getToolsToRegister({ allowWrite: false });
+        expect(noWrite.length).toBe(12); // 20 - 8 write tools
+        expect(noWrite.every(t => t.mode !== 'write')).toBe(true);
 
         // Test allowRead: false
         const noRead = getToolsToRegister({ allowRead: false });
         expect(noRead.length).toBe(8); // 20 - 12 read tools
         expect(noRead.every(t => t.mode !== 'read')).toBe(true);
-
-        // Test allowUpdate: false
-        const noUpdate = getToolsToRegister({ allowUpdate: false });
-        expect(noUpdate.length).toBe(18); // 20 - 2 update tools
-        expect(noUpdate.every(t => t.mode !== 'update')).toBe(true);
     });
 
     test('all returned tools have valid structures', () => {

@@ -13,9 +13,8 @@ const EnvSchema = z.object({
     TESTRAIL_USERNAME: z.email('Must be a valid email address'),
     TESTRAIL_API_KEY: z.string().min(1, 'API key is required'),
     TESTRAIL_ENABLE_SHARED_STEPS: z.string().optional().transform(val => val === 'true'),
-    TESTRAIL_ALLOW_CREATE_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
+    TESTRAIL_ALLOW_WRITE_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
     TESTRAIL_ALLOW_READ_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
-    TESTRAIL_ALLOW_UPDATE_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
     TESTRAIL_ALLOW_DELETE_OPERATIONS: z.string().optional().transform(val => val === 'true')
 });
 
@@ -33,9 +32,8 @@ const {
     TESTRAIL_USERNAME,
     TESTRAIL_API_KEY,
     TESTRAIL_ENABLE_SHARED_STEPS,
-    TESTRAIL_ALLOW_CREATE_OPERATIONS,
+    TESTRAIL_ALLOW_WRITE_OPERATIONS,
     TESTRAIL_ALLOW_READ_OPERATIONS,
-    TESTRAIL_ALLOW_UPDATE_OPERATIONS,
     TESTRAIL_ALLOW_DELETE_OPERATIONS
 } = parseResult.data;
 
@@ -48,9 +46,8 @@ const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TEST
 
 const tools = getToolsToRegister({
     enableSharedSteps: TESTRAIL_ENABLE_SHARED_STEPS,
-    allowCreate: TESTRAIL_ALLOW_CREATE_OPERATIONS,
+    allowWrite: TESTRAIL_ALLOW_WRITE_OPERATIONS,
     allowRead: TESTRAIL_ALLOW_READ_OPERATIONS,
-    allowUpdate: TESTRAIL_ALLOW_UPDATE_OPERATIONS,
     allowDelete: TESTRAIL_ALLOW_DELETE_OPERATIONS
 });
 

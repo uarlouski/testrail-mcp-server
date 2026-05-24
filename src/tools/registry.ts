@@ -22,9 +22,8 @@ import { sharedStepsTools } from "./shared_steps/index.js";
 
 export interface ToolRegistrationConfig {
     enableSharedSteps?: boolean;
-    allowCreate?: boolean;
+    allowWrite?: boolean;
     allowRead?: boolean;
-    allowUpdate?: boolean;
     allowDelete?: boolean;
 }
 
@@ -54,15 +53,13 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
         tools.push(...sharedStepsTools);
     }
 
-    const allowCreate = config.allowCreate !== false;
+    const allowWrite = config.allowWrite !== false;
     const allowRead = config.allowRead !== false;
-    const allowUpdate = config.allowUpdate !== false;
     const allowDelete = config.allowDelete === true;
 
     return tools.filter(tool => {
-        if (tool.mode === 'create') return allowCreate;
+        if (tool.mode === 'write') return allowWrite;
         if (tool.mode === 'read') return allowRead;
-        if (tool.mode === 'update') return allowUpdate;
         return allowDelete;
     });
 }
