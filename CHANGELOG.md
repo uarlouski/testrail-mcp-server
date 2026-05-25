@@ -4,6 +4,7 @@
 
 ### Breaking
 - **Tool Permission Restrictions**: Delete operations are now disabled by default for security. The `delete_shared_step` tool will no longer be registered unless `TESTRAIL_ALLOW_DELETE_OPERATIONS` is explicitly set to `true` in your environment.
+- **Tool Replaced**: The `add_run` tool has been completely removed and replaced by `mutate_run`. Clients must now use `mutate_run` with a `payload` object specifying `action: "create"`.
 
 ### Added
 - Introduce tool permission security controls (WRITE, READ, DELETE)
@@ -12,6 +13,7 @@
     - `TESTRAIL_ALLOW_DELETE_OPERATIONS` (default: `false`)
 - Add `get_project` tool to allow AI assistants to retrieve a specific project by ID
 - Add `mutate_section` tool to create or update sections in a project
+- Add `mutate_run` tool to create or update runs in a project
 
 ### Changed
 - Clarify `fields` parameter description in `add_case`, `update_case`, and `update_cases` tools to explicitly state that field entries are merged into the root API request body
