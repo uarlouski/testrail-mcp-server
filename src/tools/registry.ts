@@ -8,7 +8,7 @@ import { updateCasesTool } from "./update_cases.js";
 import { addCaseTool } from "./add_case.js";
 import { projectsTools } from "./projects/index.js";
 import { sectionsTools } from "./sections/index.js";
-import { addRunTool } from "./add_run.js";
+import { runsTools } from "./runs/index.js";
 import { getStatusesTool } from "./get_statuses.js";
 import { getPrioritiesTool } from "./get_priorities.js";
 import { getTestsTool } from "./get_tests.js";
@@ -38,7 +38,7 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
         updateCaseTool,
         updateCasesTool,
         addCaseTool,
-        addRunTool,
+        ...runsTools,
         getStatusesTool,
         getPrioritiesTool,
         getTestsTool,

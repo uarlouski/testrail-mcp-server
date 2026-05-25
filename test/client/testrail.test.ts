@@ -1041,5 +1041,80 @@ describe('TestRailClient', () => {
             expect.any(Object)
         );
     });
+
+    test('updateRun posts fields to update run', async () => {
+        const mockRun = { id: 1, name: 'Updated Run' };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockRun
+        });
+
+        const result = await client.updateRun(1, { name: 'Updated Run' });
+
+        expect(result).toEqual(mockRun);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/update_run/1',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ name: 'Updated Run' })
+            })
+        );
+    });
+
+    test('addSection posts section details', async () => {
+        const mockSection = { id: 1, name: 'New Section' };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockSection
+        });
+
+        const result = await client.addSection(10, { name: 'New Section' });
+
+        expect(result).toEqual(mockSection);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/add_section/10',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ name: 'New Section' })
+            })
+        );
+    });
+
+    test('updateSection posts updated section details', async () => {
+        const mockSection = { id: 1, name: 'Updated Section' };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockSection
+        });
+
+        const result = await client.updateSection(1, { name: 'Updated Section' });
+
+        expect(result).toEqual(mockSection);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/update_section/1',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ name: 'Updated Section' })
+            })
+        );
+    });
+
+    test('getProject retrieves project details', async () => {
+        const mockProject = { id: 10, name: 'Project X' };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockProject
+        });
+
+        const result = await client.getProject(10);
+
+        expect(result).toEqual(mockProject);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_project/10',
+            expect.objectContaining({
+                method: 'GET'
+            })
+        );
+    });
 });
 

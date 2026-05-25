@@ -22,7 +22,7 @@ describe('Tools Registry (getToolsToRegister)', () => {
         const names = toolsDefault.map(t => t.name);
         expect(names).toContain('get_projects');
         expect(names).toContain('get_case');
-        expect(names).toContain('add_run');
+        expect(names).toContain('mutate_run');
 
         // Ensure shared steps tools are NOT present
         expect(names).not.toContain('get_shared_steps');

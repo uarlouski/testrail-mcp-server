@@ -152,6 +152,10 @@ export class TestRailClient {
         return this.post<Run>(`${API_BASE_V2}/add_run/${projectId}`, fields);
     }
 
+    async updateRun(runId: number, fields: Record<string, any>): Promise<Run> {
+        return this.post<Run>(`${API_BASE_V2}/update_run/${runId}`, fields);
+    }
+
     async getSections(projectId: number): Promise<Section[]> {
         const url = `${API_BASE_V2}/get_sections/${projectId}`;
         return this.paginateAll<Section>(url, 'sections');

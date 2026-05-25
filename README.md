@@ -182,7 +182,7 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 ### ▶️ Test Execution & Tracking
 | Tool | Functionality |
 |------|-------------|
-| `add_run` | Generate a new, focused test run directly in TestRail. |
+| `mutate_run` | Create a new test run or update an existing one in TestRail. |
 | `get_tests` | Retrieve individual tests for a specific test run, with optional status filtering. |
 | `add_results` | Submit test results to a test run using the specific `test_id`. |
 | `add_results_for_cases` | Submits results to a run mapping directly to `case_id`s, streamlining automation workflows. |
