@@ -54,6 +54,16 @@ export const CaseSchema = z.object({
 
 export type Case = z.infer<typeof CaseSchema>;
 
+export const SuiteSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    description: z.string().nullable().optional(),
+    project_id: z.number(),
+    url: z.string(),
+}).loose();
+
+export type Suite = z.infer<typeof SuiteSchema>;
+
 export const SectionSchema = z.object({
     id: z.number(),
     name: z.string(),

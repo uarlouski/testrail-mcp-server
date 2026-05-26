@@ -12,11 +12,11 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
         expect(toolsDefault).toBeDefined();
         expect(Array.isArray(toolsDefault)).toBe(true);
-        expect(toolsDefault.length).toBe(20); // 20 default tools
+        expect(toolsDefault.length).toBe(21); // 21 default tools
 
         expect(toolsFalse).toBeDefined();
         expect(Array.isArray(toolsFalse)).toBe(true);
-        expect(toolsFalse.length).toBe(20);
+        expect(toolsFalse.length).toBe(21);
 
         // Check a few default tool names are present
         const names = toolsDefault.map(t => t.name);
@@ -34,7 +34,7 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
         expect(tools).toBeDefined();
         expect(Array.isArray(tools)).toBe(true);
-        expect(tools.length).toBe(26); // 20 default + 6 shared steps tools
+        expect(tools.length).toBe(27); // 21 default + 6 shared steps tools
 
         const names = tools.map(t => t.name);
         expect(names).toContain('get_projects');
@@ -51,7 +51,7 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
     test('excludes delete tools by default', () => {
         const tools = getToolsToRegister({ enableSharedSteps: true });
-        expect(tools.length).toBe(25); // delete_shared_step is excluded by default
+        expect(tools.length).toBe(26); // delete_shared_step is excluded by default
         const names = tools.map(t => t.name);
         expect(names).not.toContain('delete_shared_step');
     });
@@ -59,12 +59,12 @@ describe('Tools Registry (getToolsToRegister)', () => {
     test('filters tools based on allowWrite and allowRead permissions', () => {
         // Test allowWrite: false
         const noWrite = getToolsToRegister({ allowWrite: false });
-        expect(noWrite.length).toBe(12); // 20 - 8 write tools
+        expect(noWrite.length).toBe(12); // 21 - 9 write tools
         expect(noWrite.every(t => t.mode !== 'write')).toBe(true);
 
         // Test allowRead: false
         const noRead = getToolsToRegister({ allowRead: false });
-        expect(noRead.length).toBe(8); // 20 - 12 read tools
+        expect(noRead.length).toBe(9); // 21 - 12 read tools
         expect(noRead.every(t => t.mode !== 'read')).toBe(true);
     });
 
