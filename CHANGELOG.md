@@ -12,6 +12,7 @@
     - `TESTRAIL_ALLOW_READ_OPERATIONS` (default: `true`)
     - `TESTRAIL_ALLOW_DELETE_OPERATIONS` (default: `false`)
 - Add `get_project` tool to allow AI assistants to retrieve a specific project by ID
+- Add `mutate_suite` tool to create or update test suites in a project
 - Add `mutate_section` tool to create or update sections in a project
 - Add `mutate_run` tool to create or update runs in a project
 

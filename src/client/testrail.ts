@@ -1,4 +1,4 @@
-import { Case, Section, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label, SharedStep, SharedStepHistory, User } from "../types/testrail.js";
+import { Case, Section, Suite, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label, SharedStep, SharedStepHistory, User } from "../types/testrail.js";
 import { isActive } from "../utils/sanitizer.js";
 
 import * as fs from "fs";
@@ -167,6 +167,14 @@ export class TestRailClient {
 
     async updateSection(sectionId: number, data: Record<string, any>): Promise<Section> {
         return this.post<Section>(`${API_BASE_V2}/update_section/${sectionId}`, data);
+    }
+
+    async addSuite(projectId: number, data: Record<string, any>): Promise<Suite> {
+        return this.post<Suite>(`${API_BASE_V2}/add_suite/${projectId}`, data);
+    }
+
+    async updateSuite(suiteId: number, data: Record<string, any>): Promise<Suite> {
+        return this.post<Suite>(`${API_BASE_V2}/update_suite/${suiteId}`, data);
     }
 
     async getProject(projectId: number): Promise<Project> {

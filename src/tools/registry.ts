@@ -7,6 +7,7 @@ import { updateCaseTool } from "./update_case.js";
 import { updateCasesTool } from "./update_cases.js";
 import { addCaseTool } from "./add_case.js";
 import { projectsTools } from "./projects/index.js";
+import { suitesTools } from "./suites/index.js";
 import { sectionsTools } from "./sections/index.js";
 import { runsTools } from "./runs/index.js";
 import { getStatusesTool } from "./get_statuses.js";
@@ -30,6 +31,7 @@ export interface ToolRegistrationConfig {
 export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefinition<any, any>[] {
     const tools: ToolDefinition<any, any>[] = [
         ...projectsTools,
+        ...suitesTools,
         getCaseTool,
         getCasesTool,
         getCaseFieldsTool,
