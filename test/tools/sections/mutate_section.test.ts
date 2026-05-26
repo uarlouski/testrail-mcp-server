@@ -97,4 +97,14 @@ describe('mutate_section tool', () => {
             }, mockClient)
         ).rejects.toThrow('TestRail API Down');
     });
+
+    test('handler throws error on unsupported action', async () => {
+        await expect(
+            mutateSectionTool.handler({
+                payload: {
+                    action: 'delete' as any,
+                }
+            }, mockClient)
+        ).rejects.toThrow('Unsupported mutation action: delete');
+    });
 });
