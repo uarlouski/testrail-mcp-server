@@ -44,10 +44,13 @@ export const mutateRunTool: ToolDefinition<typeof parameters, TestRailClient> = 
             
             const run = await client.addRun(project_id, params);
             return RunSchema.parse(run);
-        } else {
+        } else if (payload.action === "update") {
             const { run_id, action, ...data } = payload;
             const run = await client.updateRun(run_id, data);
             return RunSchema.parse(run);
+        } else {
+            const unknownAction = (payload as any).action;
+            throw new Error(`Unsupported mutation action: ${unknownAction}`);
         }
     }
 };

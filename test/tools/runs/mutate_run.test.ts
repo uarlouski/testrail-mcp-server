@@ -133,4 +133,14 @@ describe('mutate_run tool', () => {
             }, mockClient)
         ).rejects.toThrow('TestRail API Down');
     });
+
+    test('handler throws error on unsupported action', async () => {
+        await expect(
+            mutateRunTool.handler({
+                payload: {
+                    action: 'delete' as any,
+                }
+            }, mockClient)
+        ).rejects.toThrow('Unsupported mutation action: delete');
+    });
 });

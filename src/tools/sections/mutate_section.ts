@@ -37,10 +37,13 @@ export const mutateSectionTool: ToolDefinition<typeof parameters, TestRailClient
             const { project_id, action, ...data } = payload;
             const section = await client.addSection(project_id, data);
             return SectionSchema.parse(section);
-        } else {
+        } else if (payload.action === "update") {
             const { section_id, action, ...data } = payload;
             const section = await client.updateSection(section_id, data);
             return SectionSchema.parse(section);
+        } else {
+            const unknownAction = (payload as any).action;
+            throw new Error(`Unsupported mutation action: ${unknownAction}`);
         }
     }
 };
