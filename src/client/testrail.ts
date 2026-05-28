@@ -252,6 +252,10 @@ export class TestRailClient {
         return this.post<SharedStep>(`${API_BASE_V2}/update_shared_step/${sharedStepId}`, data);
     }
 
+    async deleteCase(caseId: number): Promise<void> {
+        return this._executeRequest<void>('POST', `${API_BASE_V2}/delete_case/${caseId}`, this.headers, JSON.stringify({}), false);
+    }
+
     async deleteSharedStep(sharedStepId: number): Promise<void> {
         return this._executeRequest<void>('POST', `${API_BASE_V2}/delete_shared_step/${sharedStepId}`, this.headers, JSON.stringify({}), false);
     }

@@ -149,7 +149,7 @@ Once configured, turbo-charge your QA workflow by asking your AI assistant:
 | `TESTRAIL_ENABLE_SHARED_STEPS` | Set to `true` to enable Shared Steps management tools | | `false` |
 | `TESTRAIL_ALLOW_WRITE_OPERATIONS` | Allow write operations (e.g. adding/updating test cases, test runs, sections) | | `true` |
 | `TESTRAIL_ALLOW_READ_OPERATIONS` | Allow read operations (e.g. retrieving projects, test cases, templates) | | `true` |
-| `TESTRAIL_ALLOW_DELETE_OPERATIONS` | Allow delete operations (e.g. deleting shared steps). Enabled strictly via true. | | `false` |
+| `TESTRAIL_ALLOW_DELETE_OPERATIONS` | Allow delete operations (e.g. deleting cases or shared steps). Enabled strictly via `true`. | | `false` |
 
 ---
 
@@ -197,7 +197,11 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 | `get_shared_step_history` | View the complete audit trail and version history of a shared step set. |
 | `add_shared_step` | Create a new reusable set of shared test steps. |
 | `update_shared_step` | Modify an existing shared step set (changes propagate to all linked test cases). |
-| `delete_shared_step` | Securely delete a shared step entity. |
+
+### 🗑️ Deletion
+| Tool | Functionality |
+|------|-------------|
+| `delete_entity` | Deletes a specified TestRail entity (supports `"case"` or `"shared_step"`) by its ID. Requires `TESTRAIL_ALLOW_DELETE_OPERATIONS` to be set to `true` in your environment. |
 
 ### 🧠 System Metadata
 | Tool | Functionality |

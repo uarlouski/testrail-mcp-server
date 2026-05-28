@@ -46,14 +46,14 @@ describe('Tools Registry (getToolsToRegister)', () => {
         expect(names).toContain('get_shared_step_history');
         expect(names).toContain('add_shared_step');
         expect(names).toContain('update_shared_step');
-        expect(names).toContain('delete_shared_step');
+        expect(names).toContain('delete_entity');
     });
 
     test('excludes delete tools by default', () => {
         const tools = getToolsToRegister({ enableSharedSteps: true });
-        expect(tools.length).toBe(26); // delete_shared_step is excluded by default
+        expect(tools.length).toBe(26); // delete_entity is excluded by default
         const names = tools.map(t => t.name);
-        expect(names).not.toContain('delete_shared_step');
+        expect(names).not.toContain('delete_entity');
     });
 
     test('filters tools based on allowWrite and allowRead permissions', () => {
