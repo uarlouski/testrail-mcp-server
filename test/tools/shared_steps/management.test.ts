@@ -2,7 +2,6 @@ import { jest } from '@jest/globals';
 import { getSharedStepHistoryTool } from '../../../src/tools/shared_steps/get_shared_step_history.js';
 import { addSharedStepTool } from '../../../src/tools/shared_steps/add_shared_step.js';
 import { updateSharedStepTool } from '../../../src/tools/shared_steps/update_shared_step.js';
-import { deleteSharedStepTool } from '../../../src/tools/shared_steps/delete_shared_step.js';
 import { TestRailClient } from '../../../src/client/testrail.js';
 
 describe('Shared Step Management Tools', () => {
@@ -66,14 +65,6 @@ describe('Shared Step Management Tools', () => {
                 ]
             });
             expect(result).toEqual({ shared_step: mockStep });
-        });
-    });
-
-    describe('delete_shared_step', () => {
-        test('calls client.deleteSharedStep', async () => {
-            const result = await deleteSharedStepTool.handler({ shared_step_id: 1 }, mockClient);
-            expect(mockClient.deleteSharedStep).toHaveBeenCalledWith(1);
-            expect(result.message).toContain('deleted successfully');
         });
     });
 });

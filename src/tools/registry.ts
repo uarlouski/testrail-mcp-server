@@ -19,6 +19,7 @@ import { addResultsForCasesTool } from "./add_results_for_cases.js";
 import { getLabelsTool } from "./get_labels.js";
 import { getUsersTool } from "./get_users.js";
 import { sharedStepsTools } from "./shared_steps/index.js";
+import { deleteEntityTool } from "./delete_entity.js";
 
 
 export interface ToolRegistrationConfig {
@@ -49,6 +50,7 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
         addAttachmentToRunTool,
         getLabelsTool,
         getUsersTool,
+        deleteEntityTool,
     ];
 
     if (config.enableSharedSteps) {

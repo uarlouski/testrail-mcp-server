@@ -3,8 +3,9 @@
 ## [Unreleased]
 
 ### Breaking
-- **Tool Permission Restrictions**: Delete operations are now disabled by default for security. The `delete_shared_step` tool will no longer be registered unless `TESTRAIL_ALLOW_DELETE_OPERATIONS` is explicitly set to `true` in your environment.
+- **Tool Permission Restrictions**: Delete operations are now disabled by default for security. The `delete_entity` tool will no longer be registered unless `TESTRAIL_ALLOW_DELETE_OPERATIONS` is explicitly set to `true` in your environment.
 - **Tool Replaced**: The `add_run` tool has been completely removed and replaced by `mutate_run`. Clients must now use `mutate_run` with a `payload` object specifying `action: "create"`.
+- **Unified Deletion Tool**: The specific `delete_shared_step` tool has been **removed** and replaced by the unified `delete_entity` tool. AI assistants and clients must now use `delete_entity` with `entity_type: "shared_step"`.
 
 ### Added
 - Introduce tool permission security controls (WRITE, READ, DELETE)
@@ -15,6 +16,7 @@
 - Add `mutate_suite` tool to create or update test suites in a project
 - Add `mutate_section` tool to create or update sections in a project
 - Add `mutate_run` tool to create or update runs in a project
+- Add unified `delete_entity` tool to delete supported TestRail entities (`case` or `shared_step`) by ID
 
 ### Changed
 - Clarify `fields` parameter description in `add_case`, `update_case`, and `update_cases` tools to explicitly state that field entries are merged into the root API request body
