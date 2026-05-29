@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
-import { SharedStepSchema } from "../../types/testrail.js";
+import { SharedStepSchema } from "./types.js";
 
 const parameters = {
     project_id: z.number().describe("The ID of the project where the shared step will be created"),

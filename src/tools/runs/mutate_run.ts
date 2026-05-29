@@ -1,25 +1,7 @@
 import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
-import { RunSchema } from "../../types/testrail.js";
-
-const BaseRunFields = z.object({
-    name: z.string().optional().describe("The name of the test run"),
-    description: z.string().optional().describe("The description of the test run"),
-    case_ids: z.array(z.number()).optional().describe("An array of case IDs for the custom case selection"),
-});
-
-const CreateRunSchema = BaseRunFields.extend({
-    action: z.literal("create").describe("The operation to perform: create a new test run"),
-    project_id: z.number().describe("The ID of the project the test run should be added to"),
-    suite_id: z.number().optional().describe("The ID of the test suite for the test run"),
-    case_ids: z.array(z.number()).optional().describe("Array of case IDs to include in the run. If provided, the run will only include these cases; otherwise, all cases will be included."),
-});
-
-const UpdateRunSchema = BaseRunFields.extend({
-    action: z.literal("update").describe("The operation to perform: update an existing test run"),
-    run_id: z.number().describe("The ID of the test run to update"),
-});
+import { RunSchema, CreateRunSchema, UpdateRunSchema } from "./types.js";
 
 const parameters = {
     payload: z.discriminatedUnion("action", [

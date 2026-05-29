@@ -1,22 +1,7 @@
 import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
-import { SuiteSchema } from "../../types/testrail.js";
-
-const BaseSuiteFields = z.object({
-    name: z.string().describe("The name of the test suite"),
-    description: z.string().optional().describe("The description of the test suite"),
-});
-
-const CreateSuiteSchema = BaseSuiteFields.extend({
-    action: z.literal("create").describe("The operation to perform: create a new test suite"),
-    project_id: z.number().describe("The ID of the project the test suite should be added to"),
-});
-
-const UpdateSuiteSchema = BaseSuiteFields.partial().extend({
-    action: z.literal("update").describe("The operation to perform: update an existing test suite"),
-    suite_id: z.number().describe("The ID of the test suite to update"),
-});
+import { SuiteSchema, CreateSuiteSchema, UpdateSuiteSchema } from "./types.js";
 
 const parameters = {
     payload: z.discriminatedUnion("action", [

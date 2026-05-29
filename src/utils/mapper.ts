@@ -1,4 +1,4 @@
-import { Case, CaseField } from "../types/testrail.js";
+import { Case, CaseField } from "../tools/cases/types.js";
 import { sanitizeValue } from "./sanitizer.js";
 
 /**

@@ -1,5 +1,5 @@
-import { CaseField } from "../types/testrail.js";
-import { SYSTEM_FIELDS, mapToFieldSchema } from "../tools/get_case_fields.js";
+import { CaseField } from "../tools/cases/types.js";
+import { SYSTEM_FIELDS, mapToFieldSchema } from "../tools/cases/get_case_fields.js";
 import { isActive } from "./sanitizer.js";
 
 /**

@@ -1,7 +1,7 @@
 import { jest, describe, test, expect, beforeEach } from '@jest/globals';
 import { querySuiteTool } from '../../../src/tools/suites/query_suite.js';
 import { TestRailClient } from '../../../src/client/testrail.js';
-import { Suite } from '../../../src/types/testrail.js';
+import { Suite } from '../../../src/tools/suites/types.js';
 
 describe('query_suite tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;

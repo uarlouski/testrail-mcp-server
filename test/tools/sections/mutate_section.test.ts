@@ -1,7 +1,7 @@
 import { jest, describe, test, expect, beforeEach } from '@jest/globals';
 import { mutateSectionTool } from '../../../src/tools/sections/mutate_section.js';
 import { TestRailClient } from '../../../src/client/testrail.js';
-import { Section } from '../../../src/types/testrail.js';
+import { Section } from '../../../src/tools/sections/types.js';
 
 describe('mutate_section tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;

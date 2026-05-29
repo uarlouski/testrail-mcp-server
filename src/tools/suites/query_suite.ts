@@ -1,18 +1,8 @@
 import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
-import { SuiteSchema } from "../../types/testrail.js";
+import { SuiteSchema, GetOneSuiteSchema, GetManySuitesSchema } from "./types.js";
 import { handleQuery } from "../../utils/query_handler.js";
-
-const GetOneSuiteSchema = z.object({
-    action: z.literal("one").describe("Retrieve a single test suite by ID"),
-    suite_id: z.number().int().describe("The ID of the test suite"),
-});
-
-const GetManySuitesSchema = z.object({
-    action: z.literal("many").describe("Retrieve all test suites for a project"),
-    project_id: z.number().int().describe("The ID of the project"),
-});
 
 const parameters = {
     payload: z.discriminatedUnion("action", [

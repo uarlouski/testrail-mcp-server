@@ -1,4 +1,11 @@
-import { Case, Section, Suite, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label, SharedStep, SharedStepHistory, User, ConfigurationGroup } from "../types/testrail.js";
+import { Priority, CaseType, Template, Status, Test, Label, User, ConfigurationGroup } from "../tools/commons/types.js";
+import { Project } from "../tools/projects/types.js";
+import { Run, Attachment } from "../tools/runs/types.js";
+import { Section } from "../tools/sections/types.js";
+import { Suite } from "../tools/suites/types.js";
+import { SharedStep, SharedStepHistory } from "../tools/shared_steps/types.js";
+import { Case, CaseField } from "../tools/cases/types.js";
+import { Result } from "../tools/results/types.js";
 import { isActive } from "../utils/sanitizer.js";
 
 import * as fs from "fs";

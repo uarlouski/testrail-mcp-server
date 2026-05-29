@@ -2,7 +2,7 @@ import { z } from "zod";
 import fs from "fs";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
-import { SectionSchema } from "../../types/testrail.js";
+import { SectionSchema } from "./types.js";
 
 const parameters = {
     project_id: z.number().describe("The ID of the project. Use get_projects to find available projects"),
