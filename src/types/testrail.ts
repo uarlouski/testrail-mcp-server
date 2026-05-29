@@ -194,3 +194,21 @@ export const UserSchema = z.object({
 
 export type User = z.infer<typeof UserSchema>;
 
+export const ConfigurationSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    group_id: z.number(),
+});
+
+export type Configuration = z.infer<typeof ConfigurationSchema>;
+
+export const ConfigurationGroupSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    project_id: z.number(),
+    configs: z.array(ConfigurationSchema),
+});
+
+export type ConfigurationGroup = z.infer<typeof ConfigurationGroupSchema>;
+
+

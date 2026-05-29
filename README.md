@@ -164,8 +164,8 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 ### 🔭 Discovery & Navigation
 | Tool | Functionality |
 |------|-------------|
-| `get_projects` | List all available active and completed projects in your instance. |
-| `get_project` | Retrieve specific details for a single project by ID. |
+| `query_project` | Retrieve a single project (`action: "one"`) or all active projects (`action: "many"`). |
+| `query_suite` | Retrieve a single test suite (`action: "one"`) or all test suites for a project (`action: "many"`). |
 | `get_sections` | Navigate the precise folder/section hierarchy of any test suite. |
 | `mutate_suite` | Create a new test suite or update an existing one in TestRail. |
 | `mutate_section` | Create a new section or update an existing section in TestRail. |
@@ -183,8 +183,10 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 ### ▶️ Test Execution & Tracking
 | Tool | Functionality |
 |------|-------------|
+| `query_run` | Retrieve a single test run (`action: "one"`) or all test runs for a project (`action: "many"`, supporting filters). |
 | `mutate_run` | Create a new test run or update an existing one in TestRail. |
 | `get_tests` | Retrieve individual tests for a specific test run, with optional status filtering. |
+| `get_results` | Retrieve paginated results for a specific test ID. |
 | `add_results` | Submit test results to a test run using the specific `test_id`. |
 | `add_results_for_cases` | Submits results to a run mapping directly to `case_id`s, streamlining automation workflows. |
 | `add_attachment_to_run` | Attach logs, files, or zipped artifacts directly to an ongoing test run. |
@@ -210,6 +212,7 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 | `get_priorities` | Retrieve priority levels configured within your instance structure. |
 | `get_case_fields` | Discover custom field definitions, formats, and UI dropdown options. Supports filtering by `project_id`. |
 | `get_templates` | Identify available case templates to mandate correct AI structuring. |
+| `get_configurations` | Retrieve all configuration groups and configurations for a project. |
 
 ---
 

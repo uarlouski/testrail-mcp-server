@@ -1116,5 +1116,101 @@ describe('TestRailClient', () => {
             })
         );
     });
+
+    test('getSuite retrieves suite details', async () => {
+        const mockSuite = { id: 5, name: 'Suite S', project_id: 1, url: 'http://url/5' };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockSuite
+        });
+
+        const result = await client.getSuite(5);
+
+        expect(result).toEqual(mockSuite);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_suite/5',
+            expect.objectContaining({ method: 'GET' })
+        );
+    });
+
+    test('getSuites returns suites array', async () => {
+        const mockSuites = [{ id: 5, name: 'Suite S', project_id: 1, url: 'http://url/5' }];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ suites: mockSuites })
+        });
+
+        const result = await client.getSuites(1);
+
+        expect(result).toEqual(mockSuites);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_suites/1',
+            expect.any(Object)
+        );
+    });
+
+    test('getRun retrieves run details', async () => {
+        const mockRun = { id: 2, name: 'Run R', project_id: 1 };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockRun
+        });
+
+        const result = await client.getRun(2);
+
+        expect(result).toEqual(mockRun);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_run/2',
+            expect.objectContaining({ method: 'GET' })
+        );
+    });
+
+    test('getRuns returns runs array with filters', async () => {
+        const mockRuns = [{ id: 2, name: 'Run R', project_id: 1 }];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ runs: mockRuns })
+        });
+
+        const result = await client.getRuns(1, { suite_id: '5' });
+
+        expect(result).toEqual(mockRuns);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_runs/1&suite_id=5',
+            expect.any(Object)
+        );
+    });
+
+    test('getResults returns results array', async () => {
+        const mockResults = [{ id: 10, test_id: 2 }];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ results: mockResults })
+        });
+
+        const result = await client.getResults(2);
+
+        expect(result).toEqual(mockResults);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_results/2',
+            expect.any(Object)
+        );
+    });
+
+    test('getConfigs returns configuration groups', async () => {
+        const mockConfigs = [{ id: 1, name: 'Group 1', project_id: 1, configs: [] }];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockConfigs
+        });
+
+        const result = await client.getConfigs(1);
+
+        expect(result).toEqual(mockConfigs);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_configs/1',
+            expect.objectContaining({ method: 'GET' })
+        );
+    });
 });
 

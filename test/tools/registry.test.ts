@@ -12,15 +12,15 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
         expect(toolsDefault).toBeDefined();
         expect(Array.isArray(toolsDefault)).toBe(true);
-        expect(toolsDefault.length).toBe(21); // 21 default tools
+        expect(toolsDefault.length).toBe(24); // 24 default tools
 
         expect(toolsFalse).toBeDefined();
         expect(Array.isArray(toolsFalse)).toBe(true);
-        expect(toolsFalse.length).toBe(21);
+        expect(toolsFalse.length).toBe(24);
 
         // Check a few default tool names are present
         const names = toolsDefault.map(t => t.name);
-        expect(names).toContain('get_projects');
+        expect(names).toContain('query_project');
         expect(names).toContain('get_case');
         expect(names).toContain('mutate_run');
 
@@ -34,10 +34,10 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
         expect(tools).toBeDefined();
         expect(Array.isArray(tools)).toBe(true);
-        expect(tools.length).toBe(27); // 21 default + 6 shared steps tools
+        expect(tools.length).toBe(30); // 24 default + 6 shared steps tools
 
         const names = tools.map(t => t.name);
-        expect(names).toContain('get_projects');
+        expect(names).toContain('query_project');
         expect(names).toContain('get_case');
 
         // Ensure shared steps tools ARE present
@@ -51,7 +51,7 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
     test('excludes delete tools by default', () => {
         const tools = getToolsToRegister({ enableSharedSteps: true });
-        expect(tools.length).toBe(26); // delete_entity is excluded by default
+        expect(tools.length).toBe(29); // delete_entity is excluded by default (30 - 1)
         const names = tools.map(t => t.name);
         expect(names).not.toContain('delete_entity');
     });
@@ -59,12 +59,12 @@ describe('Tools Registry (getToolsToRegister)', () => {
     test('filters tools based on allowWrite and allowRead permissions', () => {
         // Test allowWrite: false
         const noWrite = getToolsToRegister({ allowWrite: false });
-        expect(noWrite.length).toBe(12); // 21 - 9 write tools
+        expect(noWrite.length).toBe(15); // 24 - 9 write tools
         expect(noWrite.every(t => t.mode !== 'write')).toBe(true);
 
         // Test allowRead: false
         const noRead = getToolsToRegister({ allowRead: false });
-        expect(noRead.length).toBe(9); // 21 - 12 read tools
+        expect(noRead.length).toBe(9); // 24 - 15 read tools
         expect(noRead.every(t => t.mode !== 'read')).toBe(true);
     });
 
