@@ -119,6 +119,81 @@ describe('mutate_run tool', () => {
         expect(getCaseMock).not.toHaveBeenCalled();
     });
 
+    test('handler creates run successfully (action: create) with provided suite_id and no case_ids (include_all automatically set to true)', async () => {
+        const args = {
+            payload: {
+                action: 'create' as const,
+                project_id: 10,
+                name: 'New Test Run',
+                description: 'Testing run creation',
+                suite_id: 5,
+            }
+        };
+
+        const result = await mutateRunTool.handler(args, mockClient);
+
+        expect(result).toBeDefined();
+        expect(result.id).toBe(42);
+        
+        expect(getCaseMock).not.toHaveBeenCalled();
+        expect(addRunMock).toHaveBeenCalledWith(10, {
+            name: 'New Test Run',
+            description: 'Testing run creation',
+            suite_id: 5,
+            include_all: true,
+        });
+    });
+
+    test('handler creates run successfully (action: create) with provided suite_id and case_ids (include_all inferred to false)', async () => {
+        const args = {
+            payload: {
+                action: 'create' as const,
+                project_id: 10,
+                name: 'New Test Run',
+                description: 'Testing run creation',
+                suite_id: 5,
+                case_ids: [101, 102],
+            }
+        };
+
+        const result = await mutateRunTool.handler(args, mockClient);
+
+        expect(result).toBeDefined();
+        expect(result.id).toBe(42);
+        
+        expect(getCaseMock).not.toHaveBeenCalled();
+        expect(addRunMock).toHaveBeenCalledWith(10, {
+            name: 'New Test Run',
+            description: 'Testing run creation',
+            suite_id: 5,
+            include_all: false,
+            case_ids: [101, 102],
+        });
+    });
+
+    test('handler creates run successfully (action: create) with neither suite_id nor case_ids (include_all defaulted to true)', async () => {
+        const args = {
+            payload: {
+                action: 'create' as const,
+                project_id: 10,
+                name: 'New Test Run',
+                description: 'Testing run creation',
+            }
+        };
+
+        const result = await mutateRunTool.handler(args, mockClient);
+
+        expect(result).toBeDefined();
+        expect(result.id).toBe(42);
+        
+        expect(getCaseMock).not.toHaveBeenCalled();
+        expect(addRunMock).toHaveBeenCalledWith(10, {
+            name: 'New Test Run',
+            description: 'Testing run creation',
+            include_all: true,
+        });
+    });
+
     test('handler throws error on API failure', async () => {
         addRunMock.mockRejectedValue(new Error('TestRail API Down'));
 

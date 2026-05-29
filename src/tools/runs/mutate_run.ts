@@ -12,7 +12,8 @@ const BaseRunFields = z.object({
 const CreateRunSchema = BaseRunFields.extend({
     action: z.literal("create").describe("The operation to perform: create a new test run"),
     project_id: z.number().describe("The ID of the project the test run should be added to"),
-    case_ids: z.array(z.number()).min(1).describe("Array of case IDs to include in the run. Required to automatically determine the suite_id."),
+    suite_id: z.number().optional().describe("The ID of the test suite for the test run"),
+    case_ids: z.array(z.number()).optional().describe("Array of case IDs to include in the run. If provided, the run will only include these cases; otherwise, all cases will be included."),
 });
 
 const UpdateRunSchema = BaseRunFields.extend({
@@ -38,9 +39,20 @@ export const mutateRunTool: ToolDefinition<typeof parameters, TestRailClient> = 
         if (payload.action === "create") {
             const { project_id, action, ...data } = payload;
             
-            // For creation, we determine suite_id automatically from the first case
-            const caseData = await client.getCase(data.case_ids[0]);
-            const params = { suite_id: caseData.suite_id, include_all: false, ...data };
+            const params: Record<string, any> = { ...data };
+
+            if (!params.suite_id && params.case_ids && params.case_ids.length > 0) {
+                // Determine suite_id automatically from the first case
+                const caseData = await client.getCase(params.case_ids[0]);
+                params.suite_id = caseData.suite_id;
+                params.include_all = false;
+            } else if (params.suite_id) {
+                // suite_id provided
+                params.include_all = !params.case_ids || params.case_ids.length === 0;
+            } else {
+                // Neither suite_id nor case_ids provided (e.g. single-suite project)
+                params.include_all = true;
+            }
             
             const run = await client.addRun(project_id, params);
             return RunSchema.parse(run);
