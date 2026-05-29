@@ -19,6 +19,7 @@
 - Add unified `delete_entity` tool to delete supported TestRail entities (`case` or `shared_step`) by ID
 
 ### Changed
+- Allow creating test runs for entire suites by providing a suite ID (`suite_id`), eliminating the need to manually specify individual test case IDs.
 - Clarify `fields` parameter description in `add_case`, `update_case`, and `update_cases` tools to explicitly state that field entries are merged into the root API request body
 
 ## [1.11.0]
