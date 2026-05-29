@@ -1,6 +1,7 @@
 import { jest, describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import { TestRailClient } from '../../src/client/testrail.js';
-import { Section, Case } from '../../src/types/testrail.js';
+import { Case } from '../../src/tools/cases/types.js';
+import { Section } from '../../src/tools/sections/types.js';
 import * as fs from 'fs';
 
 describe('TestRailClient', () => {

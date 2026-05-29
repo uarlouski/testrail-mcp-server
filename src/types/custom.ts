@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Label } from "./testrail.js";
+import { Label } from "../tools/commons/types.js";
 
 export interface TestCaseResponse {
     id: number;

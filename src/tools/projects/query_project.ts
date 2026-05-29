@@ -1,17 +1,8 @@
 import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
-import { ProjectSchema } from "../../types/testrail.js";
+import { ProjectSchema, GetOneProjectSchema, GetManyProjectsSchema } from "./types.js";
 import { handleQuery } from "../../utils/query_handler.js";
-
-const GetOneProjectSchema = z.object({
-    action: z.literal("one").describe("Retrieve a single project by ID"),
-    project_id: z.number().int().describe("The ID of the project"),
-});
-
-const GetManyProjectsSchema = z.object({
-    action: z.literal("many").describe("Retrieve all available projects"),
-});
 
 const parameters = {
     payload: z.discriminatedUnion("action", [

@@ -1,28 +1,12 @@
 import { ToolDefinition } from "../types/custom.js";
-import { getCaseTool } from "./get_case.js";
-import { getCasesTool } from "./get_cases.js";
-import { getCaseFieldsTool } from "./get_case_fields.js";
-import { getTemplatesTool } from "./get_templates.js";
-import { updateCaseTool } from "./update_case.js";
-import { updateCasesTool } from "./update_cases.js";
-import { addCaseTool } from "./add_case.js";
+import { casesTools } from "./cases/index.js";
 import { projectsTools } from "./projects/index.js";
 import { suitesTools } from "./suites/index.js";
 import { sectionsTools } from "./sections/index.js";
 import { runsTools } from "./runs/index.js";
-import { getStatusesTool } from "./get_statuses.js";
-import { getPrioritiesTool } from "./get_priorities.js";
-import { getTestsTool } from "./get_tests.js";
-import { addResultsTool } from "./add_results.js";
-import { addAttachmentToRunTool } from "./add_attachment_to_run.js";
-import { addResultsForCasesTool } from "./add_results_for_cases.js";
-import { getLabelsTool } from "./get_labels.js";
-import { getUsersTool } from "./get_users.js";
 import { sharedStepsTools } from "./shared_steps/index.js";
-import { deleteEntityTool } from "./delete_entity.js";
-import { getResultsTool } from "./get_results.js";
-import { getConfigurationsTool } from "./get_configurations.js";
-
+import { resultsTools } from "./results/index.js";
+import { commonsTools } from "./commons/index.js";
 
 export interface ToolRegistrationConfig {
     enableSharedSteps?: boolean;
@@ -35,26 +19,11 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
     const tools: ToolDefinition<any, any>[] = [
         ...projectsTools,
         ...suitesTools,
-        getCaseTool,
-        getCasesTool,
-        getCaseFieldsTool,
-        getTemplatesTool,
+        ...casesTools,
         ...sectionsTools,
-        updateCaseTool,
-        updateCasesTool,
-        addCaseTool,
         ...runsTools,
-        getStatusesTool,
-        getPrioritiesTool,
-        getTestsTool,
-        addResultsTool,
-        addResultsForCasesTool,
-        addAttachmentToRunTool,
-        getLabelsTool,
-        getUsersTool,
-        deleteEntityTool,
-        getResultsTool,
-        getConfigurationsTool,
+        ...resultsTools,
+        ...commonsTools,
     ];
 
     if (config.enableSharedSteps) {

@@ -1,7 +1,8 @@
 import { jest, describe, test, expect, beforeEach } from '@jest/globals';
 import { mutateRunTool } from '../../../src/tools/runs/mutate_run.js';
 import { TestRailClient } from '../../../src/client/testrail.js';
-import { Run, Case } from '../../../src/types/testrail.js';
+import { Case } from '../../../src/tools/cases/types.js';
+import { Run } from '../../../src/tools/runs/types.js';
 
 describe('mutate_run tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;

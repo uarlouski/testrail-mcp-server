@@ -1,20 +1,8 @@
 import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
-import { RunSchema } from "../../types/testrail.js";
+import { RunSchema, GetOneRunSchema, GetManyRunsSchema } from "./types.js";
 import { handleQuery } from "../../utils/query_handler.js";
-
-const GetOneRunSchema = z.object({
-    action: z.literal("one").describe("Retrieve a single test run by ID"),
-    run_id: z.number().int().describe("The ID of the test run"),
-});
-
-const GetManyRunsSchema = z.object({
-    action: z.literal("many").describe("Retrieve all test runs for a project"),
-    project_id: z.number().int().describe("The ID of the project"),
-    suite_id: z.number().int().optional().describe("Filter by suite ID"),
-    is_completed: z.number().int().min(0).max(1).optional().describe("Filter by completion status (1 for completed, 0 for active)"),
-});
 
 const parameters = {
     payload: z.discriminatedUnion("action", [
