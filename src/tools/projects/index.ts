@@ -1,8 +1,6 @@
 import { ToolDefinition } from "../../types/custom.js";
-import { getProjectTool } from "./get_project.js";
-import { getProjectsTool } from "./get_projects.js";
+import { queryProjectTool } from "./query_project.js";
 
 export const projectsTools: ToolDefinition<any, any>[] = [
-    getProjectTool,
-    getProjectsTool,
+    queryProjectTool,
 ]

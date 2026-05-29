@@ -6,17 +6,22 @@
 - **Tool Permission Restrictions**: Delete operations are now disabled by default for security. The `delete_entity` tool will no longer be registered unless `TESTRAIL_ALLOW_DELETE_OPERATIONS` is explicitly set to `true` in your environment.
 - **Tool Replaced**: The `add_run` tool has been completely removed and replaced by `mutate_run`. Clients must now use `mutate_run` with a `payload` object specifying `action: "create"`.
 - **Unified Deletion Tool**: The specific `delete_shared_step` tool has been **removed** and replaced by the unified `delete_entity` tool. AI assistants and clients must now use `delete_entity` with `entity_type: "shared_step"`.
+- **Tool Consolidation & Unification**: The separate `get_project` and `get_projects` tools have been **removed** and replaced by a unified `query_project` tool. Clients and AI assistants must now use `query_project` with a `payload` specifying `action: "one"` or `action: "many"`.
 
 ### Added
 - Introduce tool permission security controls (WRITE, READ, DELETE)
     - `TESTRAIL_ALLOW_WRITE_OPERATIONS` (default: `true`)
     - `TESTRAIL_ALLOW_READ_OPERATIONS` (default: `true`)
     - `TESTRAIL_ALLOW_DELETE_OPERATIONS` (default: `false`)
-- Add `get_project` tool to allow AI assistants to retrieve a specific project by ID
 - Add `mutate_suite` tool to create or update test suites in a project
 - Add `mutate_section` tool to create or update sections in a project
 - Add `mutate_run` tool to create or update runs in a project
 - Add unified `delete_entity` tool to delete supported TestRail entities (`case` or `shared_step`) by ID
+- Add unified `query_suite` tool to retrieve a single test suite (`action: "one"`) or all test suites for a project (`action: "many"`)
+- Add unified `query_run` tool to retrieve a single test run (`action: "one"`) or all test runs for a project (`action: "many"`, supporting suite/completion status filtering)
+- Add unified `query_project` tool to retrieve a single project (`action: "one"`) or all active projects (`action: "many"`)
+- Add `get_results` tool to retrieve paginated results for a specific test ID
+- Add `get_configurations` tool to retrieve configuration groups and configuration matrix for a project
 
 ### Changed
 - Allow creating test runs for entire suites by providing a suite ID (`suite_id`), eliminating the need to manually specify individual test case IDs.

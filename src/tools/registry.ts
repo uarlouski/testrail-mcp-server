@@ -20,6 +20,8 @@ import { getLabelsTool } from "./get_labels.js";
 import { getUsersTool } from "./get_users.js";
 import { sharedStepsTools } from "./shared_steps/index.js";
 import { deleteEntityTool } from "./delete_entity.js";
+import { getResultsTool } from "./get_results.js";
+import { getConfigurationsTool } from "./get_configurations.js";
 
 
 export interface ToolRegistrationConfig {
@@ -51,6 +53,8 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
         getLabelsTool,
         getUsersTool,
         deleteEntityTool,
+        getResultsTool,
+        getConfigurationsTool,
     ];
 
     if (config.enableSharedSteps) {

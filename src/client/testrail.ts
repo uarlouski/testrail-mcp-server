@@ -1,4 +1,4 @@
-import { Case, Section, Suite, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label, SharedStep, SharedStepHistory, User } from "../types/testrail.js";
+import { Case, Section, Suite, Priority, CaseType, CaseField, Template, Project, Run, Status, Test, Result, Attachment, Label, SharedStep, SharedStepHistory, User, ConfigurationGroup } from "../types/testrail.js";
 import { isActive } from "../utils/sanitizer.js";
 
 import * as fs from "fs";
@@ -175,6 +175,38 @@ export class TestRailClient {
 
     async updateSuite(suiteId: number, data: Record<string, any>): Promise<Suite> {
         return this.post<Suite>(`${API_BASE_V2}/update_suite/${suiteId}`, data);
+    }
+
+    async getSuite(suiteId: number): Promise<Suite> {
+        return this.get<Suite>(`${API_BASE_V2}/get_suite/${suiteId}`);
+    }
+
+    async getSuites(projectId: number): Promise<Suite[]> {
+        const url = `${API_BASE_V2}/get_suites/${projectId}`;
+        return this.paginateAll<Suite>(url, 'suites');
+    }
+
+    async getRun(runId: number): Promise<Run> {
+        return this.get<Run>(`${API_BASE_V2}/get_run/${runId}`);
+    }
+
+    async getRuns(projectId: number, filter?: Record<string, string>): Promise<Run[]> {
+        let url = `${API_BASE_V2}/get_runs/${projectId}`;
+        if (filter) {
+            for (const [key, value] of Object.entries(filter)) {
+                url += `&${key}=${encodeURIComponent(value)}`;
+            }
+        }
+        return this.paginateAll<Run>(url, 'runs');
+    }
+
+    async getResults(testId: number): Promise<Result[]> {
+        const url = `${API_BASE_V2}/get_results/${testId}`;
+        return this.paginateAll<Result>(url, 'results');
+    }
+
+    async getConfigs(projectId: number): Promise<ConfigurationGroup[]> {
+        return this.get<ConfigurationGroup[]>(`${API_BASE_V2}/get_configs/${projectId}`);
     }
 
     async getProject(projectId: number): Promise<Project> {
