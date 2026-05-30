@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
 import { SuiteSchema, CreateSuiteSchema, UpdateSuiteSchema } from "./types.js";
+import { handleMutate } from "../../utils/mutate_handler.js";
 
 const parameters = {
     payload: z.discriminatedUnion("action", [
@@ -18,17 +19,17 @@ export const mutateSuiteTool: ToolDefinition<typeof parameters, TestRailClient> 
     handler: async (args, client) => {
         const { payload } = args;
 
-        if (payload.action === "create") {
-            const { project_id, action, ...data } = payload;
-            const suite = await client.addSuite(project_id, data);
-            return SuiteSchema.parse(suite);
-        } else if (payload.action === "update") {
-            const { suite_id, action, ...data } = payload;
-            const suite = await client.updateSuite(suite_id, data);
-            return SuiteSchema.parse(suite);
-        } else {
-            const unknownAction = (payload as any).action;
-            throw new Error(`Unsupported mutation action: ${unknownAction}`);
-        }
+        return handleMutate(
+            payload,
+            async (createPayload) => {
+                const { project_id, action, ...data } = createPayload;
+                return client.addSuite(project_id, data);
+            },
+            async (updatePayload) => {
+                const { suite_id, action, ...data } = updatePayload;
+                return client.updateSuite(suite_id, data);
+            },
+            SuiteSchema
+        );
     }
 };
