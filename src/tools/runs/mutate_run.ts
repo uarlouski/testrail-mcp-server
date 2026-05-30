@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
 import { RunSchema, CreateRunSchema, UpdateRunSchema } from "./types.js";
+import { handleMutate } from "../../utils/mutate_handler.js";
 
 const parameters = {
     payload: z.discriminatedUnion("action", [
@@ -18,33 +19,33 @@ export const mutateRunTool: ToolDefinition<typeof parameters, TestRailClient> = 
     handler: async (args, client) => {
         const { payload } = args;
 
-        if (payload.action === "create") {
-            const { project_id, action, ...data } = payload;
-            
-            const params: Record<string, any> = { ...data };
+        return handleMutate(
+            payload,
+            async (createPayload) => {
+                const { project_id, action, ...data } = createPayload;
+                
+                const params: Record<string, any> = { ...data };
 
-            if (!params.suite_id && params.case_ids && params.case_ids.length > 0) {
-                // Determine suite_id automatically from the first case
-                const caseData = await client.getCase(params.case_ids[0]);
-                params.suite_id = caseData.suite_id;
-                params.include_all = false;
-            } else if (params.suite_id) {
-                // suite_id provided
-                params.include_all = !params.case_ids || params.case_ids.length === 0;
-            } else {
-                // Neither suite_id nor case_ids provided (e.g. single-suite project)
-                params.include_all = true;
-            }
-            
-            const run = await client.addRun(project_id, params);
-            return RunSchema.parse(run);
-        } else if (payload.action === "update") {
-            const { run_id, action, ...data } = payload;
-            const run = await client.updateRun(run_id, data);
-            return RunSchema.parse(run);
-        } else {
-            const unknownAction = (payload as any).action;
-            throw new Error(`Unsupported mutation action: ${unknownAction}`);
-        }
+                if (!params.suite_id && params.case_ids && params.case_ids.length > 0) {
+                    // Determine suite_id automatically from the first case
+                    const caseData = await client.getCase(params.case_ids[0]);
+                    params.suite_id = caseData.suite_id;
+                    params.include_all = false;
+                } else if (params.suite_id) {
+                    // suite_id provided
+                    params.include_all = !params.case_ids || params.case_ids.length === 0;
+                } else {
+                    // Neither suite_id nor case_ids provided (e.g. single-suite project)
+                    params.include_all = true;
+                }
+                
+                return client.addRun(project_id, params);
+            },
+            async (updatePayload) => {
+                const { run_id, action, ...data } = updatePayload;
+                return client.updateRun(run_id, data);
+            },
+            RunSchema
+        );
     }
 };

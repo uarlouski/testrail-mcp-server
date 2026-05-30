@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
 import { SectionSchema, CreateSectionSchema, UpdateSectionSchema } from "./types.js";
+import { handleMutate } from "../../utils/mutate_handler.js";
 
 const parameters = {
     payload: z.discriminatedUnion("action", [
@@ -17,17 +18,17 @@ export const mutateSectionTool: ToolDefinition<typeof parameters, TestRailClient
     parameters,
     handler: async (args, client) => {
         const { payload } = args;
-        if (payload.action === "create") {
-            const { project_id, action, ...data } = payload;
-            const section = await client.addSection(project_id, data);
-            return SectionSchema.parse(section);
-        } else if (payload.action === "update") {
-            const { section_id, action, ...data } = payload;
-            const section = await client.updateSection(section_id, data);
-            return SectionSchema.parse(section);
-        } else {
-            const unknownAction = (payload as any).action;
-            throw new Error(`Unsupported mutation action: ${unknownAction}`);
-        }
+        return handleMutate(
+            payload,
+            async (createPayload) => {
+                const { project_id, action, ...data } = createPayload;
+                return client.addSection(project_id, data);
+            },
+            async (updatePayload) => {
+                const { section_id, action, ...data } = updatePayload;
+                return client.updateSection(section_id, data);
+            },
+            SectionSchema
+        );
     }
 };
