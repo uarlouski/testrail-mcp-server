@@ -79,4 +79,31 @@ describe('Tools Registry (getToolsToRegister)', () => {
             expect(typeof tool.handler).toBe('function');
         }
     });
+
+    test('all returned tools have correct annotations based on tool mode', () => {
+        const tools = getToolsToRegister({ enableSharedSteps: true, allowDelete: true });
+
+        for (const tool of tools) {
+            expect(tool.annotations).toBeDefined();
+            if (tool.mode === 'read') {
+                expect(tool.annotations).toEqual({
+                    readOnlyHint: true,
+                    destructiveHint: false,
+                    idempotentHint: true
+                });
+            } else if (tool.mode === 'write') {
+                expect(tool.annotations).toEqual({
+                    readOnlyHint: false,
+                    destructiveHint: false,
+                    idempotentHint: false
+                });
+            } else if (tool.mode === 'delete') {
+                expect(tool.annotations).toEqual({
+                    readOnlyHint: false,
+                    destructiveHint: true,
+                    idempotentHint: false
+                });
+            }
+        }
+    });
 });
