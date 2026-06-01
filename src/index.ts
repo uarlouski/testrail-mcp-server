@@ -57,6 +57,7 @@ for (const tool of tools) {
         {
             description: tool.description,
             inputSchema: tool.parameters,
+            annotations: tool.annotations,
         },
         async (args: any) => {
             try {

@@ -34,9 +34,25 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
     const allowRead = config.allowRead !== false;
     const allowDelete = config.allowDelete === true;
 
-    return tools.filter(tool => {
+    const filteredTools = tools.filter(tool => {
         if (tool.mode === 'write') return allowWrite;
         if (tool.mode === 'read') return allowRead;
         return allowDelete;
+    });
+
+    return filteredTools.map(tool => {
+        const defaultAnnotations = {
+            readOnlyHint: tool.mode === 'read',
+            destructiveHint: tool.mode === 'delete',
+            idempotentHint: tool.mode === 'read',
+        };
+
+        return {
+            ...tool,
+            annotations: {
+                ...defaultAnnotations,
+                ...tool.annotations,
+            }
+        };
     });
 }

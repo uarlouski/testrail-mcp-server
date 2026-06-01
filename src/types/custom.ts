@@ -14,10 +14,18 @@ export interface TestCaseResponse {
 
 export type ToolMode = 'write' | 'read' | 'delete';
 
+export interface ToolAnnotations {
+    readOnlyHint?: boolean;
+    destructiveHint?: boolean;
+    idempotentHint?: boolean;
+}
+
 export interface ToolDefinition<T extends z.ZodRawShape, Context = any> {
     name: string;
     description: string;
     parameters: T;
     mode: ToolMode;
+    annotations?: ToolAnnotations;
     handler: (args: z.infer<z.ZodObject<T>>, context: Context) => Promise<Record<string, any>>;
 }
+

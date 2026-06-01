@@ -9,6 +9,7 @@
 - **Tool Consolidation & Unification**: The separate `get_project` and `get_projects` tools have been **removed** and replaced by a unified `query_project` tool. Clients and AI assistants must now use `query_project` with a `payload` specifying `action: "one"` or `action: "many"`.
 
 ### Added
+- **Dynamic MCP Tool Annotations**: Automatically inject standard MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`) to tools based on their interaction modes (`read`, `write`, `delete`).
 - Introduce tool permission security controls (WRITE, READ, DELETE)
     - `TESTRAIL_ALLOW_WRITE_OPERATIONS` (default: `true`)
     - `TESTRAIL_ALLOW_READ_OPERATIONS` (default: `true`)
