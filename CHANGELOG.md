@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.0.0]
 
 ### Breaking
 - **Tool Permission Restrictions**: Delete operations are now disabled by default for security. The `delete_entity` tool will no longer be registered unless `TESTRAIL_ALLOW_DELETE_OPERATIONS` is explicitly set to `true` in your environment.
