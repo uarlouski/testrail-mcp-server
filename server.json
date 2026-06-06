@@ -43,6 +43,27 @@
           "format": "boolean",
           "isSecret": false,
           "name": "TESTRAIL_ENABLE_SHARED_STEPS"
+        },
+        {
+          "description": "Allow write operations on TestRail (defaults to true)",
+          "isRequired": false,
+          "format": "boolean",
+          "isSecret": false,
+          "name": "TESTRAIL_ALLOW_WRITE_OPERATIONS"
+        },
+        {
+          "description": "Allow read operations on TestRail (defaults to true)",
+          "isRequired": false,
+          "format": "boolean",
+          "isSecret": false,
+          "name": "TESTRAIL_ALLOW_READ_OPERATIONS"
+        },
+        {
+          "description": "Allow delete operations on TestRail (defaults to false)",
+          "isRequired": false,
+          "format": "boolean",
+          "isSecret": false,
+          "name": "TESTRAIL_ALLOW_DELETE_OPERATIONS"
         }
       ]
     }
