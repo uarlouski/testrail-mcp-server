@@ -19,6 +19,7 @@ export const CreateSectionSchema = BaseSectionFields.extend({
     action: z.literal("create").describe("The operation to perform: create a new section"),
     project_id: z.number().describe("The ID of the project the section should be added to"),
     parent_id: z.number().optional().describe("The ID of the parent section (to build section hierarchies)"),
+    suite_id: z.number().optional().describe("The ID of the test suite/baseline to create the section in. Required for projects with multiple suites or baselines (suite_mode 2 or 3). Use query_suite (action 'many') to list the project's suites/baselines."),
 });
 
 export const UpdateSectionSchema = BaseSectionFields.partial().extend({

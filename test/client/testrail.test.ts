@@ -1286,6 +1286,60 @@ describe('TestRailClient', () => {
         );
     });
 
+    test('getSections wraps 400 error with baseline/multi-suite hint when suite_id is missing', async () => {
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 400,
+            statusText: 'Bad Request',
+            text: async () => 'Field :suite_id is a required field.'
+        });
+
+        await expect(client.getSections(88)).rejects.toThrow(
+            /baselines or multiple suites.*get_sections requires a suite_id.*query_suite/s
+        );
+    });
+
+    test('getSections does not wrap 400 error when suite_id was provided', async () => {
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 400,
+            statusText: 'Bad Request',
+            text: async () => 'Some other 400 problem'
+        });
+
+        await expect(client.getSections(88, 631)).rejects.toThrow(
+            'TestRail API Error: 400 Bad Request - Some other 400 problem'
+        );
+        await expect(client.getSections(88, 631)).rejects.not.toThrow(/query_suite/);
+    });
+
+    test('getCases wraps 400 error with baseline/multi-suite hint when suite_id is missing', async () => {
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 400,
+            statusText: 'Bad Request',
+            text: async () => 'Field :suite_id is a required field.'
+        });
+
+        await expect(client.getCases(88)).rejects.toThrow(
+            /baselines or multiple suites.*get_cases requires a suite_id.*query_suite/s
+        );
+    });
+
+    test('getCases does not wrap 400 error when suite_id was provided via filter', async () => {
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 400,
+            statusText: 'Bad Request',
+            text: async () => 'Some other 400 problem'
+        });
+
+        await expect(client.getCases(88, undefined, { suite_id: '631' })).rejects.toThrow(
+            'TestRail API Error: 400 Bad Request - Some other 400 problem'
+        );
+        await expect(client.getCases(88, undefined, { suite_id: '631' })).rejects.not.toThrow(/query_suite/);
+    });
+
     test('getCasesRecursively without suite_id in filter calls getSections without suite_id', async () => {
         const mockSections: Section[] = [
             { id: 1, name: 'Root', parent_id: null, suite_id: 1, description: '' },

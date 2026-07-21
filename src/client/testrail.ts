@@ -95,7 +95,12 @@ export class TestRailClient {
             }
         }
 
-        return this.paginateAll<Case>(url, 'cases');
+        const suiteId = filter?.suite_id ? parseInt(filter.suite_id) : undefined;
+        try {
+            return await this.paginateAll<Case>(url, 'cases');
+        } catch (e) {
+            throw this.wrapSuiteIdError(e, suiteId, 'get_cases');
+        }
     }
 
     async getSection(sectionId: number): Promise<Section> {
@@ -170,7 +175,22 @@ export class TestRailClient {
         if (suiteId) {
             url += `&suite_id=${suiteId}`;
         }
-        return this.paginateAll<Section>(url, 'sections');
+        try {
+            return await this.paginateAll<Section>(url, 'sections');
+        } catch (e) {
+            throw this.wrapSuiteIdError(e, suiteId, 'get_sections');
+        }
+    }
+
+    private wrapSuiteIdError(err: unknown, suiteId: number | undefined, op: string): Error {
+        if (suiteId !== undefined) return err instanceof Error ? err : new Error(String(err));
+        const message = err instanceof Error ? err.message : String(err);
+        if (!message.includes('400')) return err instanceof Error ? err : new Error(message);
+        return new Error(
+            `${message}\n\nThis project likely uses baselines or multiple suites ` +
+            `(suite_mode 2 or 3); ${op} requires a suite_id. ` +
+            `List available suites/baselines with query_suite (action 'many') and retry.`
+        );
     }
 
     async addSection(projectId: number, data: Record<string, any>): Promise<Section> {

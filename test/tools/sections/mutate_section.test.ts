@@ -59,6 +59,24 @@ describe('mutate_section tool', () => {
         expect(updateSectionMock).not.toHaveBeenCalled();
     });
 
+    test('handler forwards suite_id to addSection when creating in a multi-suite project', async () => {
+        const args = {
+            payload: {
+                action: 'create' as const,
+                project_id: 88,
+                name: 'Baseline Section',
+                suite_id: 631,
+            }
+        };
+
+        await mutateSectionTool.handler(args, mockClient);
+
+        expect(addSectionMock).toHaveBeenCalledWith(88, {
+            name: 'Baseline Section',
+            suite_id: 631,
+        });
+    });
+
     test('handler updates section successfully (action: update)', async () => {
         const args = {
             payload: {

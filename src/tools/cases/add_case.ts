@@ -13,6 +13,7 @@ const parameters = {
 const description = `
 Create a new test case in TestRail.
 The create operation requires knowing valid field names that are returned by get_case_fields tool.
+The section_id implies the suite/baseline the case belongs to — in projects with multiple suites or baselines (suite_mode 2/3), pick a section that lives in the intended suite/baseline (list sections with get_sections + that suite_id).
 `;
 
 export const addCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
