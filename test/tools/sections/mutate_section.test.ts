@@ -26,6 +26,7 @@ describe('mutate_section tool', () => {
         mockClient = {
             addSection: addSectionMock,
             updateSection: updateSectionMock,
+            getProject: jest.fn<any>().mockResolvedValue({ id: 10, name: 'Project 10', suite_mode: 1 }),
         } as unknown as jest.Mocked<TestRailClient>;
     });
 
@@ -57,6 +58,39 @@ describe('mutate_section tool', () => {
             description: 'Testing section creation',
         });
         expect(updateSectionMock).not.toHaveBeenCalled();
+    });
+
+    test('handler creates section with suite_id on multi-suite project', async () => {
+        const args = {
+            payload: {
+                action: 'create' as const,
+                project_id: 10,
+                suite_id: 5,
+                name: 'Suite Section',
+            }
+        };
+
+        const result = await mutateSectionTool.handler(args, mockClient);
+
+        expect(result).toBeDefined();
+        expect(addSectionMock).toHaveBeenCalledWith(10, {
+            suite_id: 5,
+            name: 'Suite Section',
+        });
+    });
+
+    test('handler throws error when creating section on multi-suite project without suite_id', async () => {
+        mockClient.getProject.mockResolvedValue({ id: 10, name: 'Multi Project', suite_mode: 3 });
+
+        await expect(
+            mutateSectionTool.handler({
+                payload: {
+                    action: 'create',
+                    project_id: 10,
+                    name: 'Multi Section'
+                }
+            }, mockClient)
+        ).rejects.toThrow('suite_id parameter is required');
     });
 
     test('handler updates section successfully (action: update)', async () => {

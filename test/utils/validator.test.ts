@@ -126,7 +126,7 @@ describe("validateSuiteId", () => {
         expect(mockClient.getProject).toHaveBeenCalledWith(53);
     });
 
-    it("should not throw when project is baseline (suite_mode=2)", async () => {
+    it("should throw when project is baseline (suite_mode=2) and suite_id is missing", async () => {
         mockClient.getProject.mockResolvedValue({
             id: 50,
             name: "Baseline Project",
@@ -134,7 +134,10 @@ describe("validateSuiteId", () => {
             suite_mode: 2,
         });
 
-        await expect(validateSuiteId(mockClient, 50, undefined)).resolves.toBeUndefined();
+        await expect(validateSuiteId(mockClient, 50, undefined)).rejects.toThrow(
+            'Project "Baseline Project" (id: 50) uses multiple test suites/baselines (suite_mode=2). ' +
+            'The suite_id parameter is required. Use get_suites to find available suites for this project.'
+        );
         expect(mockClient.getProject).toHaveBeenCalledWith(50);
     });
 
@@ -147,7 +150,7 @@ describe("validateSuiteId", () => {
         });
 
         await expect(validateSuiteId(mockClient, 10, undefined)).rejects.toThrow(
-            'Project "Sandbox" (id: 10) uses multiple test suites (suite_mode=3). ' +
+            'Project "Sandbox" (id: 10) uses multiple test suites/baselines (suite_mode=3). ' +
             'The suite_id parameter is required. Use get_suites to find available suites for this project.'
         );
         expect(mockClient.getProject).toHaveBeenCalledWith(10);

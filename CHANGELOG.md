@@ -4,6 +4,7 @@
 
 ### Added
 - Add explicit boolean value guidance for Checkbox type to prevent the model from passing 0 or 1 values.
+- Add multi-suite and baseline project support for section creation.
 
 ## [2.1.0]
 

@@ -3,6 +3,7 @@ import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
 import { SectionSchema, CreateSectionSchema, UpdateSectionSchema } from "./types.js";
 import { handleMutate } from "../../utils/mutate_handler.js";
+import { validateSuiteId } from "../../utils/validator.js";
 
 const parameters = {
     payload: z.discriminatedUnion("action", [
@@ -21,6 +22,7 @@ export const mutateSectionTool: ToolDefinition<typeof parameters, TestRailClient
         return handleMutate(
             payload,
             async (createPayload) => {
+                await validateSuiteId(client, createPayload.project_id, createPayload.suite_id);
                 const { project_id, action, ...data } = createPayload;
                 return client.addSection(project_id, data);
             },

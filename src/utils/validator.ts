@@ -3,10 +3,11 @@ import { SYSTEM_FIELDS, mapToFieldSchema } from "../tools/cases/get_case_fields.
 import { isActive } from "./sanitizer.js";
 import { TestRailClient } from "../client/testrail.js";
 
+const SUITE_MODE_SINGLE_WITH_BASELINES = 2;
 const SUITE_MODE_MULTI = 3;
 
 /**
- * Validates that suite_id is provided when the project uses multiple test suites (suite_mode=3).
+ * Validates that suite_id is provided when the project uses multiple test suites or baselines (suite_mode=2 or 3).
  * Throws a descriptive Error if suite_id is required but missing.
  */
 export async function validateSuiteId(client: TestRailClient, projectId: number, suiteId: number | undefined): Promise<void> {
@@ -14,9 +15,9 @@ export async function validateSuiteId(client: TestRailClient, projectId: number,
 
     const project = await client.getProject(projectId);
 
-    if (project.suite_mode === SUITE_MODE_MULTI) {
+    if (project.suite_mode === SUITE_MODE_MULTI || project.suite_mode === SUITE_MODE_SINGLE_WITH_BASELINES) {
         throw new Error(
-            `Project "${project.name}" (id: ${project.id}) uses multiple test suites (suite_mode=3). ` +
+            `Project "${project.name}" (id: ${project.id}) uses multiple test suites/baselines (suite_mode=${project.suite_mode}). ` +
             `The suite_id parameter is required. Use get_suites to find available suites for this project.`
         );
     }

@@ -18,6 +18,7 @@ export const BaseSectionFields = z.object({
 export const CreateSectionSchema = BaseSectionFields.extend({
     action: z.literal("create").describe("The operation to perform: create a new section"),
     project_id: z.number().describe("The ID of the project the section should be added to"),
+    suite_id: z.number().optional().describe("The ID of the test suite (required for multi-suite projects, i.e. suite_mode=2 or 3). Use get_suites to find available suites"),
     parent_id: z.number().optional().describe("The ID of the parent section (to build section hierarchies)"),
 });
 
