@@ -292,6 +292,46 @@ describe('get_case_fields tool', () => {
         const result = await getCaseFieldsTool.handler({}, mockClient);
 
         const unknownField = result.fields.find((f: any) => f.system_name === 'custom_unknown_type');
-        expect(unknownField.type).toBe('Unknown (999)');
+        expect(unknownField.type).toEqual({ typeId: 999, name: 'Unknown (999)' });
+    });
+
+    test('concatenates field description and field type description in FieldSchema', async () => {
+        const checkboxFields: CaseField[] = [
+            {
+                id: 1,
+                name: 'is_automated',
+                system_name: 'custom_is_automated',
+                label: 'Is Automated',
+                type_id: 5,
+                template_ids: [],
+                include_all: true,
+                is_active: true,
+                description: 'Whether test is automated',
+                configs: []
+            },
+            {
+                id: 2,
+                name: 'no_field_desc_checkbox',
+                system_name: 'custom_no_field_desc_checkbox',
+                label: 'No Field Desc Checkbox',
+                type_id: 5,
+                template_ids: [],
+                include_all: true,
+                is_active: true,
+                description: null,
+                configs: []
+            }
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(checkboxFields);
+
+        const result = await getCaseFieldsTool.handler({}, mockClient);
+
+        const automatedField = result.fields.find((f: any) => f.system_name === 'custom_is_automated');
+        expect(automatedField.description).toBe('Whether test is automated Boolean value, either true or false.');
+        expect(automatedField.type).toEqual({ typeId: 5, name: 'Checkbox', description: 'Boolean value, either true or false.' });
+
+        const noDescCheckboxField = result.fields.find((f: any) => f.system_name === 'custom_no_field_desc_checkbox');
+        expect(noDescCheckboxField.description).toBe('Boolean value, either true or false.');
     });
 });

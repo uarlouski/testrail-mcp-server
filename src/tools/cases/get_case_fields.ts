@@ -19,40 +19,43 @@ Call get_case_fields with project_id first if field names are not already known.
 Using an unknown field name (e.g. 'label_ids') will result in an error.
 `;
 
+export const FIELD_TYPES: Readonly<FieldType[]> = [
+    { typeId: 1, name: "String" },
+    { typeId: 2, name: "Integer" },
+    { typeId: 3, name: "Text" },
+    { typeId: 4, name: "URL" },
+    { typeId: 5, name: "Checkbox", description: "Boolean value, either true or false." },
+    { typeId: 6, name: "Dropdown" },
+    { typeId: 7, name: "User" },
+    { typeId: 8, name: "Date" },
+    { typeId: 9, name: "Milestone" },
+    { typeId: 10, name: "Steps" },
+    { typeId: 11, name: "Step Results" },
+    { typeId: 12, name: "Multi-select" },
+    { typeId: 13, name: "Scenarios" },
+    { typeId: 14, name: "List" },
+] as const;
+
+export interface FieldType {
+    typeId: number;
+    name: string;
+    description?: string;
+}
+
 export interface FieldSchema {
     system_name: string;
     label: string;
-    type: string;
+    type: FieldType;
     is_required: boolean;
     template_ids?: number[];
     options?: string[];
-    comment?: string;
+    description?: string;
     project_scope?: { scope: "global" } | { scope: "projects"; project_ids: number[] };
 }
 
-interface CaseFieldsResponse {
-    fields: FieldSchema[];
-}
-
-const FIELD_TYPE_NAMES: Record<number, string> = {
-    1: "String",
-    2: "Integer",
-    3: "Text",
-    4: "URL",
-    5: "Checkbox",
-    6: "Dropdown",
-    7: "User",
-    8: "Date",
-    9: "Milestone",
-    10: "Steps",
-    11: "Step Results",
-    12: "Multi-select",
-    13: "Scenarios",
-    14: "List",
-};
-
-function getFieldTypeName(typeId: number): string {
-    return FIELD_TYPE_NAMES[typeId] || `Unknown (${typeId})`;
+function getFieldType(typeId: number): FieldType {
+    const found = FIELD_TYPES.find(t => t.typeId === typeId);
+    return found ?? { typeId, name: `Unknown (${typeId})` };
 }
 
 function isFieldRequired(field: CaseField): boolean {
@@ -60,13 +63,19 @@ function isFieldRequired(field: CaseField): boolean {
 }
 
 export function mapToFieldSchema(field: CaseField): FieldSchema {
+    const fieldType = getFieldType(field.type_id);
+    const descriptions = [field.description, fieldType.description].filter(Boolean);
 
     const schema: FieldSchema = {
         system_name: field.system_name,
         label: field.label,
-        type: getFieldTypeName(field.type_id),
+        type: fieldType,
         is_required: isFieldRequired(field),
     };
+
+    if (descriptions.length > 0) {
+        schema.description = descriptions.join(" ");
+    }
 
     if (!field.include_all && field.template_ids.length > 0) {
         schema.template_ids = field.template_ids;
@@ -97,15 +106,15 @@ function isFieldForProject(field: CaseField, projectId: number): boolean {
 }
 
 export const SYSTEM_FIELDS: FieldSchema[] = [
-    { system_name: "title", label: "Title", type: "String", is_required: true, project_scope: { scope: "global" } },
-    { system_name: "section_id", label: "Section", type: "Integer", is_required: true, project_scope: { scope: "global" } },
-    { system_name: "template_id", label: "Template", type: "Integer", is_required: false, project_scope: { scope: "global" } },
-    { system_name: "type_id", label: "Type", type: "Integer", is_required: false, project_scope: { scope: "global" } },
-    { system_name: "priority_id", label: "Priority", type: "Integer", is_required: false, project_scope: { scope: "global" } },
-    { system_name: "estimate", label: "Estimate", type: "String", is_required: false, project_scope: { scope: "global" } },
-    { system_name: "milestone_id", label: "Milestone", type: "Integer", is_required: false, project_scope: { scope: "global" } },
-    { system_name: "refs", label: "References", type: "String", is_required: false, project_scope: { scope: "global" } },
-    { system_name: "labels", label: "Labels", type: "List", is_required: false, project_scope: { scope: "global" }, comment: "Use get_labels tool to get available labels/tags." },
+    { system_name: "title", label: "Title", type: getFieldType(1), is_required: true, project_scope: { scope: "global" } },
+    { system_name: "section_id", label: "Section", type: getFieldType(2), is_required: true, project_scope: { scope: "global" } },
+    { system_name: "template_id", label: "Template", type: getFieldType(2), is_required: false, project_scope: { scope: "global" } },
+    { system_name: "type_id", label: "Type", type: getFieldType(2), is_required: false, project_scope: { scope: "global" } },
+    { system_name: "priority_id", label: "Priority", type: getFieldType(2), is_required: false, project_scope: { scope: "global" } },
+    { system_name: "estimate", label: "Estimate", type: getFieldType(1), is_required: false, project_scope: { scope: "global" } },
+    { system_name: "milestone_id", label: "Milestone", type: getFieldType(2), is_required: false, project_scope: { scope: "global" } },
+    { system_name: "refs", label: "References", type: getFieldType(1), is_required: false, project_scope: { scope: "global" } },
+    { system_name: "labels", label: "Labels", type: getFieldType(14), is_required: false, project_scope: { scope: "global" }, description: "Use get_labels tool to get available labels/tags." },
 ];
 
 const description = `

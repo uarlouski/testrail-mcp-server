@@ -3,10 +3,15 @@
 ## [Unreleased]
 
 ### Added
+- Add explicit boolean value guidance for Checkbox type to prevent the model from passing 0 or 1 values.
+
+## [2.1.0]
+
+### Added
 - **Multi-Suite Project Support**: Added support for retrieving test cases and sections from projects that use multiple test suites. Users can now pass an optional `suite_id` parameter to the `get_cases` and `get_sections` tools.
 - **Older TestRail API Support**: Improved backward compatibility to support paginating lists on older TestRail instances (pre-version 7.x).
 
-## [2.1.0]
+## [2.0.0]
 
 ### Breaking
 - **Tool Permission Restrictions**: Delete operations are now disabled by default for security. The `delete_entity` tool will no longer be registered unless `TESTRAIL_ALLOW_DELETE_OPERATIONS` is explicitly set to `true` in your environment.
