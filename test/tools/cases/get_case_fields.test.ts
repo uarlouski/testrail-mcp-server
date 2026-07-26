@@ -292,7 +292,7 @@ describe('get_case_fields tool', () => {
         const result = await getCaseFieldsTool.handler({}, mockClient);
 
         const unknownField = result.fields.find((f: any) => f.system_name === 'custom_unknown_type');
-        expect(unknownField.type).toEqual({ typeId: 999, name: 'Unknown (999)' });
+        expect(unknownField.type).toBe('Unknown (999)');
     });
 
     test('concatenates field description and field type description in FieldSchema', async () => {
@@ -329,7 +329,7 @@ describe('get_case_fields tool', () => {
 
         const automatedField = result.fields.find((f: any) => f.system_name === 'custom_is_automated');
         expect(automatedField.description).toBe('Whether test is automated Boolean value, either true or false.');
-        expect(automatedField.type).toEqual({ typeId: 5, name: 'Checkbox', description: 'Boolean value, either true or false.' });
+        expect(automatedField.type).toBe('Checkbox');
 
         const noDescCheckboxField = result.fields.find((f: any) => f.system_name === 'custom_no_field_desc_checkbox');
         expect(noDescCheckboxField.description).toBe('Boolean value, either true or false.');
