@@ -7,6 +7,7 @@ import { runsTools } from "./runs/index.js";
 import { sharedStepsTools } from "./shared_steps/index.js";
 import { resultsTools } from "./results/index.js";
 import { commonsTools } from "./commons/index.js";
+import { attachmentsTools } from "./attachments/index.js";
 
 export interface ToolRegistrationConfig {
     enableSharedSteps?: boolean;
@@ -23,6 +24,7 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
         ...sectionsTools,
         ...runsTools,
         ...resultsTools,
+        ...attachmentsTools,
         ...commonsTools,
     ];
 

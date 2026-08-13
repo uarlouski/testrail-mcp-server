@@ -1,4 +1,4 @@
-import { jest, describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { jest, describe, test, expect, beforeEach, beforeAll, afterAll } from '@jest/globals';
 import { addAttachmentToRunTool } from '../../../src/tools/runs/add_attachment_to_run.js';
 import { TestRailClient } from '../../../src/client/testrail.js';
 import * as fs from 'fs';
@@ -19,7 +19,7 @@ describe('addAttachmentToRunTool', () => {
 
     beforeEach(() => {
         mockClient = {
-            addAttachmentToRun: jest.fn()
+            addAttachment: jest.fn(),
         } as unknown as jest.Mocked<TestRailClient>;
     });
 
@@ -32,7 +32,7 @@ describe('addAttachmentToRunTool', () => {
         const fakePath = path.join(testTempDir, 'does-not-exist.txt');
         await expect(addAttachmentToRunTool.handler({
             run_id: 1,
-            file_path: fakePath
+            file_path: fakePath,
         }, mockClient)).rejects.toThrow(`File or directory not found: ${fakePath}`);
     });
 
@@ -41,17 +41,17 @@ describe('addAttachmentToRunTool', () => {
         fs.writeFileSync(filePath, 'Hello World');
 
         const mockAttachmentResult = {
-            attachment_id: 12345
+            attachment_id: 12345,
         };
 
-        mockClient.addAttachmentToRun.mockResolvedValue(mockAttachmentResult as any);
+        mockClient.addAttachment.mockResolvedValue(mockAttachmentResult as any);
 
         const result = await addAttachmentToRunTool.handler({
             run_id: 1,
-            file_path: filePath
+            file_path: filePath,
         }, mockClient);
 
-        expect(mockClient.addAttachmentToRun).toHaveBeenCalledWith(1, filePath, 'test.txt');
+        expect(mockClient.addAttachment).toHaveBeenCalledWith('run', 1, filePath, 'test.txt');
         expect(result).toEqual(mockAttachmentResult);
     });
 
@@ -62,16 +62,17 @@ describe('addAttachmentToRunTool', () => {
         fs.writeFileSync(path.join(dirPath, 'file2.txt'), 'Content 2');
 
         const mockAttachmentResult = {
-            attachment_id: 54321
+            attachment_id: 54321,
         };
-        mockClient.addAttachmentToRun.mockResolvedValue(mockAttachmentResult as any);
+        mockClient.addAttachment.mockResolvedValue(mockAttachmentResult as any);
 
         const result = await addAttachmentToRunTool.handler({
             run_id: 1,
-            file_path: dirPath
+            file_path: dirPath,
         }, mockClient);
 
-        expect(mockClient.addAttachmentToRun).toHaveBeenCalledWith(
+        expect(mockClient.addAttachment).toHaveBeenCalledWith(
+            'run',
             1,
             expect.stringMatching(/testdir-\d+\.zip$/),
             'testdir.zip'
@@ -79,7 +80,7 @@ describe('addAttachmentToRunTool', () => {
         expect(result).toEqual(mockAttachmentResult);
 
         // Verify the temporary zip file was cleaned up
-        const calledZipPath = mockClient.addAttachmentToRun.mock.calls[0][1];
+        const calledZipPath = mockClient.addAttachment.mock.calls[0][2];
         expect(fs.existsSync(calledZipPath)).toBe(false);
     });
 });
