@@ -6,9 +6,10 @@
 - Add `add_attachment` tool to upload files, screenshots, logs, or auto-zipped directories to test cases or test runs (`entity_type: "case" | "run"`), supporting both numeric and `'C123'` case IDs.
 - Add `query_attachment` tool to download an attachment by ID (`action: "one"`) or retrieve attachment metadata for test cases or test runs (`action: "many"`), supporting pagination and optional `output_file` export.
 - Extend `delete_entity` tool to support deleting attachments (`entity_type: "attachment"`) using numeric IDs.
+- Add `TESTRAIL_ENABLE_DEPRECATED_TOOLS` environment variable (defaults to `true`) allowing users to preserve backward compatibility or disable deprecated tools to optimize prompt tokens.
 
 ### Deprecated
-- Deprecated `add_attachment_to_run` in favor of the generic `add_attachment` tool.
+- Deprecated `add_attachment_to_run` in favor of the generic `add_attachment` tool (scheduled for removal in 3.0.0).
 
 ## [2.2.0]
 
