@@ -1,6 +1,7 @@
 import { Priority, CaseType, Template, Status, Test, Label, User, ConfigurationGroup } from "../tools/commons/types.js";
 import { Project } from "../tools/projects/types.js";
-import { Run, Attachment } from "../tools/runs/types.js";
+import { Run } from "../tools/runs/types.js";
+import { Attachment, AttachmentItem, AttachmentEntityType } from "../tools/attachments/types.js";
 import { Section } from "../tools/sections/types.js";
 import { Suite } from "../tools/suites/types.js";
 import { SharedStep, SharedStepHistory } from "../tools/shared_steps/types.js";
@@ -9,6 +10,7 @@ import { Result } from "../tools/results/types.js";
 import { isActive } from "../utils/sanitizer.js";
 
 import * as fs from "fs";
+import * as path from "path";
 
 interface PaginatedCasesResponse {
     cases: Case[];
@@ -256,7 +258,7 @@ export class TestRailClient {
         return this.post<Result[]>(`${API_BASE_V2}/add_results_for_cases/${runId}`, { results });
     }
 
-    async addAttachmentToRun(runId: number, filePath: string, filename: string): Promise<Attachment> {
+    async addAttachment(entityType: AttachmentEntityType, entityId: number, filePath: string, filename: string): Promise<Attachment> {
         const fileBuffer = await fs.promises.readFile(filePath);
         const blob = new Blob([fileBuffer]);
         const formData = new FormData();
@@ -266,7 +268,12 @@ export class TestRailClient {
             'Authorization': this.auth,
         };
 
-        return this._executeRequest<Attachment>('POST', `${API_BASE_V2}/add_attachment_to_run/${runId}`, headers, formData);
+        return this._executeRequest<Attachment>('POST', `${API_BASE_V2}/add_attachment_to_${entityType}/${entityId}`, headers, formData);
+    }
+
+    async getAttachments(entityType: AttachmentEntityType, entityId: number): Promise<AttachmentItem[]> {
+        const url = `${API_BASE_V2}/get_attachments_for_${entityType}/${entityId}`;
+        return this.paginateAll<AttachmentItem>(url, 'attachments');
     }
 
     async getSharedSteps(projectId: number, options?: { refs?: string }): Promise<SharedStep[]> {
@@ -295,12 +302,37 @@ export class TestRailClient {
         return this.post<SharedStep>(`${API_BASE_V2}/update_shared_step/${sharedStepId}`, data);
     }
 
+    async getAttachment(attachmentId: number | string, outputFilePath: string): Promise<{ file: string; size: number }> {
+        const dir = path.dirname(outputFilePath);
+        if (dir && !fs.existsSync(dir)) {
+            await fs.promises.mkdir(dir, { recursive: true });
+        }
+
+        const buffer = await this._executeRequest<Buffer>(
+            'GET',
+            `${API_BASE_V2}/get_attachment/${attachmentId}`,
+            this.headers,
+            undefined,
+            'buffer'
+        );
+
+        await fs.promises.writeFile(outputFilePath, buffer);
+        return {
+            file: outputFilePath,
+            size: buffer.byteLength,
+        };
+    }
+
     async deleteCase(caseId: number): Promise<void> {
-        return this._executeRequest<void>('POST', `${API_BASE_V2}/delete_case/${caseId}`, this.headers, JSON.stringify({}), false);
+        return this._executeRequest<void>('POST', `${API_BASE_V2}/delete_case/${caseId}`, this.headers, JSON.stringify({}), 'text');
     }
 
     async deleteSharedStep(sharedStepId: number): Promise<void> {
-        return this._executeRequest<void>('POST', `${API_BASE_V2}/delete_shared_step/${sharedStepId}`, this.headers, JSON.stringify({}), false);
+        return this._executeRequest<void>('POST', `${API_BASE_V2}/delete_shared_step/${sharedStepId}`, this.headers, JSON.stringify({}), 'text');
+    }
+
+    async deleteAttachment(attachmentId: number | string): Promise<void> {
+        return this._executeRequest<void>('POST', `${API_BASE_V2}/delete_attachment/${attachmentId}`, this.headers, JSON.stringify({}), 'text');
     }
 
     async getUsers(projectId?: number): Promise<User[]> {
@@ -355,7 +387,13 @@ export class TestRailClient {
         return this._executeRequest<T>(method, endpoint, this.headers, jsonData);
     }
 
-    private async _executeRequest<T>(method: 'GET' | 'POST', endpoint: string, headers: HeadersInit, body?: any, parseBody: boolean = true): Promise<T> {
+    private async _executeRequest<T>(
+        method: 'GET' | 'POST',
+        endpoint: string,
+        headers: HeadersInit,
+        body?: any,
+        responseType: 'json' | 'text' | 'buffer' = 'json'
+    ): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
         const params: RequestInit = {
             method,
@@ -402,8 +440,11 @@ export class TestRailClient {
                     throw new Error(errorMessage);
                 }
 
-                if (parseBody) {
+                if (responseType === 'json') {
                     return await response.json() as T;
+                } else if (responseType === 'buffer') {
+                    const arrayBuffer = await response.arrayBuffer();
+                    return Buffer.from(arrayBuffer) as T;
                 }
 
                 return await response.text() as T;

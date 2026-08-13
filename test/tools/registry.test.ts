@@ -12,17 +12,20 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
         expect(toolsDefault).toBeDefined();
         expect(Array.isArray(toolsDefault)).toBe(true);
-        expect(toolsDefault.length).toBe(24); // 24 default tools
+        expect(toolsDefault.length).toBe(26); // 26 default tools (delete_entity excluded by default)
 
         expect(toolsFalse).toBeDefined();
         expect(Array.isArray(toolsFalse)).toBe(true);
-        expect(toolsFalse.length).toBe(24);
+        expect(toolsFalse.length).toBe(26);
 
-        // Check a few default tool names are present
+        // Check tool names are present
         const names = toolsDefault.map(t => t.name);
         expect(names).toContain('query_project');
         expect(names).toContain('get_case');
         expect(names).toContain('mutate_run');
+        expect(names).toContain('add_attachment');
+        expect(names).toContain('query_attachment');
+        expect(names).toContain('add_attachment_to_run');
 
         // Ensure shared steps tools are NOT present
         expect(names).not.toContain('get_shared_steps');
@@ -34,11 +37,14 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
         expect(tools).toBeDefined();
         expect(Array.isArray(tools)).toBe(true);
-        expect(tools.length).toBe(30); // 24 default + 6 shared steps tools
+        expect(tools.length).toBe(32); // 27 base + 5 shared steps tools
 
         const names = tools.map(t => t.name);
         expect(names).toContain('query_project');
         expect(names).toContain('get_case');
+        expect(names).toContain('add_attachment');
+        expect(names).toContain('query_attachment');
+        expect(names).toContain('add_attachment_to_run');
 
         // Ensure shared steps tools ARE present
         expect(names).toContain('get_shared_steps');
@@ -51,7 +57,7 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
     test('excludes delete tools by default', () => {
         const tools = getToolsToRegister({ enableSharedSteps: true });
-        expect(tools.length).toBe(29); // delete_entity is excluded by default (30 - 1)
+        expect(tools.length).toBe(31); // delete_entity is excluded by default (32 - 1)
         const names = tools.map(t => t.name);
         expect(names).not.toContain('delete_entity');
     });
@@ -59,12 +65,12 @@ describe('Tools Registry (getToolsToRegister)', () => {
     test('filters tools based on allowWrite and allowRead permissions', () => {
         // Test allowWrite: false
         const noWrite = getToolsToRegister({ allowWrite: false });
-        expect(noWrite.length).toBe(15); // 24 - 9 write tools
+        expect(noWrite.length).toBe(16); // 16 read tools
         expect(noWrite.every(t => t.mode !== 'write')).toBe(true);
 
         // Test allowRead: false
         const noRead = getToolsToRegister({ allowRead: false });
-        expect(noRead.length).toBe(9); // 24 - 15 read tools
+        expect(noRead.length).toBe(10); // 10 write tools
         expect(noRead.every(t => t.mode !== 'read')).toBe(true);
     });
 

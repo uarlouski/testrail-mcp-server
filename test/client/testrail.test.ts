@@ -3,6 +3,8 @@ import { TestRailClient } from '../../src/client/testrail.js';
 import { Case } from '../../src/tools/cases/types.js';
 import { Section } from '../../src/tools/sections/types.js';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 
 describe('TestRailClient', () => {
     let client: TestRailClient;
@@ -726,7 +728,7 @@ describe('TestRailClient', () => {
         );
     });
 
-    test('addAttachmentToRun uploads file using FormData', async () => {
+    test('addAttachment uploads file for run using FormData', async () => {
         const mockAttachment = { attachment_id: 443 };
         const mockFileBuffer = Buffer.from('file content');
 
@@ -737,7 +739,7 @@ describe('TestRailClient', () => {
             json: async () => mockAttachment
         });
 
-        const result = await client.addAttachmentToRun(100, '/path/to/file.txt', 'file.txt');
+        const result = await client.addAttachment('run', 100, '/path/to/file.txt', 'file.txt');
 
         expect(result).toEqual(mockAttachment);
         expect(fs.promises.readFile).toHaveBeenCalledWith('/path/to/file.txt');
@@ -1457,5 +1459,111 @@ describe('TestRailClient', () => {
             expect.any(Object)
         );
     });
+
+    test('addAttachment uploads file for case using FormData', async () => {
+        const mockAttachment = { attachment_id: 888 };
+        const mockFileBuffer = Buffer.from('image content');
+
+        jest.spyOn(fs.promises, 'readFile').mockResolvedValue(mockFileBuffer);
+
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockAttachment
+        });
+
+        const result = await client.addAttachment('case', 123, '/path/to/screenshot.png', 'screenshot.png');
+
+        expect(result).toEqual(mockAttachment);
+        expect(fs.promises.readFile).toHaveBeenCalledWith('/path/to/screenshot.png');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/add_attachment_to_case/123',
+            expect.objectContaining({
+                method: 'POST',
+                headers: expect.objectContaining({
+                    'Authorization': expect.stringContaining('Basic')
+                }),
+                body: expect.any(FormData)
+            })
+        );
+    });
+
+    test('getAttachments for case returns attachments array with pagination', async () => {
+        const mockAttachments = [
+            { id: 1, filename: 'file1.png', size: 100 }
+        ];
+
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ attachments: mockAttachments, _links: { next: null } })
+        });
+
+        const result = await client.getAttachments('case', 123);
+        expect(result).toEqual(mockAttachments);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_attachments_for_case/123',
+            expect.any(Object)
+        );
+    });
+
+    test('getAttachments for run returns attachments array with pagination', async () => {
+        const mockAttachments = [
+            { id: 2, filename: 'run_log.txt', size: 200 }
+        ];
+
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ attachments: mockAttachments, _links: { next: null } })
+        });
+
+        const result = await client.getAttachments('run', 456);
+        expect(result).toEqual(mockAttachments);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_attachments_for_run/456',
+            expect.any(Object)
+        );
+    });
+
+    test('getAttachment downloads binary data and writes to file', async () => {
+        const mockData = Buffer.from('image binary bytes');
+        const outputPath = path.join(os.tmpdir(), 'test-download-attachment.png');
+
+        fetchMock.mockResolvedValue({
+            ok: true,
+            arrayBuffer: async () => mockData.buffer.slice(mockData.byteOffset, mockData.byteOffset + mockData.byteLength)
+        });
+
+        const result = await client.getAttachment(12345, outputPath);
+        expect(result.file).toBe(outputPath);
+        expect(result.size).toBe(mockData.byteLength);
+        expect(fs.existsSync(outputPath)).toBe(true);
+        expect(fs.readFileSync(outputPath)).toEqual(mockData);
+
+        fs.unlinkSync(outputPath);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_attachment/12345',
+            expect.objectContaining({
+                method: 'GET',
+            })
+        );
+    });
+
+    test('deleteAttachment sends POST request with empty body', async () => {
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            text: async () => ''
+        });
+
+        await client.deleteAttachment(12345);
+
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/delete_attachment/12345',
+            expect.objectContaining({
+                method: 'POST',
+                body: '{}'
+            })
+        );
+    });
 });
+
 

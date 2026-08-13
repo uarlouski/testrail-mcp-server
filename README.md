@@ -189,7 +189,12 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 | `get_results` | Retrieve paginated results for a specific test ID. |
 | `add_results` | Submit test results to a test run using the specific `test_id`. |
 | `add_results_for_cases` | Submits results to a run mapping directly to `case_id`s, streamlining automation workflows. |
-| `add_attachment_to_run` | Attach logs, files, or zipped artifacts directly to an ongoing test run. |
+
+### 📎 Attachments & Media
+| Tool | Functionality |
+|------|-------------|
+| `add_attachment` | Add an attachment (screenshot, log, file, or auto-zipped directory) to a test case or test run (`entity_type: "case" \| "run"`). |
+| `query_attachment` | Download an attachment to a local file (`action: "one"`) or retrieve attachment metadata for a test case or test run (`action: "many"`, supporting `output_file` export). |
 
 ### 🔗 Shared Steps (Optional)
 | Tool | Functionality |
@@ -203,7 +208,7 @@ The TestRail MCP Server provides heavily typed, descriptive tools designed speci
 ### 🗑️ Deletion
 | Tool | Functionality |
 |------|-------------|
-| `delete_entity` | Deletes a specified TestRail entity (supports `"case"` or `"shared_step"`) by its ID. Requires `TESTRAIL_ALLOW_DELETE_OPERATIONS` to be set to `true` in your environment. |
+| `delete_entity` | Deletes a specified TestRail entity (supports `"case"`, `"shared_step"`, or `"attachment"`) by its ID. Requires `TESTRAIL_ALLOW_DELETE_OPERATIONS` to be set to `true` in your environment. |
 
 ### 🧠 System Metadata
 | Tool | Functionality |
