@@ -64,6 +64,13 @@
           "format": "boolean",
           "isSecret": false,
           "name": "TESTRAIL_ALLOW_DELETE_OPERATIONS"
+        },
+        {
+          "description": "Enable deprecated tools for backward compatibility (defaults to true)",
+          "isRequired": false,
+          "format": "boolean",
+          "isSecret": false,
+          "name": "TESTRAIL_ENABLE_DEPRECATED_TOOLS"
         }
       ]
     }

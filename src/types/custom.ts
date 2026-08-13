@@ -25,6 +25,7 @@ export interface ToolDefinition<T extends z.ZodRawShape, Context = any> {
     description: string;
     parameters: T;
     mode: ToolMode;
+    deprecated?: boolean;
     annotations?: ToolAnnotations;
     handler: (args: z.infer<z.ZodObject<T>>, context: Context) => Promise<Record<string, any>>;
 }

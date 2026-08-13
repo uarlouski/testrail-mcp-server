@@ -103,4 +103,14 @@ describe('index.ts environment validation', () => {
         await import('../src/index.js');
         expect(exitMock).not.toHaveBeenCalled();
     });
+
+    test('handles TESTRAIL_ENABLE_DEPRECATED_TOOLS configuration', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        process.env.TESTRAIL_ENABLE_DEPRECATED_TOOLS = 'false';
+
+        await import('../src/index.js');
+        expect(exitMock).not.toHaveBeenCalled();
+    });
 });

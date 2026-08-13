@@ -15,7 +15,8 @@ const EnvSchema = z.object({
     TESTRAIL_ENABLE_SHARED_STEPS: z.string().optional().transform(val => val === 'true'),
     TESTRAIL_ALLOW_WRITE_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
     TESTRAIL_ALLOW_READ_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
-    TESTRAIL_ALLOW_DELETE_OPERATIONS: z.string().optional().transform(val => val === 'true')
+    TESTRAIL_ALLOW_DELETE_OPERATIONS: z.string().optional().transform(val => val === 'true'),
+    TESTRAIL_ENABLE_DEPRECATED_TOOLS: z.string().optional().transform(val => val === undefined ? true : val === 'true')
 });
 
 const parseResult = EnvSchema.safeParse(process.env);
@@ -34,7 +35,8 @@ const {
     TESTRAIL_ENABLE_SHARED_STEPS,
     TESTRAIL_ALLOW_WRITE_OPERATIONS,
     TESTRAIL_ALLOW_READ_OPERATIONS,
-    TESTRAIL_ALLOW_DELETE_OPERATIONS
+    TESTRAIL_ALLOW_DELETE_OPERATIONS,
+    TESTRAIL_ENABLE_DEPRECATED_TOOLS
 } = parseResult.data;
 
 const server = new McpServer({
@@ -48,7 +50,8 @@ const tools = getToolsToRegister({
     enableSharedSteps: TESTRAIL_ENABLE_SHARED_STEPS,
     allowWrite: TESTRAIL_ALLOW_WRITE_OPERATIONS,
     allowRead: TESTRAIL_ALLOW_READ_OPERATIONS,
-    allowDelete: TESTRAIL_ALLOW_DELETE_OPERATIONS
+    allowDelete: TESTRAIL_ALLOW_DELETE_OPERATIONS,
+    enableDeprecatedTools: TESTRAIL_ENABLE_DEPRECATED_TOOLS
 });
 
 for (const tool of tools) {

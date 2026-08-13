@@ -74,6 +74,27 @@ describe('Tools Registry (getToolsToRegister)', () => {
         expect(noRead.every(t => t.mode !== 'read')).toBe(true);
     });
 
+    test('filters deprecated tools based on enableDeprecatedTools', () => {
+        // By default, deprecated tools are enabled
+        const defaultTools = getToolsToRegister({});
+        const defaultNames = defaultTools.map(t => t.name);
+        expect(defaultNames).toContain('add_attachment_to_run');
+        expect(defaultTools.length).toBe(26);
+
+        // Explicit enableDeprecatedTools: false
+        const noDeprecated = getToolsToRegister({ enableDeprecatedTools: false });
+        const noDeprecatedNames = noDeprecated.map(t => t.name);
+        expect(noDeprecatedNames).not.toContain('add_attachment_to_run');
+        expect(noDeprecated.length).toBe(25);
+        expect(noDeprecated.every(t => !t.deprecated)).toBe(true);
+
+        // Explicit enableDeprecatedTools: true
+        const withDeprecated = getToolsToRegister({ enableDeprecatedTools: true });
+        const withDeprecatedNames = withDeprecated.map(t => t.name);
+        expect(withDeprecatedNames).toContain('add_attachment_to_run');
+        expect(withDeprecated.length).toBe(26);
+    });
+
     test('all returned tools have valid structures', () => {
         const tools = getToolsToRegister({ enableSharedSteps: true, allowDelete: true });
 

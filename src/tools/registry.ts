@@ -11,6 +11,7 @@ import { attachmentsTools } from "./attachments/index.js";
 
 export interface ToolRegistrationConfig {
     enableSharedSteps?: boolean;
+    enableDeprecatedTools?: boolean;
     allowWrite?: boolean;
     allowRead?: boolean;
     allowDelete?: boolean;
@@ -35,8 +36,10 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
     const allowWrite = config.allowWrite !== false;
     const allowRead = config.allowRead !== false;
     const allowDelete = config.allowDelete === true;
+    const enableDeprecatedTools = config.enableDeprecatedTools !== false;
 
     const filteredTools = tools.filter(tool => {
+        if (tool.deprecated && !enableDeprecatedTools) return false;
         if (tool.mode === 'write') return allowWrite;
         if (tool.mode === 'read') return allowRead;
         return allowDelete;
