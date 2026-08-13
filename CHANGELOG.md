@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.3.0]
 
 ### Added
 - Add `add_attachment` tool to upload files, screenshots, logs, or auto-zipped directories to test cases or test runs (`entity_type: "case" | "run"`), supporting both numeric and `'C123'` case IDs.
