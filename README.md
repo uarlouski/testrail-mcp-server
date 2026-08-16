@@ -36,6 +36,9 @@ Managing test cases manually is tedious and error-prone. With the **TestRail MCP
 
 **No context switching. No tedious copy-pasting. Just ask your AI.**
 
+> [!NOTE]
+> **Compatibility Baseline**: The primary baseline version this MCP server is tested and validated against is **TestRail 10.6.2** (API v2). Older TestRail instances (including pre-7.x pagination) are also supported via built-in backward compatibility.
+
 ## ✨ Key Features & Capabilities
 
 | Capability | Description |
