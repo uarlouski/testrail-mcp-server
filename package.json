@@ -21,13 +21,21 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "mcp-server",
     "testrail",
     "server",
     "typescript",
     "llm",
     "ai",
+    "ai-agents",
     "testing",
-    "automation"
+    "automation",
+    "qa-automation",
+    "qa-tools",
+    "test-management",
+    "claude",
+    "cursor",
+    "windsurf"
   ],
   "author": "Uladzislau Arlouski",
   "repository": {
