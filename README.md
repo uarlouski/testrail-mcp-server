@@ -167,71 +167,19 @@ To ensure smooth transitions, deprecated tools remain available by default (`TES
 
 ---
 
-## 🛠️ Complete Tool Reference
+## 📚 Documentation & Complete Tool Reference
 
-The TestRail MCP Server provides heavily typed, descriptive tools designed specifically for LLM interaction:
+For a comprehensive guide, detailed configuration options, and a complete breakdown of all available tools, please visit our official documentation site:
 
-> **💡 Pro Tip: Handling Large Data Sets & Permissions**
-> - **Large Data Sets**: For list-based tools like `get_cases` and `get_sections`, you can supply the `output_file` parameter with an absolute file path. The server will bypass the LLM context window by writing the raw JSON directly to disk and returning a concise summary, allowing you to run external scripts against the export!
-> - **Intelligent User Fallback**: When fetching users using `get_users` without admin rights, TestRail denies access globally. The server dynamically catches this permission restriction and falls back to polling all active projects in parallel, retrieving and deduplicating active users so assignees and reviewers can always be mapped.
+**👉 [TestRail MCP Server Documentation](https://uarlouski.github.io/testrail-mcp-server/)**
 
-### 🔭 Discovery & Navigation
-| Tool | Functionality |
-|------|-------------|
-| `query_project` | Retrieve a single project (`action: "one"`) or all active projects (`action: "many"`). |
-| `query_suite` | Retrieve a single test suite (`action: "one"`) or all test suites for a project (`action: "many"`). |
-| `get_sections` | Navigate the precise folder/section hierarchy of any test suite. |
-| `mutate_suite` | Create a new test suite or update an existing one in TestRail. |
-| `mutate_section` | Create a new section or update an existing section in TestRail. |
-| `get_users` | Retrieve active users. Handles per-project filtering and automatic fallback polling for non-admin accounts. |
+The documentation includes detailed explanations for:
+- 🔭 **Discovery & Navigation**: Exploring projects, suites, and sections.
+- 📋 **Test Case Management**: Fetching, creating, and bulk-updating test cases.
+- ▶️ **Execution & Tracking**: Managing test runs and submitting test results.
+- 📎 **Attachments**: Automatically zipping and uploading files or directories.
+- 🔗 **Shared Steps**: Managing reusable step definitions.
 
-### 📋 Test Case Management
-| Tool | Functionality |
-|------|-------------|
-| `get_cases` | Query test cases with advanced filtering (priority, template, type, etc.) and pagination. |
-| `get_case` | Fetch complete, structured details of a specific test case, including custom steps and fields. |
-| `add_case` | Seamlessly create a new test case equipped with robust custom field validation. |
-| `update_case` | Modify an existing test case's steps, metadata, or titles. |
-| `update_cases` | Execute bulk-updates on multiple test cases simultaneously to save time. |
-
-### ▶️ Test Execution & Tracking
-| Tool | Functionality |
-|------|-------------|
-| `query_run` | Retrieve a single test run (`action: "one"`) or all test runs for a project (`action: "many"`, supporting filters). |
-| `mutate_run` | Create a new test run or update an existing one in TestRail. |
-| `get_tests` | Retrieve individual tests for a specific test run, with optional status filtering. |
-| `get_results` | Retrieve paginated results for a specific test ID. |
-| `add_results` | Submit test results to a test run using the specific `test_id`. |
-| `add_results_for_cases` | Submits results to a run mapping directly to `case_id`s, streamlining automation workflows. |
-
-### 📎 Attachments & Media
-| Tool | Functionality |
-|------|-------------|
-| `add_attachment` | Add an attachment (screenshot, log, file, or auto-zipped directory) to a test case or test run (`entity_type: "case" \| "run"`). |
-| `query_attachment` | Download an attachment to a local file (`action: "one"`) or retrieve attachment metadata for a test case or test run (`action: "many"`, supporting `output_file` export). |
-
-### 🔗 Shared Steps (Optional)
-| Tool | Functionality |
-|------|-------------|
-| `get_shared_steps` | List shared test steps for a project with optional reference filtering. |
-| `get_shared_step` | Retrieve precise details of a specific shared test step set. |
-| `get_shared_step_history` | View the complete audit trail and version history of a shared step set. |
-| `add_shared_step` | Create a new reusable set of shared test steps. |
-| `update_shared_step` | Modify an existing shared step set (changes propagate to all linked test cases). |
-
-### 🗑️ Deletion
-| Tool | Functionality |
-|------|-------------|
-| `delete_entity` | Deletes a specified TestRail entity (supports `"case"`, `"shared_step"`, or `"attachment"`) by its ID. Requires `TESTRAIL_ALLOW_DELETE_OPERATIONS` to be set to `true` in your environment. |
-
-### 🧠 System Metadata
-| Tool | Functionality |
-|------|-------------|
-| `get_statuses` | Systematically list all configured test statuses (Passed, Failed, Blocked, Retest, etc.). |
-| `get_priorities` | Retrieve priority levels configured within your instance structure. |
-| `get_case_fields` | Discover custom field definitions, formats, and UI dropdown options. Supports filtering by `project_id`. |
-| `get_templates` | Identify available case templates to mandate correct AI structuring. |
-| `get_configurations` | Retrieve all configuration groups and configurations for a project. |
 
 ---
 

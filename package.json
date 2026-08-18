@@ -16,7 +16,10 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "keywords": [
     "mcp",
@@ -54,6 +57,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "@types/archiver": "^7.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.5.0",
@@ -62,7 +66,8 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "@jest/globals": "^29.7.0"
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.41"
   },
   "devEngines": {
     "packageManager": {

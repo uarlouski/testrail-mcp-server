@@ -28,3 +28,5 @@ coverage/
 
 # TypeScript cache
 *.tsbuildinfo
+docs/.vitepress/dist
+docs/.vitepress/cache
