@@ -104,6 +104,16 @@ describe('index.ts environment validation', () => {
         expect(exitMock).not.toHaveBeenCalled();
     });
 
+    test('loads case history tools when TESTRAIL_ENABLE_CASE_HISTORY is true', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        process.env.TESTRAIL_ENABLE_CASE_HISTORY = 'true';
+
+        await import('../src/index.js');
+        expect(exitMock).not.toHaveBeenCalled();
+    });
+
     test('handles TESTRAIL_ENABLE_DEPRECATED_TOOLS configuration', async () => {
         process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
         process.env.TESTRAIL_USERNAME = 'test@example.com';
@@ -114,3 +124,4 @@ describe('index.ts environment validation', () => {
         expect(exitMock).not.toHaveBeenCalled();
     });
 });
+

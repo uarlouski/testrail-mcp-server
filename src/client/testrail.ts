@@ -5,7 +5,7 @@ import { Attachment, AttachmentItem, AttachmentEntityType } from "../tools/attac
 import { Section } from "../tools/sections/types.js";
 import { Suite } from "../tools/suites/types.js";
 import { SharedStep, SharedStepHistory } from "../tools/shared_steps/types.js";
-import { Case, CaseField } from "../tools/cases/types.js";
+import { Case, CaseField, CaseHistoryEntry } from "../tools/cases/types.js";
 import { Result } from "../tools/results/types.js";
 import { isActive } from "../utils/sanitizer.js";
 
@@ -53,6 +53,10 @@ export class TestRailClient {
 
     async getCase(caseId: number): Promise<Case> {
         return this.get<Case>(`${API_BASE_V2}/get_case/${caseId}`);
+    }
+
+    async getCaseHistory(caseId: number): Promise<CaseHistoryEntry[]> {
+        return this.paginateAll<CaseHistoryEntry>(`${API_BASE_V2}/get_history_for_case/${caseId}`, 'history');
     }
 
     async getCasesRecursively(projectId: number, sectionId: number, filter?: Record<string, string>, excludedSectionNames?: string[]): Promise<Case[]> {

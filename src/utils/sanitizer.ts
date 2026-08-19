@@ -60,3 +60,18 @@ export function isActive(value: any): boolean {
     const activeFlag = (typeof value === 'object') ? value.is_active : value;
     return activeFlag === 1 || activeFlag === true || activeFlag === '1' || activeFlag === 'true';
 }
+
+/**
+ * Normalizes an entity ID (e.g. case ID, run ID, attachment ID).
+ * Handles string IDs with 'C' prefixes (e.g. 'C123' -> 123), numeric IDs, and trims whitespace.
+ */
+export function normalizeEntityId(id: number | string): number {
+    const idString = typeof id === "string" ? id.trim() : String(id);
+    const cleaned = idString.toUpperCase().startsWith("C") ? idString.substring(1) : idString;
+    const parsed = Number(cleaned);
+    if (isNaN(parsed)) {
+        throw new Error(`Invalid entity ID: ${id}`);
+    }
+    return parsed;
+}
+

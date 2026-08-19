@@ -30,6 +30,16 @@ describe('Tools Registry (getToolsToRegister)', () => {
         // Ensure shared steps tools are NOT present
         expect(names).not.toContain('get_shared_steps');
         expect(names).not.toContain('add_shared_step');
+
+        // Ensure case history tool is NOT present by default
+        expect(names).not.toContain('get_case_history');
+    });
+
+    test('returns default tools plus case history tool when enableCaseHistory is true', () => {
+        const tools = getToolsToRegister({ enableCaseHistory: true });
+        expect(tools.length).toBe(27);
+        const names = tools.map(t => t.name);
+        expect(names).toContain('get_case_history');
     });
 
     test('returns default tools plus shared steps tools when enableSharedSteps is true (with allowDelete: true)', () => {

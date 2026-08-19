@@ -258,6 +258,61 @@ describe('TestRailClient', () => {
         );
     });
 
+    test('getCaseHistory returns history array from paginated response', async () => {
+        const mockHistory = [
+            { id: 101, case_id: 1, user_id: 2, created_on: 1600000000, type_id: 1, changes: [] },
+            { id: 102, case_id: 1, user_id: 2, created_on: 1600001000, type_id: 1, changes: [{ field: 'title', old_value: 'A', new_value: 'B' }] }
+        ];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => ({
+                offset: 0,
+                limit: 250,
+                size: 2,
+                _links: { next: null, prev: null },
+                history: mockHistory
+            })
+        });
+
+        const result = await client.getCaseHistory(1);
+        expect(result).toEqual(mockHistory);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_history_for_case/1',
+            expect.any(Object)
+        );
+    });
+
+    test('getCaseHistory handles multi-page pagination', async () => {
+        const page1History = [{ id: 101, case_id: 1 }];
+        const page2History = [{ id: 102, case_id: 1 }];
+
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: async () => ({
+                    history: page1History,
+                    _links: { next: '/api/v2/get_history_for_case/1&offset=250' }
+                })
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: async () => ({
+                    history: page2History,
+                    _links: { next: null }
+                })
+            });
+
+        const result = await client.getCaseHistory(1);
+        expect(result).toEqual([...page1History, ...page2History]);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
     test('getSection returns data on success', async () => {
         const mockData = {
             id: 1,

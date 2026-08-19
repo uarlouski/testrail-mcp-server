@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
 import { validateCaseFields } from "../../utils/validator.js";
+import { normalizeEntityId } from "../../utils/sanitizer.js";
 import { CASE_FIELDS_PARAM_DESCRIPTION } from "./get_case_fields.js";
 
 const parameters = {
@@ -23,9 +24,7 @@ export const updateCaseTool: ToolDefinition<typeof parameters, TestRailClient> =
     handler: async ({ case_id, fields }, client) => {
         validateCaseFields(fields, await client.getCaseFields());
 
-        const idString = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;
-        const id = Number(idString);
-
+        const id = normalizeEntityId(case_id);
         const updatedCase = await client.updateCase(id, fields);
 
         return {

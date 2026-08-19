@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Add `get_case_history` tool to retrieve audit and change history for test cases.
+- Add `TESTRAIL_ENABLE_CASE_HISTORY` environment variable (defaults to `false`) to conditionally register test case history tools and optimize LLM context window tokens.
+
 ## [2.3.0]
 
 ### Added

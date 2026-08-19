@@ -3,19 +3,7 @@ import * as path from "path";
 import * as os from "os";
 import archiver from "archiver";
 
-/**
- * Normalizes an entity ID (case ID or run ID).
- * Handles string IDs with 'C' prefixes (e.g. 'C123' -> 123) and numeric IDs.
- */
-export function normalizeEntityId(id: number | string): number {
-    const idString = typeof id === "string" ? id.trim() : String(id);
-    const cleaned = idString.toUpperCase().startsWith("C") ? idString.substring(1) : idString;
-    const parsed = Number(cleaned);
-    if (isNaN(parsed)) {
-        throw new Error(`Invalid entity ID: ${id}`);
-    }
-    return parsed;
-}
+export { normalizeEntityId } from "./sanitizer.js";
 
 /**
  * Prepares a file or directory for upload.
