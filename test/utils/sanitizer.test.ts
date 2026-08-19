@@ -1,5 +1,5 @@
 import { describe, test, expect } from '@jest/globals';
-import { sanitizeValue, removeNullish, isActive } from '../../src/utils/sanitizer.js';
+import { sanitizeValue, removeNullish, isActive, normalizeEntityId } from '../../src/utils/sanitizer.js';
 
 describe('sanitizeValue', () => {
     test('strips style attributes from string values', () => {
@@ -169,3 +169,24 @@ describe('isActive', () => {
         expect(isActive({})).toBe(false);
     });
 });
+
+describe('normalizeEntityId', () => {
+    test('returns number as-is when given a number', () => {
+        expect(normalizeEntityId(123)).toBe(123);
+    });
+
+    test('parses numeric string', () => {
+        expect(normalizeEntityId('456')).toBe(456);
+    });
+
+    test('strips "C" or "c" prefix and trims whitespace', () => {
+        expect(normalizeEntityId('C789')).toBe(789);
+        expect(normalizeEntityId('c789')).toBe(789);
+        expect(normalizeEntityId('  C100  ')).toBe(100);
+    });
+
+    test('throws error for invalid non-numeric string', () => {
+        expect(() => normalizeEntityId('invalid')).toThrow('Invalid entity ID: invalid');
+    });
+});
+

@@ -47,3 +47,28 @@ export const CaseSchema = z.object({
 }).loose();
 
 export type Case = z.infer<typeof CaseSchema>;
+
+export const CaseHistoryChangeSchema = z.object({
+    field: z.string(),
+    old_value: z.any().nullable().optional(),
+    new_value: z.any().nullable().optional(),
+});
+
+export type CaseHistoryChange = z.infer<typeof CaseHistoryChangeSchema>;
+
+export const CaseHistoryEntrySchema = z.object({
+    id: z.number(),
+    created_on: z.number().optional(),
+    changes: z.array(CaseHistoryChangeSchema).optional().default([]),
+});
+
+export type CaseHistoryEntry = z.infer<typeof CaseHistoryEntrySchema>;
+
+export const CaseHistoryResponseSchema = z.object({
+    case_id: z.number(),
+    latest_revision: z.number().nullable(),
+    has_changes: z.boolean(),
+    history: z.array(CaseHistoryEntrySchema),
+});
+
+export type CaseHistoryResponse = z.infer<typeof CaseHistoryResponseSchema>;

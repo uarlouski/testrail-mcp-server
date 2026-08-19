@@ -1,5 +1,5 @@
 import { ToolDefinition } from "../types/custom.js";
-import { casesTools } from "./cases/index.js";
+import { casesTools, getCaseHistoryTool } from "./cases/index.js";
 import { projectsTools } from "./projects/index.js";
 import { suitesTools } from "./suites/index.js";
 import { sectionsTools } from "./sections/index.js";
@@ -11,6 +11,7 @@ import { attachmentsTools } from "./attachments/index.js";
 
 export interface ToolRegistrationConfig {
     enableSharedSteps?: boolean;
+    enableCaseHistory?: boolean;
     enableDeprecatedTools?: boolean;
     allowWrite?: boolean;
     allowRead?: boolean;
@@ -31,6 +32,10 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
 
     if (config.enableSharedSteps) {
         tools.push(...sharedStepsTools);
+    }
+
+    if (config.enableCaseHistory) {
+        tools.push(getCaseHistoryTool as any);
     }
 
     const allowWrite = config.allowWrite !== false;

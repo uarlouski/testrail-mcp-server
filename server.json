@@ -45,6 +45,13 @@
           "name": "TESTRAIL_ENABLE_SHARED_STEPS"
         },
         {
+          "description": "Enable test case history management",
+          "isRequired": false,
+          "format": "boolean",
+          "isSecret": false,
+          "name": "TESTRAIL_ENABLE_CASE_HISTORY"
+        },
+        {
           "description": "Allow write operations on TestRail (defaults to true)",
           "isRequired": false,
           "format": "boolean",

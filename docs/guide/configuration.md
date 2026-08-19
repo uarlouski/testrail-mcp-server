@@ -8,6 +8,7 @@ This page details the environment variables required to securely configure the T
 | `TESTRAIL_USERNAME` | Your TestRail user email address | ✅ | |
 | `TESTRAIL_API_KEY` | Your TestRail API key | ✅ | |
 | `TESTRAIL_ENABLE_SHARED_STEPS` | Set to `true` to enable Shared Steps management tools | | `false` |
+| `TESTRAIL_ENABLE_CASE_HISTORY` | Set to `true` to enable Case History and revision tracking tools | | `false` |
 | `TESTRAIL_ALLOW_WRITE_OPERATIONS` | Allow write operations (e.g. adding/updating test cases) | | `true` |
 | `TESTRAIL_ALLOW_READ_OPERATIONS` | Allow read operations (e.g. retrieving projects) | | `true` |
 | `TESTRAIL_ALLOW_DELETE_OPERATIONS` | Allow delete operations (e.g. deleting cases). Enabled strictly via `true`. | | `false` |

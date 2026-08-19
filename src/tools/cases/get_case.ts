@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { processCustomFields } from "../../utils/mapper.js";
+import { normalizeEntityId } from "../../utils/sanitizer.js";
 import { TestRailClient } from "../../client/testrail.js";
 import { TestCaseResponse, ToolDefinition } from "../../types/custom.js";
 import { LabelSchema } from "../commons/types.js";
@@ -14,8 +15,7 @@ export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     description: "Get detailed information about a test case including its custom fields",
     parameters,
     handler: async ({ case_id }, client) => {
-        const idString = case_id.toUpperCase().startsWith("C") ? case_id.substring(1) : case_id;
-        const id = Number(idString);
+        const id = normalizeEntityId(case_id);
         const testCase = await client.getCase(id);
 
         const [section, caseTypes, priorities, caseFields] = await Promise.all([
