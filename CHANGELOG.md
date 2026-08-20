@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.4.0]
 
 ### Added
 - Add `get_case_history` tool to retrieve audit and change history for test cases.
