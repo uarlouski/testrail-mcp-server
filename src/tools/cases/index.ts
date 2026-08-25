@@ -6,8 +6,9 @@ import { updateCaseTool } from "./update_case.js";
 import { updateCasesTool } from "./update_cases.js";
 import { addCaseTool } from "./add_case.js";
 import { getCaseHistoryTool } from "./get_case_history.js";
+import { resolveCaseFieldTool } from "./resolve_case_field.js";
 
-export { getCaseHistoryTool };
+export { getCaseHistoryTool, resolveCaseFieldTool };
 
 export const casesTools: ToolDefinition<any, any>[] = [
     getCaseTool,
@@ -16,5 +17,6 @@ export const casesTools: ToolDefinition<any, any>[] = [
     updateCaseTool,
     updateCasesTool,
     addCaseTool,
+    resolveCaseFieldTool,
 ];
 

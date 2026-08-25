@@ -59,16 +59,32 @@ export function processCustomFields(
 
 /**
  * Parse dropdown options from field configs.
+ * If projectId is provided, prioritizes configuration specific to that project.
  * Format: "1, First\n2, Second\n3, Third"
  */
-export function parseDropdownOptions(field: CaseField): Map<string, string> {
+export function parseDropdownOptions(field: CaseField, projectId?: number): Map<string, string> {
     const options = new Map<string, string>();
 
-    for (const config of field.configs) {
+    let configsToParse = field.configs;
+    if (projectId !== undefined) {
+        const projectConfig = field.configs.find(c =>
+            c.context && !c.context.is_global && c.context.project_ids.includes(projectId)
+        );
+        if (projectConfig) {
+            configsToParse = [projectConfig];
+        } else {
+            const globalConfig = field.configs.find(c => c.context?.is_global);
+            if (globalConfig) {
+                configsToParse = [globalConfig];
+            }
+        }
+    }
+
+    for (const config of configsToParse) {
         const items = config.options?.items;
         if (!items) continue;
 
-        const lines = items.split('\n');
+        const lines = items.split(/\r?\n/);
         for (const line of lines) {
             const commaIndex = line.indexOf(',');
             if (commaIndex > 0) {

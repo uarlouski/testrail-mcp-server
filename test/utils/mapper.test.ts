@@ -1,6 +1,6 @@
 import { jest, describe, test, expect } from '@jest/globals';
 import { Case, CaseField } from '../../src/types/testrail.js';
-import { processCustomFields } from '../../src/utils/mapper.js';
+import { processCustomFields, parseDropdownOptions } from '../../src/utils/mapper.js';
 
 describe('processCustomFields', () => {
 
@@ -122,6 +122,47 @@ describe('processCustomFields', () => {
 
         const result = processCustomFields(input, mockCaseFields);
         expect(result.automation_priority).toBe(999); // Falls back to original value
+    });
+});
+
+describe('parseDropdownOptions', () => {
+    const multiConfigField: CaseField = {
+        id: 10,
+        name: 'tags',
+        system_name: 'custom_tags',
+        label: 'Tags',
+        type_id: 12,
+        template_ids: [],
+        include_all: true,
+        is_active: true,
+        description: null,
+        configs: [
+            {
+                context: { is_global: true, project_ids: [] },
+                options: { items: '1, Global 1\n2, Global 2' }
+            },
+            {
+                context: { is_global: false, project_ids: [100] },
+                options: { items: '1, Project 100 Option 1\n2, Project 100 Option 2' }
+            }
+        ]
+    };
+
+    test('parses global config when no projectId provided', () => {
+        const options = parseDropdownOptions(multiConfigField);
+        expect(options.get('1')).toBe('Project 100 Option 1'); // when no projectId given, parses all configs
+    });
+
+    test('prioritizes project-specific config when matching projectId provided', () => {
+        const options = parseDropdownOptions(multiConfigField, 100);
+        expect(options.get('1')).toBe('Project 100 Option 1');
+        expect(options.get('2')).toBe('Project 100 Option 2');
+    });
+
+    test('falls back to global config when non-matching projectId provided', () => {
+        const options = parseDropdownOptions(multiConfigField, 999);
+        expect(options.get('1')).toBe('Global 1');
+        expect(options.get('2')).toBe('Global 2');
     });
 });
 

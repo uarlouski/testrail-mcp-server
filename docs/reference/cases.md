@@ -31,3 +31,17 @@ Modify an existing test case. You can perform partial updates to change specific
 
 ### `update_cases`
 Execute bulk-updates on multiple test cases simultaneously. Provide a list of case IDs and the fields you want to change, and the server will apply the same update to all cases efficiently.
+
+### `resolve_case_field`
+Resolve numeric reference IDs for Multi-select test case fields (`type_id: 12`) into their human-readable textual values for a specific project.
+
+- **Why it's useful**:
+  - **Translates Raw Numeric Arrays**: When retrieving test cases via `get_case`, Multi-select fields (e.g., tags, components, environments) return raw integer ID arrays like `[1, 55, 6]`. This tool converts those opaque IDs into clear textual labels (e.g., `["Authentication", "Settings", "Billing"]`).
+  - **Token & Context Optimization**: Rather than dumping massive lists of hundreds of options for every field across the whole project, AI assistants can resolve only the specific references they need on-demand, saving significant LLM context tokens.
+  - **Project-Aware Mapping**: Accurately maps IDs based on project-specific field configurations when options vary across projects.
+
+- **Parameters**:
+  - `project_id`: The ID of the project to scope field configuration
+  - `field_name`: The system name of the Multi-select field (e.g. `'custom_case_feature_tags'`)
+  - `refs`: A single numeric ID or array of numeric IDs/references (e.g. `[1, 55, 6]` or `55`) to resolve
+

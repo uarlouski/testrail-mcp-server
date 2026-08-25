@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Add `resolve_case_field` tool to resolve numeric reference IDs for Multi-select test case fields (`type_id: 12`) to their textual values for a specific project.
+
 ## [2.4.0]
 
 ### Added
