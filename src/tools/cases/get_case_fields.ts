@@ -99,7 +99,7 @@ export function mapToFieldSchema(field: CaseField): FieldSchema {
     return schema;
 }
 
-function isFieldForProject(field: CaseField, projectId: number): boolean {
+export function isFieldForProject(field: CaseField, projectId: number): boolean {
     const contexts = field.configs.map(c => c.context).filter(Boolean) as { is_global: boolean; project_ids: number[] }[];
     if (contexts.length === 0) return true;
     return contexts.some(ctx => ctx.is_global || ctx.project_ids.includes(projectId));
