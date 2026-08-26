@@ -155,6 +155,7 @@ Once configured, turbo-charge your QA workflow by asking your AI assistant:
 | `TESTRAIL_ALLOW_READ_OPERATIONS` | Allow read operations (e.g. retrieving projects, test cases, templates) | | `true` |
 | `TESTRAIL_ALLOW_DELETE_OPERATIONS` | Allow delete operations (e.g. deleting cases or shared steps). Enabled strictly via `true`. | | `false` |
 | `TESTRAIL_ENABLE_DEPRECATED_TOOLS` | Enable deprecated tools for backward compatibility. Set to `false` to reduce context token overhead. | | `true` |
+| `TESTRAIL_DISABLED_TOOLS` | Comma-separated list of specific tool names to disable (e.g., `mutate_suite,delete_entity`). Fails if invalid tool names are specified. | | - |
 
 ### ⚠️ Deprecation Lifecycle & Features Scheduled for Removal
 

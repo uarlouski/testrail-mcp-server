@@ -145,4 +145,37 @@ describe('Tools Registry (getToolsToRegister)', () => {
             }
         }
     });
+
+    test('filters out tools specified in disabledTools', () => {
+        const defaultTools = getToolsToRegister({});
+        expect(defaultTools.some(t => t.name === 'get_case')).toBe(true);
+        expect(defaultTools.some(t => t.name === 'mutate_run')).toBe(true);
+
+        const toolsWithDisabled = getToolsToRegister({
+            disabledTools: ['get_case', 'mutate_run']
+        });
+
+        expect(toolsWithDisabled.length).toBe(defaultTools.length - 2);
+        expect(toolsWithDisabled.some(t => t.name === 'get_case')).toBe(false);
+        expect(toolsWithDisabled.some(t => t.name === 'mutate_run')).toBe(false);
+    });
+
+    test('throws error listing all non-existent tools when unknown tool names are provided in disabledTools', () => {
+        expect(() => getToolsToRegister({
+            disabledTools: ['fake_tool_one', 'get_case', 'fake_tool_two']
+        })).toThrow('Cannot disable non-existent tool(s): fake_tool_one, fake_tool_two');
+    });
+
+    test('allows disabling conditional/gated tools without error', () => {
+        // Gated tools (like shared steps and case history) exist in the system and should be recognized as valid tool names
+        const tools = getToolsToRegister({
+            enableSharedSteps: true,
+            disabledTools: ['get_shared_steps', 'get_case_history']
+        });
+
+        const names = tools.map(t => t.name);
+        expect(names).not.toContain('get_shared_steps');
+        expect(names).not.toContain('get_case_history');
+    });
 });
+

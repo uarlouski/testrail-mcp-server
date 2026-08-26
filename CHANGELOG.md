@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Add `TESTRAIL_DISABLED_TOOLS` environment variable (comma-separated list) to disable specific tools by name. Includes startup validation that raises an error listing all non-existent tools if unknown tool names are specified.
+
 ## [2.5.0]
 
 ### Added

@@ -17,7 +17,8 @@ const EnvSchema = z.object({
     TESTRAIL_ALLOW_WRITE_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
     TESTRAIL_ALLOW_READ_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
     TESTRAIL_ALLOW_DELETE_OPERATIONS: z.string().optional().transform(val => val === 'true'),
-    TESTRAIL_ENABLE_DEPRECATED_TOOLS: z.string().optional().transform(val => val === undefined ? true : val === 'true')
+    TESTRAIL_ENABLE_DEPRECATED_TOOLS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
+    TESTRAIL_DISABLED_TOOLS: z.string().optional().transform(val => val ? val.split(',').map(s => s.trim()).filter(Boolean) : [])
 });
 
 const parseResult = EnvSchema.safeParse(process.env);
@@ -38,7 +39,8 @@ const {
     TESTRAIL_ALLOW_WRITE_OPERATIONS,
     TESTRAIL_ALLOW_READ_OPERATIONS,
     TESTRAIL_ALLOW_DELETE_OPERATIONS,
-    TESTRAIL_ENABLE_DEPRECATED_TOOLS
+    TESTRAIL_ENABLE_DEPRECATED_TOOLS,
+    TESTRAIL_DISABLED_TOOLS
 } = parseResult.data;
 
 const server = new McpServer({
@@ -49,14 +51,21 @@ const server = new McpServer({
 
 const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY);
 
-const tools = getToolsToRegister({
-    enableSharedSteps: TESTRAIL_ENABLE_SHARED_STEPS,
-    enableCaseHistory: TESTRAIL_ENABLE_CASE_HISTORY,
-    allowWrite: TESTRAIL_ALLOW_WRITE_OPERATIONS,
-    allowRead: TESTRAIL_ALLOW_READ_OPERATIONS,
-    allowDelete: TESTRAIL_ALLOW_DELETE_OPERATIONS,
-    enableDeprecatedTools: TESTRAIL_ENABLE_DEPRECATED_TOOLS
-});
+let tools;
+try {
+    tools = getToolsToRegister({
+        enableSharedSteps: TESTRAIL_ENABLE_SHARED_STEPS,
+        enableCaseHistory: TESTRAIL_ENABLE_CASE_HISTORY,
+        allowWrite: TESTRAIL_ALLOW_WRITE_OPERATIONS,
+        allowRead: TESTRAIL_ALLOW_READ_OPERATIONS,
+        allowDelete: TESTRAIL_ALLOW_DELETE_OPERATIONS,
+        enableDeprecatedTools: TESTRAIL_ENABLE_DEPRECATED_TOOLS,
+        disabledTools: TESTRAIL_DISABLED_TOOLS
+    });
+} catch (error: any) {
+    console.error("Invalid TestRail environment configuration:", error.message);
+    process.exit(1);
+}
 
 for (const tool of tools) {
     server.registerTool(

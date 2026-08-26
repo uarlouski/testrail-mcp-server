@@ -123,5 +123,44 @@ describe('index.ts environment validation', () => {
         await import('../src/index.js');
         expect(exitMock).not.toHaveBeenCalled();
     });
+
+    test('handles valid TESTRAIL_DISABLED_TOOLS configuration', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        process.env.TESTRAIL_DISABLED_TOOLS = 'get_case, mutate_suite';
+
+        await import('../src/index.js');
+        expect(exitMock).not.toHaveBeenCalled();
+    });
+
+    test('handles empty TESTRAIL_DISABLED_TOOLS configuration', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        process.env.TESTRAIL_DISABLED_TOOLS = '';
+
+        await import('../src/index.js');
+        expect(exitMock).not.toHaveBeenCalled();
+    });
+
+    test('exits with code 1 if TESTRAIL_DISABLED_TOOLS contains non-existent tools', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        process.env.TESTRAIL_DISABLED_TOOLS = 'fake_tool_one, get_case, fake_tool_two';
+
+        try {
+            await import('../src/index.js');
+        } catch (e) {
+            // ignore
+        }
+
+        expect(exitMock).toHaveBeenCalledWith(1);
+        expect(errorMock).toHaveBeenCalledWith(
+            'Invalid TestRail environment configuration:',
+            expect.stringContaining('Cannot disable non-existent tool(s): fake_tool_one, fake_tool_two')
+        );
+    });
 });
 
