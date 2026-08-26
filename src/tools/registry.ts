@@ -16,9 +16,32 @@ export interface ToolRegistrationConfig {
     allowWrite?: boolean;
     allowRead?: boolean;
     allowDelete?: boolean;
+    disabledTools?: string[];
 }
 
+export const ALL_TOOLS: ToolDefinition<any, any>[] = [
+    ...projectsTools,
+    ...suitesTools,
+    ...casesTools,
+    getCaseHistoryTool as any,
+    ...sectionsTools,
+    ...runsTools,
+    ...resultsTools,
+    ...attachmentsTools,
+    ...commonsTools,
+    ...sharedStepsTools,
+];
+
+const ALL_TOOL_NAMES = new Set(ALL_TOOLS.map(t => t.name));
+
 export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefinition<any, any>[] {
+    if (config.disabledTools && config.disabledTools.length > 0) {
+        const unknownTools = config.disabledTools.filter(name => !ALL_TOOL_NAMES.has(name));
+        if (unknownTools.length > 0) {
+            throw new Error(`Cannot disable non-existent tool(s): ${unknownTools.join(', ')}`);
+        }
+    }
+
     const tools: ToolDefinition<any, any>[] = [
         ...projectsTools,
         ...suitesTools,
@@ -42,8 +65,10 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
     const allowRead = config.allowRead !== false;
     const allowDelete = config.allowDelete === true;
     const enableDeprecatedTools = config.enableDeprecatedTools !== false;
+    const disabledSet = new Set(config.disabledTools ?? []);
 
     const filteredTools = tools.filter(tool => {
+        if (disabledSet.has(tool.name)) return false;
         if (tool.deprecated && !enableDeprecatedTools) return false;
         if (tool.mode === 'write') return allowWrite;
         if (tool.mode === 'read') return allowRead;
