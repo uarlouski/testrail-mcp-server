@@ -5,6 +5,11 @@
 ### Added
 - Add `TESTRAIL_DISABLED_TOOLS` environment variable (comma-separated list) to disable specific tools by name. Includes startup validation that raises an error listing all non-existent tools if unknown tool names are specified.
 
+### Changed
+- Enhance tools output sanitization:
+    - Convert TestRail HTML formatting (lists, paragraphs, links, typography, entity decoding) to clean Markdown/plaintext.
+    - Normalize inline images to `[Attachment: <id>]` references.
+
 ## [2.5.0]
 
 ### Added
