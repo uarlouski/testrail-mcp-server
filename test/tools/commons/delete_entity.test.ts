@@ -36,4 +36,8 @@ describe('delete_entity tool', () => {
         expect(mockClient.deleteSharedStep).not.toHaveBeenCalled();
         expect(result.message).toBe('Attachment 789 deleted successfully.');
     });
+
+    test('throws error for unsupported entity type', async () => {
+        await expect(deleteEntityTool.handler({ entity_type: 'unknown' as any, entity_id: 999 }, mockClient)).rejects.toThrow('Unsupported entity type: unknown');
+    });
 });

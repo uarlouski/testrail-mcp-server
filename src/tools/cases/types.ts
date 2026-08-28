@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { LabelSchema } from "../commons/types.js";
+import { CaseFieldTypeId } from "./fields.js";
+
+export { CaseFieldTypeId };
 
 export const CaseFieldConfigSchema = z.object({
     context: z.object({

@@ -34,6 +34,9 @@ describe('Tools Registry (getToolsToRegister)', () => {
 
         // Ensure case history tool is NOT present by default
         expect(names).not.toContain('get_case_history');
+
+        // Ensure RAG export tool is NOT present by default
+        expect(names).not.toContain('export_cases_for_rag');
     });
 
     test('returns default tools plus case history tool when enableCaseHistory is true', () => {
@@ -41,6 +44,13 @@ describe('Tools Registry (getToolsToRegister)', () => {
         expect(tools.length).toBe(28);
         const names = tools.map(t => t.name);
         expect(names).toContain('get_case_history');
+    });
+
+    test('returns default tools plus RAG export tool when enableRagTools is true', () => {
+        const tools = getToolsToRegister({ enableRagTools: true });
+        expect(tools.length).toBe(28);
+        const names = tools.map(t => t.name);
+        expect(names).toContain('export_cases_for_rag');
     });
 
     test('returns default tools plus shared steps tools when enableSharedSteps is true (with allowDelete: true)', () => {

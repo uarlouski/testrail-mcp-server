@@ -247,6 +247,27 @@ describe('get_case_history tool', () => {
         expect(fileContent.history.length).toBe(3);
     });
 
+    test('filters by after_timestamp when some entries have null/undefined created_on', async () => {
+        const historyWithNullCreatedOn = [
+            { id: 101, case_id: 123, created_on: null as any, changes: [] },
+            { id: 102, case_id: 123, created_on: 1600005000, changes: [] },
+        ];
+        getCaseHistoryMock.mockResolvedValue(historyWithNullCreatedOn);
+
+        const result = await getCaseHistoryTool.handler({ case_id: '123', after_timestamp: 1600001000 }, mockClient);
+        expect(result.history.length).toBe(1);
+        expect(result.history[0].id).toBe(102);
+    });
+
+    test('writes to output_file when output directory already exists', async () => {
+        getCaseHistoryMock.mockResolvedValue(mockHistory);
+        const outputFile = path.join(tempDir, 'history_existing_dir.json');
+
+        const result = await getCaseHistoryTool.handler({ case_id: '123', output_file: outputFile }, mockClient);
+        expect(result.success).toBe(true);
+        expect(fs.existsSync(outputFile)).toBe(true);
+    });
+
     test('propagates errors from client.getCaseHistory', async () => {
         getCaseHistoryMock.mockRejectedValue(new Error('Network error'));
 

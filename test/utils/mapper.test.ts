@@ -43,6 +43,45 @@ describe('processCustomFields', () => {
         expect(result.automation_priority).toBe('P0');
     });
 
+    test('maps multi-select array field values using config', () => {
+        const multiSelectFields: CaseField[] = [
+            { id: 8, name: 'browsers', system_name: 'custom_browsers', label: 'Browsers', type_id: 12, template_ids: [], include_all: true, is_active: true, description: null, configs: [{ options: { items: '1, Chrome\n2, Firefox\n3, Safari' } }] },
+        ];
+        const input: Case = {
+            id: 1, title: 'Foo', template_id: 1,
+            custom_browsers: [1, 2],
+        } as unknown as Case;
+
+        const result = processCustomFields(input, multiSelectFields);
+        expect(result.browsers).toEqual(['Chrome', 'Firefox']);
+    });
+
+    test('maps single value for multi-select field as array', () => {
+        const multiSelectFields: CaseField[] = [
+            { id: 8, name: 'browsers', system_name: 'custom_browsers', label: 'Browsers', type_id: 12, template_ids: [], include_all: true, is_active: true, description: null, configs: [{ options: { items: '1, Chrome\n2, Firefox\n3, Safari' } }] },
+        ];
+        const input: Case = {
+            id: 1, title: 'Foo', template_id: 1,
+            custom_browsers: 1,
+        } as unknown as Case;
+
+        const result = processCustomFields(input, multiSelectFields);
+        expect(result.browsers).toEqual(['Chrome']);
+    });
+
+    test('normalizes multi-select field without dropdown options configs to array', () => {
+        const multiSelectFields: CaseField[] = [
+            { id: 9, name: 'tags', system_name: 'custom_tags', label: 'Tags', type_id: 12, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+        ];
+        const input: Case = {
+            id: 1, title: 'Foo', template_id: 1,
+            custom_tags: 123,
+        } as unknown as Case;
+
+        const result = processCustomFields(input, multiSelectFields);
+        expect(result.tags).toEqual([123]);
+    });
+
     test('includes only template-specific fields for template 1', () => {
         const input: Case = {
             id: 1, title: 'Foo', template_id: 1,

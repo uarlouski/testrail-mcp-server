@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Add `export_cases_for_rag` tool (gated by `TESTRAIL_ENABLE_RAG_TOOLS`) to export test cases as formatted Markdown documents with companion JSON metadata sidecar files for Knowledge Base and RAG ingestion.
 - Add `TESTRAIL_DISABLED_TOOLS` environment variable (comma-separated list) to disable specific tools by name. Includes startup validation that raises an error listing all non-existent tools if unknown tool names are specified.
 
 ### Changed
