@@ -1,54 +1,81 @@
 import { describe, test, expect } from '@jest/globals';
-import { sanitizeValue, removeNullish, isActive, normalizeEntityId } from '../../src/utils/sanitizer.js';
+import { sanitizeValue, htmlToMarkdown, removeNullish, isActive, normalizeEntityId } from '../../src/utils/sanitizer.js';
 
-describe('sanitizeValue', () => {
-    test('strips style attributes from string values', () => {
-        const input = '<p style="color: red; font-size: 14px;">Hello</p>';
-        expect(sanitizeValue(input)).toBe('<p>Hello</p>');
+describe('htmlToMarkdown & sanitizeValue', () => {
+    test('converts paragraph tags and strips style attributes to clean text', () => {
+        const input = '<p style="color: red; font-size: 14px;">Hello World</p>';
+        expect(sanitizeValue(input)).toBe('Hello World');
     });
 
-    test('strips multiple style attributes', () => {
-        const input = '<div style="margin: 10px;"><span style="font-weight: bold;">Text</span></div>';
-        expect(sanitizeValue(input)).toBe('<div><span>Text</span></div>');
+    test('converts ordered lists to numbered markdown format', () => {
+        const input = '<ol><li>First step</li><li>Second step</li></ol>';
+        expect(htmlToMarkdown(input)).toBe('1. First step\n2. Second step');
     });
 
-    test('handles single quotes in style', () => {
-        const input = "<p style='color: blue;'>Text</p>";
-        expect(sanitizeValue(input)).toBe('<p>Text</p>');
+    test('converts unordered lists to dash bullet format', () => {
+        const input = '<ul><li>Option A</li><li>Option B</li></ul>';
+        expect(htmlToMarkdown(input)).toBe('- Option A\n- Option B');
     });
 
-    test('preserves other attributes', () => {
-        const input = '<a href="http://example.com" style="color: blue;" class="link">Link</a>';
-        expect(sanitizeValue(input)).toBe('<a href="http://example.com" class="link">Link</a>');
+    test('extracts attachment images with data-attachment-id', () => {
+        const input = '<span class="markdown-img-container"><img src="index.php?/attachments/get/b0dd22aa-634b-4116-b85e-025ac45ba4f9" data-attachment-id="b0dd22aa-634b-4116-b85e-025ac45ba4f9" width="300"></span>';
+        expect(htmlToMarkdown(input)).toBe('[Attachment: b0dd22aa-634b-4116-b85e-025ac45ba4f9]');
     });
 
-    test('returns unchanged text without styles', () => {
-        const input = '<p>No styles here</p>';
-        expect(sanitizeValue(input)).toBe('<p>No styles here</p>');
-    });
-    test('sanitizes string values', () => {
-        const input = '<p style="color: red;">Hello</p>';
-        expect(sanitizeValue(input)).toBe('<p>Hello</p>');
+    test('extracts attachment images from attachment src URL without explicit data-attachment-id', () => {
+        const input = '<img src="index.php?/attachments/get/12345678-abcd-ef01-2345-6789abcdef01" class="fr-fic">';
+        expect(htmlToMarkdown(input)).toBe('[Attachment: 12345678-abcd-ef01-2345-6789abcdef01]');
     });
 
-    test('sanitizes nested objects', () => {
+    test('converts regular images with src and alt', () => {
+        const input = '<img src="https://example.com/logo.png" alt="Company Logo">';
+        expect(htmlToMarkdown(input)).toBe('![Company Logo](https://example.com/logo.png)');
+    });
+
+    test('converts links to markdown format', () => {
+        const input = '<a href="http://example.com" style="color: blue;" class="link">Visit Website</a>';
+        expect(htmlToMarkdown(input)).toBe('[Visit Website](http://example.com)');
+    });
+
+    test('converts text formatting: bold, italic, code', () => {
+        const input = '<strong>Bold</strong> and <em>Italic</em> and <code>var x = 1;</code>';
+        expect(htmlToMarkdown(input)).toBe('**Bold** and *Italic* and `var x = 1;`');
+    });
+
+    test('decodes common HTML entities', () => {
+        const input = 'Admin -&gt; Stores &amp; Config &quot;Checkout&quot; &#39;test&#39;';
+        expect(htmlToMarkdown(input)).toBe('Admin -> Stores & Config "Checkout" \'test\'');
+    });
+
+    test('handles complex TestRail precondition markup', () => {
+        const input = '<ol><li><p>Street restrictions are configured in Magento Admin -&gt; Stores -&gt; Configuration -&gt; BDA -&gt; Customer -&gt; Address Restrictions<br>(e.g. use regex = \'(\\bp\\.?o\\.?\\s?box\\b|\\bP\\.O\\.B\\b|\\bPOB\\b)\')<br><span class="markdown-img-container"><img src="index.php?/attachments/get/b0dd22aa-634b-4116-b85e-025ac45ba4f9" class="fr-fic fr-dib fr-fil markdown-img" width="300" id="attachment-b0dd22aa-634b-4116-b85e-025ac45ba4f9" data-attachment-id="b0dd22aa-634b-4116-b85e-025ac45ba4f9" data-entity-id="86069"></span></p></li></ol>';
+        const expected = '1. Street restrictions are configured in Magento Admin -> Stores -> Configuration -> BDA -> Customer -> Address Restrictions\n(e.g. use regex = \'(\\bp\\.?o\\.?\\s?box\\b|\\bP\\.O\\.B\\b|\\bPOB\\b)\')\n[Attachment: b0dd22aa-634b-4116-b85e-025ac45ba4f9]';
+        expect(htmlToMarkdown(input)).toBe(expected);
+    });
+
+    test('returns unchanged text when no HTML tags or entities exist', () => {
+        const input = 'Simple plain text without formatting';
+        expect(htmlToMarkdown(input)).toBe('Simple plain text without formatting');
+    });
+
+    test('sanitizes nested objects recursively', () => {
         const input = {
-            content: '<div style="margin: 10px;">Step 1</div>',
-            expected: '<p style="color: green;">Result</p>'
+            content: '<div style="margin: 10px;"><p>Step 1</p></div>',
+            expected: '<p style="color: green;">Result: &lt;OK&gt;</p>'
         };
         const result = sanitizeValue(input);
-        expect(result.content).toBe('<div>Step 1</div>');
-        expect(result.expected).toBe('<p>Result</p>');
+        expect(result.content).toBe('Step 1');
+        expect(result.expected).toBe('Result: <OK>');
     });
 
-    test('sanitizes arrays', () => {
+    test('sanitizes arrays recursively', () => {
         const input = [
-            { content: '<span style="font-size: 12px;">Item 1</span>' },
-            { content: '<span style="font-size: 14px;">Item 2</span>' }
+            { content: '<span style="font-size: 12px;"><p>Item 1</p></span>' },
+            { content: '<span style="font-size: 14px;"><p>Item 2</p></span>' }
         ];
         const result = sanitizeValue(input);
-        expect(result[0].content).toBe('<span>Item 1</span>');
-        expect(result[1].content).toBe('<span>Item 2</span>');
+        expect(result[0].content).toBe('Item 1');
+        expect(result[1].content).toBe('Item 2');
     });
 
     test('preserves non-string values', () => {
