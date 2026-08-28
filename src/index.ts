@@ -14,6 +14,7 @@ const EnvSchema = z.object({
     TESTRAIL_API_KEY: z.string().min(1, 'API key is required'),
     TESTRAIL_ENABLE_SHARED_STEPS: z.string().optional().transform(val => val === 'true'),
     TESTRAIL_ENABLE_CASE_HISTORY: z.string().optional().transform(val => val === 'true'),
+    TESTRAIL_ENABLE_RAG_TOOLS: z.string().optional().transform(val => val === 'true'),
     TESTRAIL_ALLOW_WRITE_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
     TESTRAIL_ALLOW_READ_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
     TESTRAIL_ALLOW_DELETE_OPERATIONS: z.string().optional().transform(val => val === 'true'),
@@ -36,6 +37,7 @@ const {
     TESTRAIL_API_KEY,
     TESTRAIL_ENABLE_SHARED_STEPS,
     TESTRAIL_ENABLE_CASE_HISTORY,
+    TESTRAIL_ENABLE_RAG_TOOLS,
     TESTRAIL_ALLOW_WRITE_OPERATIONS,
     TESTRAIL_ALLOW_READ_OPERATIONS,
     TESTRAIL_ALLOW_DELETE_OPERATIONS,
@@ -56,6 +58,7 @@ try {
     tools = getToolsToRegister({
         enableSharedSteps: TESTRAIL_ENABLE_SHARED_STEPS,
         enableCaseHistory: TESTRAIL_ENABLE_CASE_HISTORY,
+        enableRagTools: TESTRAIL_ENABLE_RAG_TOOLS,
         allowWrite: TESTRAIL_ALLOW_WRITE_OPERATIONS,
         allowRead: TESTRAIL_ALLOW_READ_OPERATIONS,
         allowDelete: TESTRAIL_ALLOW_DELETE_OPERATIONS,

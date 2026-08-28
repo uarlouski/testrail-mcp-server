@@ -7,8 +7,9 @@ import { updateCasesTool } from "./update_cases.js";
 import { addCaseTool } from "./add_case.js";
 import { getCaseHistoryTool } from "./get_case_history.js";
 import { resolveCaseFieldTool } from "./resolve_case_field.js";
+import { exportCasesForRagTool } from "./export_cases_for_rag.js";
 
-export { getCaseHistoryTool, resolveCaseFieldTool };
+export { getCaseHistoryTool, resolveCaseFieldTool, exportCasesForRagTool };
 
 export const casesTools: ToolDefinition<any, any>[] = [
     getCaseTool,
@@ -19,4 +20,5 @@ export const casesTools: ToolDefinition<any, any>[] = [
     addCaseTool,
     resolveCaseFieldTool,
 ];
+
 

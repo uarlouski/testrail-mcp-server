@@ -53,6 +53,27 @@ describe('htmlToMarkdown & sanitizeValue', () => {
         expect(htmlToMarkdown(input)).toBe(expected);
     });
 
+    test('decodes numeric HTML entities (decimal and hex)', () => {
+        const input = '&#65;&#66;&#67; and &#x41;&#x42;&#x43;';
+        expect(htmlToMarkdown(input)).toBe('ABC and ABC');
+    });
+
+    test('converts img tags with no src to [Image]', () => {
+        const input = '<img class="unknown">';
+        expect(htmlToMarkdown(input)).toBe('[Image]');
+    });
+
+    test('converts headings h1 to h6 to markdown headings', () => {
+        const input = '<h1>Title</h1><h2>Subtitle</h2>';
+        expect(htmlToMarkdown(input)).toBe('# Title\n\n## Subtitle');
+    });
+
+    test('returns non-string values as-is in htmlToMarkdown', () => {
+        expect(htmlToMarkdown(null as any)).toBe(null);
+        expect(htmlToMarkdown(undefined as any)).toBe(undefined);
+        expect(htmlToMarkdown(123 as any)).toBe(123);
+    });
+
     test('returns unchanged text when no HTML tags or entities exist', () => {
         const input = 'Simple plain text without formatting';
         expect(htmlToMarkdown(input)).toBe('Simple plain text without formatting');

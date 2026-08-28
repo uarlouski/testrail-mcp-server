@@ -45,3 +45,15 @@ Resolve numeric reference IDs for Multi-select test case fields (`type_id: 12`) 
   - `field_name`: The system name of the Multi-select field (e.g. `'custom_case_feature_tags'`)
   - `refs`: A single numeric ID or array of numeric IDs/references (e.g. `[1, 55, 6]` or `55`) to resolve
 
+### `export_cases_for_rag`
+*(Gated by `TESTRAIL_ENABLE_RAG_TOOLS=true`)*
+
+Export test cases formatted as clean Markdown documents with companion JSON metadata sidecar files (`.metadata.json`) for Knowledge Base and RAG (Retrieval-Augmented Generation) ingestion.
+
+- **How it works**:
+  - **Dynamic Markdown Document**: Formats test case title, section header, preconditions, numbered steps & expected results, and unstructured text fields into a clean Markdown `.md` document.
+  - **Companion Metadata Sidecar**: Generates a `.md.metadata.json` sidecar file containing structured attributes (`metadataAttributes`) such as case ID, title, section, priority, references, resolved multi-select tag strings, dropdowns, and checkboxes for vector search filtering and retrieval.
+- **Parameters**:
+  - `case_ids`: Array of test case IDs to export (e.g. `['C123', 456]`)
+  - `output_dir`: *(Optional)* Target directory path to save exported `.md` and `.metadata.json` files
+

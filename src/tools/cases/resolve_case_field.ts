@@ -3,7 +3,7 @@ import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
 import { parseDropdownOptions } from "../../utils/mapper.js";
 import { isActive } from "../../utils/sanitizer.js";
-import { isFieldForProject } from "./get_case_fields.js";
+import { isFieldForProject, CaseFieldTypeId } from "./get_case_fields.js";
 
 const parameters = {
     project_id: z.number().describe("The ID of the project to resolve field values for"),
@@ -32,7 +32,7 @@ export const resolveCaseFieldTool: ToolDefinition<typeof parameters, TestRailCli
             throw new Error(`Field '${field_name}' not found in active case fields.`);
         }
 
-        if (targetField.type_id !== 12) {
+        if (targetField.type_id !== CaseFieldTypeId.MultiSelect) {
             throw new Error(`Field '${targetField.system_name}' is of type_id ${targetField.type_id}, but resolve_case_field only supports Multi-select fields (type_id: 12).`);
         }
 

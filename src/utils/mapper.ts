@@ -1,4 +1,4 @@
-import { Case, CaseField } from "../tools/cases/types.js";
+import { Case, CaseField, CaseFieldTypeId } from "../tools/cases/types.js";
 import { sanitizeValue } from "./sanitizer.js";
 
 /**
@@ -47,8 +47,21 @@ export function processCustomFields(
 
         if (dropdownOptionsMap.has(key)) {
             const options = dropdownOptionsMap.get(key)!;
-            const optionKey = String(value);
-            finalValue = options.get(optionKey) || value;
+            const field = applicableFields.find(f => f.system_name === key);
+            if (Array.isArray(value)) {
+                finalValue = value.map(v => options.get(String(v)) || v);
+            } else if (field?.type_id === CaseFieldTypeId.MultiSelect) {
+                const resolved = options.get(String(value)) || value;
+                finalValue = [resolved];
+            } else {
+                const optionKey = String(value);
+                finalValue = options.get(optionKey) || value;
+            }
+        } else {
+            const field = applicableFields.find(f => f.system_name === key);
+            if (field?.type_id === CaseFieldTypeId.MultiSelect) {
+                finalValue = Array.isArray(value) ? value : [value];
+            }
         }
 
         result[outputKey] = sanitizeValue(finalValue);
