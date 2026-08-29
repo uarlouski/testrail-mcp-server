@@ -6,12 +6,12 @@
     "url": "https://github.com/uarlouski/testrail-mcp-server",
     "source": "github"
   },
-  "version": "2.5.0",
+  "version": "2.6.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@uarlouski/testrail-mcp-server",
-      "version": "2.5.0",
+      "version": "2.6.0",
       "transport": {
         "type": "stdio"
       },
@@ -50,6 +50,13 @@
           "format": "boolean",
           "isSecret": false,
           "name": "TESTRAIL_ENABLE_CASE_HISTORY"
+        },
+        {
+          "description": "Enable Knowledge Base and RAG export tools",
+          "isRequired": false,
+          "format": "boolean",
+          "isSecret": false,
+          "name": "TESTRAIL_ENABLE_RAG_TOOLS"
         },
         {
           "description": "Allow write operations on TestRail (defaults to true)",

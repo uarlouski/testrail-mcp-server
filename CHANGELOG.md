@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.6.0]
 
 ### Added
 - Add `export_cases_for_rag` tool (gated by `TESTRAIL_ENABLE_RAG_TOOLS`) to export test cases as formatted Markdown documents with companion JSON metadata sidecar files for Knowledge Base and RAG ingestion.
