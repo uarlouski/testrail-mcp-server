@@ -653,6 +653,56 @@ describe('export_cases_for_rag tool', () => {
             }
         }
     });
+
+    test('scopes custom fields to include_all and current case template_id', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_template_scope_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const customFieldsSchema: CaseField[] = [
+            { id: 1, name: 'global_field', system_name: 'custom_global_field', label: 'Global Field', type_id: 3, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 2, name: 'template1_field', system_name: 'custom_template1_field', label: 'Template 1 Field', type_id: 3, template_ids: [1], include_all: false, is_active: true, description: null, configs: [] },
+            { id: 3, name: 'template2_field', system_name: 'custom_template2_field', label: 'Template 2 Field', type_id: 3, template_ids: [2], include_all: false, is_active: true, description: null, configs: [] },
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(customFieldsSchema);
+
+        const mockCase: Case = {
+            id: 904,
+            title: 'Template Scoped Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+            custom_global_field: 'Global Content\nLine 2',
+            custom_template1_field: 'Template 1 Content\nLine 2',
+            custom_template2_field: 'Template 2 Content\nLine 2',
+        } as any;
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                case_ids: [904],
+                output_dir: testTempDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        const mdContent = await fs.promises.readFile(path.join(testTempDir, 'C904.md'), 'utf-8');
+        expect(mdContent).toContain('## Global Field');
+        expect(mdContent).toContain('## Template 1 Field');
+        expect(mdContent).not.toContain('## Template 2 Field');
+    });
 });
+
 
 
