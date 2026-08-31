@@ -1,9 +1,9 @@
 import { z } from "zod";
 import * as fs from "fs";
 import * as path from "path";
-import * as os from "os";
 import { normalizeEntityId, sanitizeValue } from "../../utils/sanitizer.js";
 import { processCustomFields } from "../../utils/mapper.js";
+import { getBaseDirectory } from "../../utils/fs.js";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
 import { Case, CaseField } from "./types.js";
@@ -179,8 +179,10 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
     description: "Export test cases as formatted Markdown documents with companion JSON metadata sidecar files for Knowledge Base and RAG ingestion.",
     parameters,
     handler: async ({ case_ids, output_dir }, client) => {
-        const baseDir = (process.cwd() && process.cwd() !== "/") ? process.cwd() : (process.env.PWD || os.homedir());
-        const targetDir = output_dir ? path.resolve(output_dir) : path.resolve(baseDir, `rag_export_${Date.now()}`);
+        const baseDir = getBaseDirectory();
+        const targetDir = output_dir
+            ? (path.isAbsolute(output_dir) ? output_dir : path.resolve(baseDir, output_dir))
+            : path.resolve(baseDir, `rag_export_${Date.now()}`);
         await fs.promises.mkdir(targetDir, { recursive: true });
 
         const [priorities, caseFields] = await Promise.all([
@@ -228,4 +230,3 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
         };
     },
 };
-

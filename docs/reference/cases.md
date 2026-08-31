@@ -57,3 +57,10 @@ Export test cases formatted as clean Markdown documents with companion JSON meta
   - `case_ids`: Array of test case IDs to export (e.g. `['C123', 456]`)
   - `output_dir`: *(Optional)* Target directory path to save exported `.md` and `.metadata.json` files
 
+> [!TIP]
+> **Output Directory in Global / User MCP Configurations**:
+> When `output_dir` is not specified, the tool defaults to auto-generating a timestamped folder (`rag_export_<timestamp>`) in the detected project directory.
+> 
+> However, if the MCP server is registered in a global or user-level MCP configuration, the MCP server process may be spawned with its working directory set to root (`/`) or the home directory (`~`). In this scenario, the export folder is automatically created inside the user's home directory (`~/rag_export_<timestamp>`).
+> 
+> **Best Practice**: We recommend explicitly specifying the `output_dir` parameter (or instructing your AI assistant to pass the current project path, e.g. `./rag_export`) to ensure exported test cases land directly in your active workspace.
