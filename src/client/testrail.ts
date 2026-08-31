@@ -40,6 +40,7 @@ export class TestRailClient {
     private statusesPromise: Promise<Status[]> | null = null;
     private projectsPromise: Promise<Project[]> | null = null;
     private templatesPromiseMap: Map<string, Promise<Template[]>> = new Map();
+    private sectionsPromiseMap: Map<string, Promise<Section>> = new Map();
 
     constructor(baseUrl: string, email: string, apiKey: string) {
         this.baseUrl = baseUrl.replace(/\/$/, "");
@@ -105,7 +106,13 @@ export class TestRailClient {
     }
 
     async getSection(sectionId: number): Promise<Section> {
-        return this.get<Section>(`${API_BASE_V2}/get_section/${sectionId}`);
+        if (!this.sectionsPromiseMap.has(sectionId.toString())) {
+            this.sectionsPromiseMap.set(
+                sectionId.toString(),
+                this.get<Section>(`${API_BASE_V2}/get_section/${sectionId}`)
+            );
+        }
+        return this.sectionsPromiseMap.get(sectionId.toString())!;
     }
 
     async getPriorities(): Promise<Priority[]> {

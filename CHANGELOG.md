@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Add in-memory caching for `get_section` in client to avoid redundant API requests for repeated section lookups.
+
 ## [2.6.0]
 
 ### Added
