@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Changed
+- Refactor `export_cases_for_rag` to use unique `system_name` directly for field identification and metadata attributes, preventing collisions when custom fields share duplicate display labels while preserving UI labels for Markdown headings.
+
 ### Fixed
 - Sanitize boolean and checkbox custom metadata attributes into string values in `export_cases_for_rag` to ensure broad compatibility with Knowledge Base and RAG ingestion pipelines.
 

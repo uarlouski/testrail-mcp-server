@@ -43,31 +43,48 @@ export function processCustomFields(
         }
 
         const outputKey = fieldNameMap.get(key)!;
-        let finalValue = value;
+        const field = applicableFields.find(f => f.system_name === key)!;
+        const options = dropdownOptionsMap.get(key);
 
-        if (dropdownOptionsMap.has(key)) {
-            const options = dropdownOptionsMap.get(key)!;
-            const field = applicableFields.find(f => f.system_name === key);
-            if (Array.isArray(value)) {
-                finalValue = value.map(v => options.get(String(v)) || v);
-            } else if (field?.type_id === CaseFieldTypeId.MultiSelect) {
-                const resolved = options.get(String(value)) || value;
-                finalValue = [resolved];
-            } else {
-                const optionKey = String(value);
-                finalValue = options.get(optionKey) || value;
-            }
-        } else {
-            const field = applicableFields.find(f => f.system_name === key);
-            if (field?.type_id === CaseFieldTypeId.MultiSelect) {
-                finalValue = Array.isArray(value) ? value : [value];
-            }
-        }
-
-        result[outputKey] = sanitizeValue(finalValue);
+        result[outputKey] = resolveCustomFieldValue(field, value, options);
     }
 
     return result;
+}
+
+/**
+ * Resolves a custom field value against its field definition:
+ * - Maps dropdown option IDs to their display labels
+ * - Normalizes multi-select values into arrays
+ * - Sanitizes HTML formatting in strings
+ */
+export function resolveCustomFieldValue(
+    field: CaseField,
+    value: any,
+    optionsMap?: Map<string, string>
+): any {
+    if (value === null || value === undefined) {
+        return value;
+    }
+
+    const options = optionsMap ?? parseDropdownOptions(field);
+    let finalValue = value;
+
+    if (options.size > 0) {
+        if (Array.isArray(value)) {
+            finalValue = value.map(v => options.get(String(v)) || v);
+        } else if (field.type_id === CaseFieldTypeId.MultiSelect) {
+            const resolved = options.get(String(value)) || value;
+            finalValue = [resolved];
+        } else {
+            const optionKey = String(value);
+            finalValue = options.get(optionKey) || value;
+        }
+    } else if (field.type_id === CaseFieldTypeId.MultiSelect) {
+        finalValue = Array.isArray(value) ? value : [value];
+    }
+
+    return sanitizeValue(finalValue);
 }
 
 /**

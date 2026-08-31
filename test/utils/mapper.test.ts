@@ -1,6 +1,6 @@
 import { jest, describe, test, expect } from '@jest/globals';
 import { Case, CaseField } from '../../src/types/testrail.js';
-import { processCustomFields, parseDropdownOptions } from '../../src/utils/mapper.js';
+import { processCustomFields, parseDropdownOptions, resolveCustomFieldValue } from '../../src/utils/mapper.js';
 
 describe('processCustomFields', () => {
 
@@ -202,6 +202,67 @@ describe('parseDropdownOptions', () => {
         const options = parseDropdownOptions(multiConfigField, 999);
         expect(options.get('1')).toBe('Global 1');
         expect(options.get('2')).toBe('Global 2');
+    });
+});
+
+describe('resolveCustomFieldValue', () => {
+    const stringField: CaseField = {
+        id: 1,
+        name: 'notes',
+        system_name: 'custom_notes',
+        label: 'Notes',
+        type_id: 1,
+        template_ids: [],
+        include_all: true,
+        is_active: true,
+        description: null,
+        configs: [],
+    };
+
+    const dropdownField: CaseField = {
+        id: 2,
+        name: 'automation_type',
+        system_name: 'custom_automation_type',
+        label: 'Automation Type',
+        type_id: 6,
+        template_ids: [],
+        include_all: true,
+        is_active: true,
+        description: null,
+        configs: [{ options: { items: '1, None\n2, Automated\n3, Needs Review' } }],
+    };
+
+    const multiSelectField: CaseField = {
+        id: 3,
+        name: 'browsers',
+        system_name: 'custom_browsers',
+        label: 'Browsers',
+        type_id: 12,
+        template_ids: [],
+        include_all: true,
+        is_active: true,
+        description: null,
+        configs: [{ options: { items: '1, Chrome\n2, Firefox\n3, Safari' } }],
+    };
+
+    test('returns null/undefined as-is', () => {
+        expect(resolveCustomFieldValue(stringField, null)).toBeNull();
+        expect(resolveCustomFieldValue(stringField, undefined)).toBeUndefined();
+    });
+
+    test('resolves dropdown numeric option to label', () => {
+        expect(resolveCustomFieldValue(dropdownField, 2)).toBe('Automated');
+        expect(resolveCustomFieldValue(dropdownField, '2')).toBe('Automated');
+        expect(resolveCustomFieldValue(dropdownField, 999)).toBe(999);
+    });
+
+    test('resolves multi-select array and single values to labels', () => {
+        expect(resolveCustomFieldValue(multiSelectField, [1, 3])).toEqual(['Chrome', 'Safari']);
+        expect(resolveCustomFieldValue(multiSelectField, 1)).toEqual(['Chrome']);
+    });
+
+    test('sanitizes HTML in string values', () => {
+        expect(resolveCustomFieldValue(stringField, '<p>Hello <strong>World</strong></p>')).toBe('Hello **World**');
     });
 });
 
