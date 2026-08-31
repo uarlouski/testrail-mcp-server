@@ -46,7 +46,10 @@ Resolve numeric reference IDs for Multi-select test case fields (`type_id: 12`) 
   - `refs`: A single numeric ID or array of numeric IDs/references (e.g. `[1, 55, 6]` or `55`) to resolve
 
 ### `export_cases_for_rag`
-*(Gated by `TESTRAIL_ENABLE_RAG_TOOLS=true`)*
+*(Experimental, gated by `TESTRAIL_ENABLE_RAG_TOOLS=true`)*
+
+> [!WARNING]
+> **Experimental Feature**: This tool is currently experimental and undergoing active design iteration. Expect major breaking changes to this API and its data structures in upcoming releases.
 
 Export test cases formatted as clean Markdown documents with companion JSON metadata sidecar files (`.metadata.json`) for Knowledge Base and RAG (Retrieval-Augmented Generation) ingestion.
 
