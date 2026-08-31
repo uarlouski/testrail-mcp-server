@@ -702,6 +702,58 @@ describe('export_cases_for_rag tool', () => {
         expect(mdContent).toContain('## Template 1 Field');
         expect(mdContent).not.toContain('## Template 2 Field');
     });
+
+    test('sanitizes boolean and checkbox fields to string values to satisfy AWS Bedrock Knowledge Base constraints', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_bool_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const customFieldsSchema: CaseField[] = [
+            { id: 1, name: 'is_automated', system_name: 'custom_is_automated', label: 'Is Automated', type_id: 5, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 2, name: 'is_flaky', system_name: 'custom_is_flaky', label: 'Is Flaky', type_id: 5, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 3, name: 'score', system_name: 'custom_score', label: 'Score', type_id: 2, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(customFieldsSchema);
+
+        const mockCase: Case = {
+            id: 905,
+            title: 'Boolean Checkbox Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+            custom_is_automated: true,
+            custom_is_flaky: false,
+            custom_score: 42,
+        } as any;
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                case_ids: [905],
+                output_dir: testTempDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C905.md.metadata.json'), 'utf-8'));
+        expect(metaContent.metadataAttributes.is_automated).toBe('true');
+        expect(metaContent.metadataAttributes.is_flaky).toBe('false');
+        expect(metaContent.metadataAttributes.score).toBe(42);
+        expect(typeof metaContent.metadataAttributes.is_automated).toBe('string');
+        expect(typeof metaContent.metadataAttributes.is_flaky).toBe('string');
+        expect(typeof metaContent.metadataAttributes.score).toBe('number');
+    });
 });
 
 

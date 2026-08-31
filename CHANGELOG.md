@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+- Sanitize boolean and checkbox custom metadata attributes into string values in `export_cases_for_rag` to ensure broad compatibility with Knowledge Base and RAG ingestion pipelines.
+
 ## [2.7.0]
 
 ### Added

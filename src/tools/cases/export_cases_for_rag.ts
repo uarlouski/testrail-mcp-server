@@ -49,9 +49,19 @@ function isMarkdownField(fieldDef: CaseField | undefined, value: any): boolean {
 }
 
 function sanitizeMetadataValue(val: any): any {
-    if (Array.isArray(val)) {
-        return val.map(item => (item !== null && typeof item === "object") ? (item.title || item.name || item.label || JSON.stringify(item)) : item);
+    if (typeof val === "boolean") {
+        return String(val);
     }
+
+    if (Array.isArray(val)) {
+        return val.map(item => {
+            if (item !== null && typeof item === "object") {
+                return item.title || item.name || item.label || JSON.stringify(item);
+            }
+            return String(item);
+        });
+    }
+
     return val;
 }
 
