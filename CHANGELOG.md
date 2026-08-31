@@ -4,6 +4,7 @@
 
 ### Changed
 - Refactor `export_cases_for_rag` to use unique `system_name` directly for field identification and metadata attributes, preventing collisions when custom fields share duplicate display labels while preserving UI labels for Markdown headings.
+- Update `export_cases_for_rag` tool description with batching recommendations for datasets larger than 25 test cases to prevent MCP tool call timeouts.
 
 ### Fixed
 - Sanitize boolean and checkbox custom metadata attributes into string values in `export_cases_for_rag` to ensure broad compatibility with Knowledge Base and RAG ingestion pipelines.

@@ -183,7 +183,7 @@ function buildMetadataAttributes(
 export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "export_cases_for_rag",
     mode: "read",
-    description: "Export test cases as formatted Markdown documents with companion JSON metadata sidecar files for Knowledge Base and RAG ingestion.",
+    description: "Export test cases as formatted Markdown documents with companion JSON metadata sidecar files for Knowledge Base and RAG ingestion. If exporting more than 25 cases, batch them into chunks of ~25 and execute in parallel with a shared output_dir to prevent tool call timeouts.",
     parameters,
     handler: async ({ case_ids, output_dir }, client) => {
         const baseDir = getBaseDirectory();
