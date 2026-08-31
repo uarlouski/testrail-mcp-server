@@ -336,6 +336,26 @@ describe('TestRailClient', () => {
         );
     });
 
+    test('getSection caches result per section', async () => {
+        const mockData1 = { id: 1, name: 'Section 1' };
+        const mockData2 = { id: 2, name: 'Section 2' };
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockData1
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockData2
+            });
+
+        await client.getSection(1);
+        await client.getSection(1);
+        await client.getSection(2);
+
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
     test('getPriorities returns data on success', async () => {
         const mockData = [{
             id: 1,
