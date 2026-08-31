@@ -5,6 +5,9 @@
 ### Added
 - Add in-memory caching for `get_section` in client to avoid redundant API requests for repeated section lookups.
 
+### Fixed
+- Improve `export_cases_for_rag` output directory resolution to prevent root filesystem write errors (`ENOENT`) when the MCP server is registered in a global or user-level MCP configuration. Now the export folder is automatically created inside the user's home directory.
+
 ## [2.6.0]
 
 ### Added

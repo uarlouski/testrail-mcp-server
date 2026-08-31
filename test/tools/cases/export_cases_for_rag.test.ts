@@ -567,5 +567,92 @@ describe('export_cases_for_rag tool', () => {
         expect(mdContent).toContain('## JSON Blob');
         expect(mdContent).toContain('"key": "value"');
     });
+
+    test('handles relative output_dir correctly', async () => {
+        const mockCase: Case = {
+            id: 902,
+            title: 'Relative Dir Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+        } as any;
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+        const relativeDir = `test_rag_relative_${Date.now()}`;
+        const result = await exportCasesForRagTool.handler(
+            {
+                case_ids: [902],
+                output_dir: relativeDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        expect(path.isAbsolute(result.output_dir)).toBe(true);
+        expect(result.output_dir.endsWith(relativeDir)).toBe(true);
+        tempDirs.push(result.output_dir);
+        expect(fs.existsSync(path.join(result.output_dir, 'C902.md'))).toBe(true);
+    });
+
+    test('falls back safely when process.cwd() and PWD are /', async () => {
+        const originalCwd = process.cwd;
+        const originalPwd = process.env.PWD;
+        const originalInitCwd = process.env.INIT_CWD;
+
+        try {
+            process.cwd = () => '/';
+            process.env.PWD = '/';
+            delete process.env.INIT_CWD;
+
+            const mockCase: Case = {
+                id: 903,
+                title: 'Root CWD Fallback Case',
+                section_id: 10,
+                template_id: 1,
+                type_id: 1,
+                priority_id: 1,
+                milestone_id: null,
+                refs: null,
+                created_on: 1700000000,
+                updated_on: 1700005000,
+                estimate: null,
+                suite_id: 1,
+                labels: [],
+            } as any;
+
+            getCaseMock.mockResolvedValue(mockCase);
+            getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+            const result = await exportCasesForRagTool.handler(
+                {
+                    case_ids: [903],
+                },
+                mockClient
+            );
+
+            expect(result.success).toBe(true);
+            expect(result.output_dir.startsWith(os.homedir()) || result.output_dir.startsWith(os.tmpdir())).toBe(true);
+            expect(result.output_dir.startsWith('/rag_export_')).toBe(false);
+            tempDirs.push(result.output_dir);
+            expect(fs.existsSync(path.join(result.output_dir, 'C903.md'))).toBe(true);
+        } finally {
+            process.cwd = originalCwd;
+            process.env.PWD = originalPwd;
+            if (originalInitCwd !== undefined) {
+                process.env.INIT_CWD = originalInitCwd;
+            }
+        }
+    });
 });
+
 
