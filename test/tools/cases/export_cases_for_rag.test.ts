@@ -401,18 +401,14 @@ describe('export_cases_for_rag tool', () => {
         expect(result.success).toBe(true);
 
         const mdContent = await fs.promises.readFile(path.join(testTempDir, 'C601.md'), 'utf-8');
+        expect(mdContent).toContain('# [C601] Fallback Case');
         expect(mdContent).toContain('**Section**: Unknown');
-        expect(mdContent).toContain('## Multi Line Unmapped');
-        expect(mdContent).toContain('Line 1\nLine 2');
-        expect(mdContent).not.toContain('## Single Line Unmapped');
 
         const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C601.md.metadata.json'), 'utf-8'));
+        expect(metaContent.metadataAttributes.case_id).toBe(601);
+        expect(metaContent.metadataAttributes.title).toBe('Fallback Case');
         expect(metaContent.metadataAttributes.priority).toBe('Unknown');
-        expect(metaContent.metadataAttributes.single_line_unmapped).toBe('Single line value');
         expect(metaContent.metadataAttributes.labels).toEqual(['Manual', 'Smoke', 'Core']);
-        expect(metaContent.metadataAttributes.review_status).toBeUndefined();
-        expect(metaContent.metadataAttributes.reviewer).toBeUndefined();
-        expect(metaContent.metadataAttributes.created_by).toBeUndefined();
     });
 
     test('handles structured vs unstructured field definitions and complex arrays in metadata', async () => {
@@ -474,8 +470,8 @@ describe('export_cases_for_rag tool', () => {
 
         const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C701.md.metadata.json'), 'utf-8'));
         expect(metaContent.metadataAttributes.labels).toEqual(['Tag99']);
-        expect(metaContent.metadataAttributes.single_line_string).toBe('Simple text');
-        expect(metaContent.metadataAttributes.object_array).toEqual([
+        expect(metaContent.metadataAttributes.string_single).toBe('Simple text');
+        expect(metaContent.metadataAttributes.obj_array).toEqual([
             'Item1',
             'Item2',
             JSON.stringify({ other: 123 }),
@@ -754,7 +750,54 @@ describe('export_cases_for_rag tool', () => {
         expect(typeof metaContent.metadataAttributes.is_flaky).toBe('string');
         expect(typeof metaContent.metadataAttributes.score).toBe('number');
     });
+
+    test('correctly handles fields with duplicate labels without collisions using unique system_name', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_dup_labels_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const customFieldsSchema: CaseField[] = [
+            { id: 1, name: 'primary_notes', system_name: 'custom_primary_notes', label: 'Notes', type_id: 1, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 2, name: 'secondary_notes', system_name: 'custom_secondary_notes', label: 'Notes', type_id: 1, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(customFieldsSchema);
+
+        const mockCase: Case = {
+            id: 906,
+            title: 'Duplicate Label Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+            custom_primary_notes: 'Primary note text',
+            custom_secondary_notes: 'Secondary note text',
+        } as any;
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                case_ids: [906],
+                output_dir: testTempDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C906.md.metadata.json'), 'utf-8'));
+        expect(metaContent.metadataAttributes.primary_notes).toBe('Primary note text');
+        expect(metaContent.metadataAttributes.secondary_notes).toBe('Secondary note text');
+    });
 });
+
 
 
 

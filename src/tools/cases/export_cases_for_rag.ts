@@ -2,7 +2,7 @@ import { z } from "zod";
 import * as fs from "fs";
 import * as path from "path";
 import { normalizeEntityId, sanitizeValue } from "../../utils/sanitizer.js";
-import { processCustomFields } from "../../utils/mapper.js";
+import { resolveCustomFieldValue } from "../../utils/mapper.js";
 import { getBaseDirectory } from "../../utils/fs.js";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
@@ -78,48 +78,45 @@ function buildFieldDefinitionMap(caseFields: CaseField[]): Map<string, CaseField
     const fieldDefMap = new Map<string, CaseField>();
     for (const cf of caseFields) {
         fieldDefMap.set(cf.system_name, cf);
-        if (cf.name) {
-            fieldDefMap.set(cf.name, cf);
-        }
-        const clean = cf.system_name.replace(/^custom_/, "");
-        fieldDefMap.set(clean, cf);
-        if (cf.label) {
-            fieldDefMap.set(cf.label, cf);
-            const snakeLabel = cf.label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-            fieldDefMap.set(snakeLabel, cf);
-        }
     }
     return fieldDefMap;
 }
 
 function categorizeCustomFields(
-    customFields: Record<string, any>,
-    fieldDefMap: Map<string, CaseField>
+    testCase: Case,
+    applicableFieldDefs: CaseField[]
 ): {
     markdownFields: Array<{ header: string; value: any; fieldDef?: CaseField }>;
     metadataFields: Array<{ key: string; value: any; fieldDef?: CaseField }>;
 } {
     const markdownFields: Array<{ header: string; value: any; fieldDef?: CaseField }> = [];
     const metadataFields: Array<{ key: string; value: any; fieldDef?: CaseField }> = [];
-    const seenKeys = new Set<string>();
+    const fieldDefMap = buildFieldDefinitionMap(applicableFieldDefs);
 
-    for (const [key, val] of Object.entries(customFields)) {
-        const cleanKey = key.replace(/^custom_/, "");
-        if (seenKeys.has(cleanKey) || seenKeys.has(key) || IGNORED_METADATA_FIELDS.has(cleanKey) || IGNORED_METADATA_FIELDS.has(key)) {
+    for (const [systemName, rawValue] of Object.entries(testCase)) {
+        if (!systemName.startsWith("custom_")) {
             continue;
         }
-        if (val === null || val === undefined || val === "" || (Array.isArray(val) && val.length === 0)) {
+        if (rawValue === null || rawValue === undefined || rawValue === "" || (Array.isArray(rawValue) && rawValue.length === 0)) {
             continue;
         }
-        seenKeys.add(cleanKey);
-        seenKeys.add(key);
+        if (IGNORED_METADATA_FIELDS.has(systemName)) {
+            continue;
+        }
 
-        const fieldDef = fieldDefMap.get(key) || fieldDefMap.get(cleanKey) || fieldDefMap.get(`custom_${cleanKey}`);
+        const fieldDef = fieldDefMap.get(systemName);
+        if (!fieldDef) {
+            continue;
+        }
+
+        const val = resolveCustomFieldValue(fieldDef, rawValue);
+
         if (isMarkdownField(fieldDef, val)) {
-            const header = fieldDef?.label || cleanKey.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+            const header = fieldDef.label || systemName.replace(/^custom_/, "");
             markdownFields.push({ header, value: val, fieldDef });
         } else {
-            metadataFields.push({ key: cleanKey, value: val, fieldDef });
+            const metaKey = fieldDef.name || systemName.replace(/^custom_/, "");
+            metadataFields.push({ key: metaKey, value: val, fieldDef });
         }
     }
 
@@ -219,9 +216,7 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
             const applicableFields = caseFields.filter(field =>
                 field.include_all || (templateId !== null && templateId !== undefined && field.template_ids.includes(templateId))
             );
-            const fieldDefMap = buildFieldDefinitionMap(applicableFields);
-            const customFields = processCustomFields(testCase, caseFields);
-            const { markdownFields, metadataFields } = categorizeCustomFields(customFields, fieldDefMap);
+            const { markdownFields, metadataFields } = categorizeCustomFields(testCase, applicableFields);
 
             const markdownContent = buildMarkdownBody(testCase, sectionName, markdownFields);
             const metadataAttributes = buildMetadataAttributes(testCase, sectionName, priority, metadataFields);
