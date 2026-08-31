@@ -5,6 +5,9 @@
 ### Added
 - Add in-memory caching for `get_section` in client to avoid redundant API requests for repeated section lookups.
 
+### Changed
+- Scope custom field schema mapping in `export_cases_for_rag` to global fields and fields matching the current test case template to prevent field definition collisions across templates.
+
 ### Fixed
 - Improve `export_cases_for_rag` output directory resolution to prevent root filesystem write errors (`ENOENT`) when the MCP server is registered in a global or user-level MCP configuration. Now the export folder is automatically created inside the user's home directory.
 

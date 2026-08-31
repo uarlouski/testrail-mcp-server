@@ -190,7 +190,6 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
             client.getCaseFields().catch(() => []),
         ]);
 
-        const fieldDefMap = buildFieldDefinitionMap(caseFields);
         const writtenFiles: string[] = [];
 
         for (const rawId of case_ids) {
@@ -206,6 +205,11 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
             }
 
             const priority = priorities.find(p => p.id === testCase.priority_id)?.name || "Unknown";
+            const templateId = testCase.template_id;
+            const applicableFields = caseFields.filter(field =>
+                field.include_all || (templateId !== null && templateId !== undefined && field.template_ids.includes(templateId))
+            );
+            const fieldDefMap = buildFieldDefinitionMap(applicableFields);
             const customFields = processCustomFields(testCase, caseFields);
             const { markdownFields, metadataFields } = categorizeCustomFields(customFields, fieldDefMap);
 
