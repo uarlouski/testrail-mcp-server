@@ -2,7 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+- Add optional `ignored_fields` parameter to `export_cases_for_rag` allowing callers to dynamically ignore/exclude custom fields by full `system_name` or stripped name (e.g., `['custom_review_status', 'review_status']`) from both Markdown documents and `.metadata.json` sidecar files.
+
 ### Changed
+- Clean up `IGNORED_METADATA_FIELDS` in `export_cases_for_rag` to contain strictly standard TestRail system fields (`created_by`, `updated_by`, `display_order`, `is_deleted`), eliminating hardcoded org-specific custom fields.
 - Refactor `export_cases_for_rag` to use unique `system_name` directly for field identification and metadata attributes, preventing collisions when custom fields share duplicate display labels while preserving UI labels for Markdown headings.
 - Update `export_cases_for_rag` tool description with batching recommendations for datasets larger than 25 test cases to prevent MCP tool call timeouts.
 
