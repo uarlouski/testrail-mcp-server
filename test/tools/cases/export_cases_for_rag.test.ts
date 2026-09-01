@@ -796,6 +796,120 @@ describe('export_cases_for_rag tool', () => {
         expect(metaContent.metadataAttributes.primary_notes).toBe('Primary note text');
         expect(metaContent.metadataAttributes.secondary_notes).toBe('Secondary note text');
     });
+
+    test('includes custom fields like review_status and reviewer by default when not in ignored_fields', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_default_custom_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const customFieldsSchema: CaseField[] = [
+            { id: 1, name: 'review_status', system_name: 'custom_review_status', label: 'Review Status', type_id: 6, template_ids: [], include_all: true, is_active: true, description: null, configs: [{ options: { items: '1, Ready\n2, Accepted' } }] },
+            { id: 2, name: 'reviewer', system_name: 'custom_reviewer', label: 'Reviewer', type_id: 7, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(customFieldsSchema);
+
+        const mockCase: Case = {
+            id: 907,
+            title: 'Custom Fields Default Inclusion Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+            custom_review_status: 2,
+            custom_reviewer: 42,
+        } as any;
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                case_ids: [907],
+                output_dir: testTempDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C907.md.metadata.json'), 'utf-8'));
+        expect(metaContent.metadataAttributes.review_status).toBe('Accepted');
+        expect(metaContent.metadataAttributes.reviewer).toBe(42);
+    });
+
+    test('excludes specified custom fields by either prefixed or stripped field name while preserving core metadata attributes', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_ignore_fields_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const customFieldsSchema: CaseField[] = [
+            { id: 1, name: 'review_status', system_name: 'custom_review_status', label: 'Review Status', type_id: 6, template_ids: [], include_all: true, is_active: true, description: null, configs: [{ options: { items: '1, Ready\n2, Accepted' } }] },
+            { id: 2, name: 'reviewer', system_name: 'custom_reviewer', label: 'Reviewer', type_id: 7, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 3, name: 'internal_notes', system_name: 'custom_internal_notes', label: 'Internal Notes', type_id: 3, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 4, name: 'public_notes', system_name: 'custom_public_notes', label: 'Public Notes', type_id: 3, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(customFieldsSchema);
+
+        const mockCase: Case = {
+            id: 908,
+            title: 'Ignored Fields Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: 'JIRA-123',
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [{ id: 1, title: 'Regression' }],
+            custom_review_status: 2,
+            custom_reviewer: 42,
+            custom_internal_notes: 'Confidential debug instructions',
+            custom_public_notes: 'Public notes content',
+        } as any;
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                case_ids: [908],
+                output_dir: testTempDir,
+                ignored_fields: [
+                    'review_status',             // un-prefixed/stripped custom field name
+                    'custom_reviewer',           // full system_name for user field
+                    'internal_notes',            // un-prefixed markdown custom field
+                ],
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+
+        const mdContent = await fs.promises.readFile(path.join(testTempDir, 'C908.md'), 'utf-8');
+        expect(mdContent).toContain('## Public Notes');
+        expect(mdContent).toContain('Public notes content');
+        expect(mdContent).not.toContain('## Internal Notes');
+        expect(mdContent).not.toContain('Confidential debug instructions');
+
+        const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C908.md.metadata.json'), 'utf-8'));
+        expect(metaContent.metadataAttributes.case_id).toBe(908);
+        expect(metaContent.metadataAttributes.title).toBe('Ignored Fields Case');
+        expect(metaContent.metadataAttributes.section).toBe('Section 10');
+        expect(metaContent.metadataAttributes.priority).toBe('Low');
+        expect(metaContent.metadataAttributes.references).toBe('JIRA-123');
+        expect(metaContent.metadataAttributes.labels).toEqual(['Regression']);
+        expect(metaContent.metadataAttributes.review_status).toBeUndefined();
+        expect(metaContent.metadataAttributes.reviewer).toBeUndefined();
+    });
 });
 
 

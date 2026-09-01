@@ -12,6 +12,7 @@ import { CaseFieldTypeId, getFieldType } from "./fields.js";
 const parameters = {
     case_ids: z.array(z.union([z.string(), z.number()])).min(1).describe("List of test case IDs (e.g. ['C123', 456])"),
     output_dir: z.string().optional().describe("Directory to save exported files. Defaults to an auto-generated directory in the current working directory."),
+    ignored_fields: z.array(z.string()).optional().describe("Optional list of custom field names or system names to ignore/exclude from export (e.g. ['custom_review_status', 'review_status']). Supports both full system_name and stripped field names. Core metadata attributes (case_id, title, section, priority, references, labels) cannot be ignored."),
 };
 
 function formatStepsSeparated(steps: any[]): string {
@@ -70,8 +71,6 @@ const IGNORED_METADATA_FIELDS = new Set([
     "updated_by",
     "display_order",
     "is_deleted",
-    "review_status",
-    "reviewer",
 ]);
 
 function buildFieldDefinitionMap(caseFields: CaseField[]): Map<string, CaseField> {
@@ -84,7 +83,8 @@ function buildFieldDefinitionMap(caseFields: CaseField[]): Map<string, CaseField
 
 function categorizeCustomFields(
     testCase: Case,
-    applicableFieldDefs: CaseField[]
+    applicableFieldDefs: CaseField[],
+    ignoredFieldsSet: Set<string>
 ): {
     markdownFields: Array<{ header: string; value: any; fieldDef?: CaseField }>;
     metadataFields: Array<{ key: string; value: any; fieldDef?: CaseField }>;
@@ -100,7 +100,8 @@ function categorizeCustomFields(
         if (rawValue === null || rawValue === undefined || rawValue === "" || (Array.isArray(rawValue) && rawValue.length === 0)) {
             continue;
         }
-        if (IGNORED_METADATA_FIELDS.has(systemName)) {
+        const strippedName = systemName.replace(/^custom_/, "");
+        if (ignoredFieldsSet.has(systemName) || ignoredFieldsSet.has(strippedName)) {
             continue;
         }
 
@@ -185,12 +186,24 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
     mode: "read",
     description: "Export test cases as formatted Markdown documents with companion JSON metadata sidecar files for Knowledge Base and RAG ingestion. If exporting more than 25 cases, batch them into chunks of ~25 and execute in parallel with a shared output_dir to prevent tool call timeouts.",
     parameters,
-    handler: async ({ case_ids, output_dir }, client) => {
+    handler: async ({ case_ids, output_dir, ignored_fields }, client) => {
         const baseDir = getBaseDirectory();
         const targetDir = output_dir
             ? (path.isAbsolute(output_dir) ? output_dir : path.resolve(baseDir, output_dir))
             : path.resolve(baseDir, `rag_export_${Date.now()}`);
         await fs.promises.mkdir(targetDir, { recursive: true });
+
+        const ignoredFieldsSet = new Set<string>(IGNORED_METADATA_FIELDS);
+        if (ignored_fields) {
+            for (const field of ignored_fields) {
+                ignoredFieldsSet.add(field);
+                if (field.startsWith("custom_")) {
+                    ignoredFieldsSet.add(field.replace(/^custom_/, ""));
+                } else {
+                    ignoredFieldsSet.add(`custom_${field}`);
+                }
+            }
+        }
 
         const [priorities, caseFields] = await Promise.all([
             client.getPriorities().catch(() => []),
@@ -216,7 +229,7 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
             const applicableFields = caseFields.filter(field =>
                 field.include_all || (templateId !== null && templateId !== undefined && field.template_ids.includes(templateId))
             );
-            const { markdownFields, metadataFields } = categorizeCustomFields(testCase, applicableFields);
+            const { markdownFields, metadataFields } = categorizeCustomFields(testCase, applicableFields, ignoredFieldsSet);
 
             const markdownContent = buildMarkdownBody(testCase, sectionName, markdownFields);
             const metadataAttributes = buildMetadataAttributes(testCase, sectionName, priority, metadataFields);

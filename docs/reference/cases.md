@@ -59,6 +59,7 @@ Export test cases formatted as clean Markdown documents with companion JSON meta
 - **Parameters**:
   - `case_ids`: Array of test case IDs to export (e.g. `['C123', 456]`)
   - `output_dir`: *(Optional)* Target directory path to save exported `.md` and `.metadata.json` files
+  - `ignored_fields`: *(Optional)* Array of custom field names or system names to ignore/exclude from export (e.g. `['custom_review_status', 'review_status']`). Supports both full `system_name` and stripped field names (without `custom_` prefix). Core metadata attributes (`case_id`, `title`, `section`, `priority`, `references`, `labels`) cannot be ignored.
 
 > [!TIP]
 > **Output Directory in Global / User MCP Configurations**:
