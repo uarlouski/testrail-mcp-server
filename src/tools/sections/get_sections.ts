@@ -11,10 +11,14 @@ const parameters = {
     output_file: z.string().optional().describe("Absolute file path to save the JSON response to. Use this for large datasets to avoid blowing up context limits."),
 };
 
+/**
+ * @deprecated Use `query_section` with payload.action = 'many' instead.
+ */
 export const getSectionsTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_sections",
     mode: "read",
-    description: "Get all sections for a project. Returns section IDs and names that can be used with add_case",
+    deprecated: true,
+    description: "Get all sections for a project. (Deprecated: Prefer query_section tool). Returns section IDs and names that can be used with add_case",
     parameters,
     handler: async ({ project_id, suite_id, output_file }, client) => {
         await validateSuiteId(client, project_id, suite_id);

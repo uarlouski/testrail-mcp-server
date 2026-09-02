@@ -3,7 +3,13 @@
 ## [Unreleased]
 
 ### Added
+- Add consolidated `query_section` tool using discriminated union pattern (`action: "one"` | `"many"`):
+  - `action: "one"`: Fetch a single section by `section_id`, with optional `include_child` flag to recursively construct a complete child section hierarchy tree.
+  - `action: "many"`: List all sections for a project/suite, with support for case-insensitive regex name filtering (`name_pattern`) and direct filesystem export (`output_file`).
 - Add optional `ignored_fields` parameter to `export_cases_for_rag` allowing callers to dynamically ignore/exclude custom fields by full `system_name` or stripped name (e.g., `['custom_review_status', 'review_status']`) from both Markdown documents and `.metadata.json` sidecar files.
+
+### Deprecated
+- Deprecate `get_sections` tool in favor of `query_section` (`action: "many"`).
 
 ### Changed
 - Clean up `IGNORED_METADATA_FIELDS` in `export_cases_for_rag` to contain strictly standard TestRail system fields (`created_by`, `updated_by`, `display_order`, `is_deleted`), eliminating hardcoded org-specific custom fields.

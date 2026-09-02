@@ -22,7 +22,15 @@ Performs write modifications on sections (folders) using a discriminated union a
 - **Action "create"**: Create a new section within a specific project and suite. Supports `parent_id` for nested parent/child section relationships.
 - **Action "update"**: Modify an existing section's name or description.
 
+### `query_section`
+Retrieves section information using a discriminated union action.
+- **Action "one"**: Fetch detailed information for a single section by its `section_id`. Set `include_child: true` (along with `project_id` and optional `suite_id`) to retrieve the section as a recursive hierarchical tree with all its nested child sections.
+- **Action "many"**: Retrieve sections for a `project_id` (and optional `suite_id`). Supports filtering by name via regex with `name_pattern` (e.g. `'auth.*'` or `'login|signup'`) and direct filesystem export via `output_file`.
+
 ### `get_sections`
+> [!WARNING]
+> **Deprecated**: Prefer using `query_section` with `action: "many"` instead.
+
 Navigate the precise folder/section hierarchy of any test suite. This is highly useful for mapping out the exact location where test cases should be added or retrieved.
 
 ### `get_users`
