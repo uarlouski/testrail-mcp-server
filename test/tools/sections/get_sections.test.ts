@@ -28,7 +28,9 @@ describe('get_sections tool', () => {
 
     test('exports correct tool definition', () => {
         expect(getSectionsTool.name).toBe('get_sections');
-        expect(getSectionsTool.description).toContain('section');
+        expect(getSectionsTool.mode).toBe('read');
+        expect(getSectionsTool.deprecated).toBe(true);
+        expect(getSectionsTool.description).toContain('Deprecated');
         expect(getSectionsTool.parameters).toBeDefined();
         expect(getSectionsTool.parameters.project_id).toBeDefined();
     });
