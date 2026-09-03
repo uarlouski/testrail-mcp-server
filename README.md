@@ -165,6 +165,7 @@ To ensure smooth transitions, deprecated tools remain available by default (`TES
 | Deprecated Tool | Replacement | Status |
 |-----------------|-------------|--------|
 | `add_attachment_to_run` | `add_attachment` (`entity_type: "case" \| "run"`) | Deprecated in `2.3.0`, scheduled for removal in `3.0.0` |
+| `get_sections` | `query_section` (`action: "many"`) | Deprecated in `2.8.0`, scheduled for removal in `3.0.0` |
 
 > **💡 Token Tip**: If you are not using legacy tools, set `TESTRAIL_ENABLE_DEPRECATED_TOOLS=false` in your environment to eliminate deprecated tool definitions from the LLM prompt and save tokens!
 
