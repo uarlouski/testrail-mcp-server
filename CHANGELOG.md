@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.8.0]
 
 ### Added
 - Add consolidated `query_section` tool using discriminated union pattern (`action: "one"` | `"many"`):

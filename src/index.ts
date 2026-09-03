@@ -47,7 +47,7 @@ const {
 
 const server = new McpServer({
     name: "TestRail MCP Server",
-    version: "2.7.0",
+    version: "2.8.0",
 });
 
 
