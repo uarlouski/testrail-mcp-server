@@ -8,9 +8,14 @@ import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
 import { Case, CaseField } from "./types.js";
 import { CaseFieldTypeId, getFieldType } from "./fields.js";
+import { fetchFilteredCases } from "./get_cases.js";
 
 const parameters = {
-    case_ids: z.array(z.union([z.string(), z.number()])).min(1).describe("List of test case IDs (e.g. ['C123', 456])"),
+    case_ids: z.array(z.union([z.string(), z.number()])).optional().describe("List of test case IDs (e.g. ['C123', 456]). Provide either case_ids OR project_id."),
+    project_id: z.number().optional().describe("The ID of the project to export cases from. Required if case_ids is not provided."),
+    suite_id: z.number().optional().describe("The ID of the test suite (required for multi-suite projects, i.e. suite_mode=2 or 3)."),
+    filter: z.record(z.string(), z.string()).optional().describe("Optional API-side filters (e.g. priority_id, type_id, milestone_id, refs, created_after, etc.)."),
+    where: z.record(z.string(), z.any()).optional().describe("Optional client-side filter for any field including custom fields (filters after fetching cases). Supports exact value matching. Example: {\"custom_automation_status\": 1}"),
     output_dir: z.string().optional().describe("Directory to save exported files. Defaults to an auto-generated directory in the current working directory."),
     ignored_fields: z.array(z.string()).optional().describe("Optional list of custom field names or system names to ignore/exclude from export (e.g. ['custom_review_status', 'review_status']). Supports both full system_name and stripped field names. Core metadata attributes (case_id, title, section, priority, references, labels) cannot be ignored."),
 };
@@ -184,9 +189,36 @@ function buildMetadataAttributes(
 export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "export_cases_for_rag",
     mode: "read",
-    description: "Export test cases as formatted Markdown documents with companion JSON metadata sidecar files for Knowledge Base and RAG ingestion. If exporting more than 25 cases, batch them into chunks of ~25 and execute in parallel with a shared output_dir to prevent tool call timeouts.",
+    description: "Export test cases as formatted Markdown documents with companion JSON metadata sidecar files for Knowledge Base and RAG ingestion. Provide either 'case_ids' to export specific cases, or 'project_id' (with optional 'suite_id', 'filter', 'where') to query and export cases from TestRail. If exporting more than 25 cases, batch them into chunks of ~25 and execute in parallel with a shared output_dir to prevent tool call timeouts.",
     parameters,
-    handler: async ({ case_ids, output_dir, ignored_fields }, client) => {
+    handler: async ({ case_ids, project_id, suite_id, filter, where, output_dir, ignored_fields }, client) => {
+        if ((!case_ids || case_ids.length === 0) && project_id === undefined) {
+            throw new Error("Either 'case_ids' or 'project_id' must be provided.");
+        }
+
+        const [priorities, caseFields] = await Promise.all([
+            client.getPriorities().catch(() => []),
+            client.getCaseFields().catch(() => []),
+        ]);
+
+        let testCases: Case[] = [];
+
+        if (case_ids && case_ids.length > 0) {
+            for (const rawId of case_ids) {
+                const id = normalizeEntityId(rawId);
+                const testCase: Case = await client.getCase(id);
+                testCases.push(testCase);
+            }
+        } else if (project_id !== undefined) {
+            testCases = await fetchFilteredCases(client, {
+                project_id,
+                suite_id,
+                filter,
+                where,
+                caseFields,
+            });
+        }
+
         const baseDir = getBaseDirectory();
         const targetDir = output_dir
             ? (path.isAbsolute(output_dir) ? output_dir : path.resolve(baseDir, output_dir))
@@ -205,20 +237,12 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
             }
         }
 
-        const [priorities, caseFields] = await Promise.all([
-            client.getPriorities().catch(() => []),
-            client.getCaseFields().catch(() => []),
-        ]);
-
         const writtenFiles: string[] = [];
 
-        for (const rawId of case_ids) {
-            const id = normalizeEntityId(rawId);
-            const testCase: Case = await client.getCase(id);
-
+        for (const testCase of testCases) {
             let sectionName = "Unknown";
             if (testCase.section_id) {
-                const section = await client.getSection(Number(testCase.section_id));
+                const section = await client.getSection(Number(testCase.section_id)).catch(() => null);
                 if (section?.name) {
                     sectionName = section.name;
                 }
@@ -245,10 +269,10 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
 
         return {
             success: true,
-            exported_count: case_ids.length,
+            exported_count: testCases.length,
             output_dir: targetDir,
             files: writtenFiles,
-            message: `Successfully exported ${case_ids.length} test case(s) for Knowledge Base ingestion.`,
+            message: `Successfully exported ${testCases.length} test case(s) for Knowledge Base ingestion.`,
         };
     },
 };

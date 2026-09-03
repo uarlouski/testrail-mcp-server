@@ -11,6 +11,8 @@ import { CaseType, Priority } from '../../../src/types/testrail.js';
 describe('export_cases_for_rag tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
     let getCaseMock: jest.Mock<(id: number) => Promise<Case>>;
+    let getCasesMock: jest.Mock<(projectId: number, sectionId?: number, filter?: Record<string, string>) => Promise<Case[]>>;
+    let getProjectMock: jest.Mock<(projectId: number) => Promise<any>>;
     let getSectionMock: jest.Mock<(id: number) => Promise<Section>>;
     let getCaseTypesMock: jest.Mock<() => Promise<CaseType[]>>;
     let getPrioritiesMock: jest.Mock<() => Promise<Priority[]>>;
@@ -28,6 +30,8 @@ describe('export_cases_for_rag tool', () => {
 
     beforeEach(() => {
         getCaseMock = jest.fn<(id: number) => Promise<Case>>();
+        getCasesMock = jest.fn<(projectId: number, sectionId?: number, filter?: Record<string, string>) => Promise<Case[]>>();
+        getProjectMock = jest.fn<(projectId: number) => Promise<any>>().mockResolvedValue({ id: 1, name: 'Default Project', suite_mode: 1 });
         getSectionMock = jest.fn<(id: number) => Promise<Section>>();
         getCaseTypesMock = jest.fn<() => Promise<CaseType[]>>().mockResolvedValue([
             { id: 1, name: 'Automated', is_default: false },
@@ -41,6 +45,8 @@ describe('export_cases_for_rag tool', () => {
 
         mockClient = {
             getCase: getCaseMock,
+            getCases: getCasesMock,
+            getProject: getProjectMock,
             getSection: getSectionMock,
             getCaseTypes: getCaseTypesMock,
             getPriorities: getPrioritiesMock,
@@ -909,6 +915,170 @@ describe('export_cases_for_rag tool', () => {
         expect(metaContent.metadataAttributes.labels).toEqual(['Regression']);
         expect(metaContent.metadataAttributes.review_status).toBeUndefined();
         expect(metaContent.metadataAttributes.reviewer).toBeUndefined();
+    });
+
+    test('throws error when neither case_ids nor project_id is provided', async () => {
+        await expect(
+            exportCasesForRagTool.handler({} as any, mockClient)
+        ).rejects.toThrow("Either 'case_ids' or 'project_id' must be provided.");
+
+        await expect(
+            exportCasesForRagTool.handler({ case_ids: [] } as any, mockClient)
+        ).rejects.toThrow("Either 'case_ids' or 'project_id' must be provided.");
+    });
+
+    test('exports cases by project_id using getCases', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_query_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const mockCase: Case = {
+            id: 501,
+            title: 'Query Case 1',
+            section_id: 10,
+            template_id: 1,
+            type_id: 2,
+            priority_id: 1,
+            milestone_id: null,
+            refs: 'REF-1',
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+            custom_preconds: 'Preconditions text',
+        };
+
+        getCasesMock.mockResolvedValue([mockCase]);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'General Section' } as any);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                project_id: 1,
+                output_dir: testTempDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        expect(result.exported_count).toBe(1);
+        expect(getCasesMock).toHaveBeenCalledWith(1, undefined, undefined);
+        expect(fs.existsSync(path.join(testTempDir, 'C501.md'))).toBe(true);
+        expect(fs.existsSync(path.join(testTempDir, 'C501.md.metadata.json'))).toBe(true);
+    });
+
+    test('validates suite_id for multi-suite projects when querying by project_id', async () => {
+        getProjectMock.mockResolvedValue({ id: 2, name: 'Multi-suite Project', suite_mode: 3 });
+
+        await expect(
+            exportCasesForRagTool.handler(
+                {
+                    project_id: 2,
+                },
+                mockClient
+            )
+        ).rejects.toThrow('uses multiple test suites/baselines (suite_mode=3). The suite_id parameter is required.');
+
+        getCasesMock.mockResolvedValue([]);
+        const result = await exportCasesForRagTool.handler(
+            {
+                project_id: 2,
+                suite_id: 42,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        expect(getCasesMock).toHaveBeenCalledWith(2, undefined, { suite_id: '42' });
+    });
+
+    test('supports filter and client-side where filtering when querying by project_id', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_filter_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const caseA: Case = {
+            id: 601,
+            title: 'Case Automated',
+            section_id: 10,
+            template_id: 1,
+            type_id: 2,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+            custom_automation_type: 2,
+        };
+
+        const caseB: Case = {
+            id: 602,
+            title: 'Case Manual',
+            section_id: 10,
+            template_id: 1,
+            type_id: 2,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+            custom_automation_type: 1,
+        };
+
+        getCasesMock.mockResolvedValue([caseA, caseB]);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                project_id: 1,
+                filter: { priority_id: '1' },
+                where: { custom_automation_type: 2 },
+                output_dir: testTempDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        expect(result.exported_count).toBe(1);
+        expect(getCasesMock).toHaveBeenCalledWith(1, undefined, { priority_id: '1' });
+        expect(fs.existsSync(path.join(testTempDir, 'C601.md'))).toBe(true);
+        expect(fs.existsSync(path.join(testTempDir, 'C602.md'))).toBe(false);
+    });
+
+    test('validates where field names against case schema', async () => {
+        await expect(
+            exportCasesForRagTool.handler(
+                {
+                    project_id: 1,
+                    where: { non_existent_field: 'test' },
+                },
+                mockClient
+            )
+        ).rejects.toThrow("Invalid fields provided: 'non_existent_field'");
+    });
+
+    test('handles 0 cases returned from query gracefully', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_empty_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        getCasesMock.mockResolvedValue([]);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                project_id: 1,
+                output_dir: testTempDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        expect(result.exported_count).toBe(0);
+        expect(result.files).toEqual([]);
+        expect(result.message).toContain('Successfully exported 0 test case(s)');
     });
 });
 
