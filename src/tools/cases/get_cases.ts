@@ -2,7 +2,7 @@ import { z } from "zod";
 import fs from "fs";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
-import { Case } from "./types.js";
+import { Case, CaseField } from "./types.js";
 import { validateCaseFields, validateSuiteId } from "../../utils/validator.js";
 
 const parameters = {
@@ -23,48 +23,81 @@ interface CasesResponse {
     cases: Record<string, any>[];
 }
 
+export interface FetchFilteredCasesOptions {
+    project_id: number;
+    suite_id?: number;
+    section?: {
+        id: number;
+        recursive?: boolean;
+        excludes?: string[];
+    };
+    filter?: Record<string, string>;
+    where?: Record<string, any>;
+    caseFields?: CaseField[];
+}
+
+export async function fetchFilteredCases(
+    client: TestRailClient,
+    options: FetchFilteredCasesOptions
+): Promise<Case[]> {
+    const { project_id, suite_id, section, where } = options;
+    let filter = options.filter;
+
+    await validateSuiteId(client, project_id, suite_id);
+
+    const caseFields = options.caseFields ?? (await client.getCaseFields());
+    if (where) {
+        validateCaseFields(Object.keys(where), caseFields);
+    }
+
+    // Inject suite_id into filter for multi-suite projects
+    if (suite_id) {
+        filter = { ...filter, suite_id: suite_id.toString() };
+    }
+
+    let cases: Case[];
+
+    if (section?.recursive) {
+        cases = await client.getCasesRecursively(project_id, section.id, filter, section.excludes);
+    } else {
+        cases = await client.getCases(project_id, section?.id, filter);
+    }
+
+    // Client-side filtering for custom fields and other unsupported API filters
+    if (where) {
+        cases = cases.filter(c => {
+            for (const [key, value] of Object.entries(where)) {
+                const caseValue = (c as Record<string, any>)[key];
+                if (caseValue !== value) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }
+
+    return cases;
+}
+
 export const getCasesTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_cases",
     mode: "read",
     description: "Get all test cases for a project. Filter by section, API params (priority, type), or any field including custom fields via 'where'. Returns case IDs, titles, and any additional requested fields.",
     parameters,
     handler: async ({ project_id, suite_id, section, filter, where, fields, output_file }, client) => {
-        await validateSuiteId(client, project_id, suite_id);
-
         const caseFields = await client.getCaseFields();
         if (fields) {
             validateCaseFields(fields, caseFields);
         }
 
-        if (where) {
-            validateCaseFields(Object.keys(where), caseFields);
-        }
-
-        // Inject suite_id into filter for multi-suite projects
-        if (suite_id) {
-            filter = { ...filter, suite_id: suite_id.toString() };
-        }
-
-        let cases: Case[];
-
-        if (section?.recursive) {
-            cases = await client.getCasesRecursively(project_id, section.id, filter, section.excludes);
-        } else {
-            cases = await client.getCases(project_id, section?.id, filter);
-        }
-
-        // Client-side filtering for custom fields and other unsupported API filters
-        if (where) {
-            cases = cases.filter(c => {
-                for (const [key, value] of Object.entries(where)) {
-                    const caseValue = (c as Record<string, any>)[key];
-                    if (caseValue !== value) {
-                        return false;
-                    }
-                }
-                return true;
-            });
-        }
+        const cases = await fetchFilteredCases(client, {
+            project_id,
+            suite_id,
+            section,
+            filter,
+            where,
+            caseFields,
+        });
 
         const response: CasesResponse = {
             cases: cases.map(c => {

@@ -56,8 +56,15 @@ Export test cases formatted as clean Markdown documents with companion JSON meta
 - **How it works**:
   - **Dynamic Markdown Document**: Formats test case title, section header, preconditions, numbered steps & expected results, and unstructured text fields into a clean Markdown `.md` document.
   - **Companion Metadata Sidecar**: Generates a `.md.metadata.json` sidecar file containing structured attributes (`metadataAttributes`) such as case ID, title, section, priority, references, resolved multi-select tag strings, dropdowns, and checkboxes for vector search filtering and retrieval.
+- **Export Modes**:
+  - **By Explicit Case IDs**: Provide `case_ids` (e.g. `['C123', 456]`) to export specific test cases.
+  - **By Query / Filters**: Provide `project_id` along with optional `suite_id`, API-side `filter`, and client-side `where` to query and export matching cases directly without fetching IDs beforehand.
 - **Parameters**:
-  - `case_ids`: Array of test case IDs to export (e.g. `['C123', 456]`)
+  - `case_ids`: *(Optional)* Array of test case IDs to export (e.g. `['C123', 456]`). Provide either `case_ids` OR `project_id`.
+  - `project_id`: *(Optional)* The ID of the project to export cases from. Required if `case_ids` is not provided.
+  - `suite_id`: *(Optional)* The ID of the test suite (required for multi-suite projects).
+  - `filter`: *(Optional)* API-side filters (e.g. `priority_id`, `type_id`, `milestone_id`, `refs`).
+  - `where`: *(Optional)* Client-side field filter matching exact field values, including custom fields (e.g. `{"custom_automation_status": 1}`).
   - `output_dir`: *(Optional)* Target directory path to save exported `.md` and `.metadata.json` files
   - `ignored_fields`: *(Optional)* Array of custom field names or system names to ignore/exclude from export (e.g. `['custom_review_status', 'review_status']`). Supports both full `system_name` and stripped field names (without `custom_` prefix). Core metadata attributes (`case_id`, `title`, `section`, `priority`, `references`, `labels`) cannot be ignored.
 
