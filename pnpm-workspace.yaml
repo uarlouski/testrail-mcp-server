@@ -1,4 +1,8 @@
+packages:
+  - "."
+  - "docs"
 allowBuilds:
+  "@parcel/watcher": false
   esbuild: false
   unrs-resolver: false
 strictPeerDependencies: true

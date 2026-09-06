@@ -36,7 +36,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm ci
+        run: pnpm --prefix docs install
 
       - name: Build with VitePress
         run: pnpm run docs:build
