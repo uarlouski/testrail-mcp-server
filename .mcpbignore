@@ -28,39 +28,6 @@ node_modules/rimraf/
 node_modules/vitepress/
 node_modules/vue/
 
-# Virtual store in node_modules/.pnpm (dev & test dependencies)
-node_modules/.pnpm/@types*
-node_modules/.pnpm/@jest*
-node_modules/.pnpm/jest*
-node_modules/.pnpm/ts-jest*
-node_modules/.pnpm/ts-node*
-node_modules/.pnpm/typescript*
-node_modules/.pnpm/rimraf*
-node_modules/.pnpm/vitepress*
-node_modules/.pnpm/vue*
-node_modules/.pnpm/@vue*
-node_modules/.pnpm/vite*
-node_modules/.pnpm/@vitejs*
-node_modules/.pnpm/shiki*
-node_modules/.pnpm/@shikijs*
-node_modules/.pnpm/esbuild*
-node_modules/.pnpm/@esbuild*
-node_modules/.pnpm/rollup*
-node_modules/.pnpm/@rollup*
-node_modules/.pnpm/algoliasearch*
-node_modules/.pnpm/@algolia*
-node_modules/.pnpm/search-insights*
-node_modules/.pnpm/postcss*
-node_modules/.pnpm/handlebars*
-node_modules/.pnpm/@iconify-json*
-node_modules/.pnpm/minisearch*
-node_modules/.pnpm/babel*
-node_modules/.pnpm/@babel*
-node_modules/.pnpm/istanbul*
-node_modules/.pnpm/expect*
-node_modules/.pnpm/diff-sequences*
-node_modules/.pnpm/pretty-format*
-
 # Configs and local environment
 .env*
 .mcpregistry*
