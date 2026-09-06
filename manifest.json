@@ -1,0 +1,149 @@
+{
+  "manifest_version": "0.2",
+  "name": "@uarlouski/testrail-mcp-server",
+  "version": "2.8.0",
+  "description": "Model Context Protocol (MCP) server connecting AI assistants directly to TestRail to manage test cases, runs, suites, sections, results, and attachments.",
+  "long_description": "An open-source Model Context Protocol (MCP) server connecting AI assistants (Claude, Cursor, Windsurf, and more) directly to TestRail API v2.\n\n### Key Features\n- **Intelligent Discovery**: Browse projects, test suites, sections, and active users.\n- **Comprehensive Case Management**: Retrieve, create, update, and bulk-edit test cases with schema-aware custom field validation.\n- **Test Execution & Tracking**: Create runs, submit test results by `test_id` or `case_id`, and monitor statuses.\n- **Attachments & Media**: Upload screenshots/logs (with directory auto-zipping) and download attachments.\n- **Shared Steps**: Manage reusable shared test steps and audit history.\n- **Knowledge Base & RAG Export**: Export test cases with sidecar metadata for AI knowledge retrieval.\n- **Configurable Security**: Granular controls for read, write, and delete operations.",
+  "author": {
+    "name": "Uladzislau Arlouski",
+    "email": "uarlouski@gmail.com",
+    "url": "https://github.com/uarlouski"
+  },
+  "support": "https://github.com/uarlouski",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.js"
+      ],
+      "env": {
+        "TESTRAIL_INSTANCE_URL": "${instance_url}",
+        "TESTRAIL_USERNAME": "${username}",
+        "TESTRAIL_API_KEY": "${api_key}",
+        "TESTRAIL_ALLOW_READ_OPERATIONS": "${allow_read_operations}",
+        "TESTRAIL_ALLOW_WRITE_OPERATIONS": "${allow_write_operations}",
+        "TESTRAIL_ALLOW_DELETE_OPERATIONS": "${allow_delete_operations}",
+        "TESTRAIL_ENABLE_SHARED_STEPS": "${enable_shared_steps}",
+        "TESTRAIL_ENABLE_CASE_HISTORY": "${enable_case_history}",
+        "TESTRAIL_ENABLE_RAG_TOOLS": "${enable_rag_tools}",
+        "TESTRAIL_ENABLE_DEPRECATED_TOOLS": "${enable_deprecated_tools}",
+        "TESTRAIL_DISABLED_TOOLS": "${disabled_tools}",
+        "TESTRAIL_ENABLE_TELEMETRY": "${enable_telemetry}"
+      }
+    }
+  },
+  "user_config": {
+    "instance_url": {
+      "type": "string",
+      "title": "TestRail Instance URL",
+      "description": "Base URL of your TestRail instance (e.g. https://example.testrail.io)",
+      "required": true,
+      "sensitive": false
+    },
+    "username": {
+      "type": "string",
+      "title": "TestRail Username",
+      "description": "Email address used to authenticate with TestRail",
+      "required": true,
+      "sensitive": false
+    },
+    "api_key": {
+      "type": "string",
+      "title": "TestRail API Key",
+      "description": "API key or token for authenticating with the TestRail API (found in My Settings → API Keys)",
+      "required": true,
+      "sensitive": true
+    },
+    "allow_read_operations": {
+      "type": "boolean",
+      "title": "Allow Read Operations",
+      "description": "Allow read operations on TestRail (e.g. retrieving projects, test cases, test runs, metadata)",
+      "required": false,
+      "default": true
+    },
+    "allow_write_operations": {
+      "type": "boolean",
+      "title": "Allow Write Operations",
+      "description": "Allow write operations on TestRail (e.g. creating/updating test cases, test runs, sections, results)",
+      "required": false,
+      "default": true
+    },
+    "allow_delete_operations": {
+      "type": "boolean",
+      "title": "Allow Delete Operations",
+      "description": "Allow delete operations on TestRail (e.g. deleting cases, shared steps, or attachments)",
+      "required": false,
+      "default": false
+    },
+    "enable_shared_steps": {
+      "type": "boolean",
+      "title": "Enable Shared Steps",
+      "description": "Enable tools for managing reusable shared test steps",
+      "required": false,
+      "default": false
+    },
+    "enable_case_history": {
+      "type": "boolean",
+      "title": "Enable Case History",
+      "description": "Enable tools for retrieving test case revision and audit history",
+      "required": false,
+      "default": false
+    },
+    "enable_rag_tools": {
+      "type": "boolean",
+      "title": "Enable RAG Tools",
+      "description": "Enable Knowledge Base / RAG export tools (export_cases_for_rag)",
+      "required": false,
+      "default": false
+    },
+    "enable_deprecated_tools": {
+      "type": "boolean",
+      "title": "Enable Deprecated Tools",
+      "description": "Enable deprecated tools for backward compatibility. Disable to save context window tokens.",
+      "required": false,
+      "default": true
+    },
+    "disabled_tools": {
+      "type": "string",
+      "title": "Disabled Tools",
+      "description": "Comma-separated list of tool names to disable (e.g. mutate_suite,delete_entity)",
+      "required": false
+    },
+    "enable_telemetry": {
+      "type": "boolean",
+      "title": "Enable Anonymous Telemetry",
+      "description": "Enable anonymous usage telemetry via Aptabase to help improve the project",
+      "required": false,
+      "default": true
+    }
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mcp-server",
+    "testrail",
+    "testrail-api",
+    "test-management",
+    "qa",
+    "quality-assurance",
+    "test-cases",
+    "test-runs",
+    "test-automation",
+    "testing",
+    "claude",
+    "cursor",
+    "windsurf",
+    "ai-agents",
+    "llm",
+    "developer-tools",
+    "api",
+    "automation"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uarlouski/testrail-mcp-server.git"
+  }
+}

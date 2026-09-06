@@ -47,3 +47,18 @@ jobs:
           name: coverage-report
           path: coverage/
           retention-days: 7
+
+      - name: Create MCP bundle
+        if: matrix.node-version == '22.x'
+        run: |
+          pnpm dlx @anthropic-ai/mcpb validate manifest.json
+          pnpm dlx @anthropic-ai/mcpb pack . testrail-mcp-server.mcpb
+
+      - name: Upload MCP bundle artifact
+        uses: actions/upload-artifact@v4
+        if: matrix.node-version == '22.x'
+        with:
+          name: mcp-bundle
+          path: testrail-mcp-server.mcpb
+          retention-days: 7
+          if-no-files-found: error
