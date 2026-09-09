@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Include test case `revision_id` in `export_cases_for_rag` companion `.md.metadata.json` sidecars. This enables Knowledge Base ingestion pipelines to:
+  - **Perform Incremental Syncing**: Compare current revision IDs against stored sidecar metadata to identify modified test cases without expensive full-document hashing or diffing.
+  - **Evict Stale Vectors**: Efficiently invalidate and re-embed outdated vector database records (e.g., in Pinecone, Weaviate, Milvus, Chroma, Bedrock Knowledge Bases) when test cases are updated in TestRail.
+  - **Maintain Revision Alignment**: Reliably correlate and cite the exact revision of test steps and requirements active during test execution or releases.
+
 ## [2.8.0]
 
 ### Added

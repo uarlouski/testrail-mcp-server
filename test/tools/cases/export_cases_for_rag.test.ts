@@ -17,6 +17,7 @@ describe('export_cases_for_rag tool', () => {
     let getCaseTypesMock: jest.Mock<() => Promise<CaseType[]>>;
     let getPrioritiesMock: jest.Mock<() => Promise<Priority[]>>;
     let getCaseFieldsMock: jest.Mock<() => Promise<CaseField[]>>;
+    let getCaseHistoryMock: jest.Mock<(caseId: number) => Promise<any[]>>;
     let tempDirs: string[] = [];
 
     const mockCaseFields: CaseField[] = [
@@ -32,7 +33,7 @@ describe('export_cases_for_rag tool', () => {
         getCaseMock = jest.fn<(id: number) => Promise<Case>>();
         getCasesMock = jest.fn<(projectId: number, sectionId?: number, filter?: Record<string, string>) => Promise<Case[]>>();
         getProjectMock = jest.fn<(projectId: number) => Promise<any>>().mockResolvedValue({ id: 1, name: 'Default Project', suite_mode: 1 });
-        getSectionMock = jest.fn<(id: number) => Promise<Section>>();
+        getSectionMock = jest.fn<(id: number) => Promise<Section>>().mockResolvedValue({ id: 10, name: 'General', description: '', suite_id: 1, parent_id: null, depth: 0, display_order: 1 });
         getCaseTypesMock = jest.fn<() => Promise<CaseType[]>>().mockResolvedValue([
             { id: 1, name: 'Automated', is_default: false },
             { id: 2, name: 'Functional', is_default: true },
@@ -42,6 +43,7 @@ describe('export_cases_for_rag tool', () => {
             { id: 2, name: 'High', short_name: 'H', priority: 2, is_default: false },
         ]);
         getCaseFieldsMock = jest.fn<() => Promise<CaseField[]>>().mockResolvedValue(mockCaseFields);
+        getCaseHistoryMock = jest.fn<(caseId: number) => Promise<any[]>>().mockResolvedValue([]);
 
         mockClient = {
             getCase: getCaseMock,
@@ -51,6 +53,7 @@ describe('export_cases_for_rag tool', () => {
             getCaseTypes: getCaseTypesMock,
             getPriorities: getPrioritiesMock,
             getCaseFields: getCaseFieldsMock,
+            getCaseHistory: getCaseHistoryMock,
         } as unknown as jest.Mocked<TestRailClient>;
     });
 
@@ -144,6 +147,7 @@ describe('export_cases_for_rag tool', () => {
         expect(metaContent).toEqual({
             metadataAttributes: {
                 case_id: 101,
+                revision_id: null,
                 title: 'Verify User Login with Valid Credentials',
                 section: 'Authentication Suite',
                 priority: 'High',
@@ -348,6 +352,7 @@ describe('export_cases_for_rag tool', () => {
         const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C501.md.metadata.json'), 'utf-8'));
         expect(metaContent.metadataAttributes).toEqual({
             case_id: 501,
+            revision_id: null,
             title: 'Auto Routing Case',
             section: 'General',
             priority: 'High',
@@ -1079,6 +1084,78 @@ describe('export_cases_for_rag tool', () => {
         expect(result.exported_count).toBe(0);
         expect(result.files).toEqual([]);
         expect(result.message).toContain('Successfully exported 0 test case(s)');
+    });
+
+    test('resolves revision_id from client.getCaseHistory with multiple revisions', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_history_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const mockCase: Case = {
+            id: 888,
+            title: 'History Test Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+        };
+        getCaseMock.mockResolvedValue(mockCase);
+        getCaseHistoryMock.mockResolvedValue([
+            { id: 101, created_on: 1700001000 },
+            { id: 38381, created_on: 1700005000 },
+            { id: 250, created_on: 1700002000 },
+        ]);
+
+        const result = await exportCasesForRagTool.handler(
+            { case_ids: [888], output_dir: testTempDir },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        expect(getCaseHistoryMock).toHaveBeenCalledWith(888);
+
+        const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C888.md.metadata.json'), 'utf-8'));
+        expect(metaContent.metadataAttributes.case_id).toBe(888);
+        expect(metaContent.metadataAttributes.revision_id).toBe(38381);
+    });
+
+
+    test('gracefully sets revision_id to null when getCaseHistory fails or is empty', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_rev_fail_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const mockCase: Case = {
+            id: 777,
+            title: 'Failing History Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+        };
+        getCaseMock.mockResolvedValue(mockCase);
+        getCaseHistoryMock.mockRejectedValue(new Error('History API disabled'));
+
+        const result = await exportCasesForRagTool.handler(
+            { case_ids: [777], output_dir: testTempDir },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C777.md.metadata.json'), 'utf-8'));
+        expect(metaContent.metadataAttributes.revision_id).toBeNull();
     });
 });
 
