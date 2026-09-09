@@ -17,7 +17,7 @@ const parameters = {
     filter: z.record(z.string(), z.string()).optional().describe("Optional API-side filters (e.g. priority_id, type_id, milestone_id, refs, created_after, etc.)."),
     where: z.record(z.string(), z.any()).optional().describe("Optional client-side filter for any field including custom fields (filters after fetching cases). Supports exact value matching. Example: {\"custom_automation_status\": 1}"),
     output_dir: z.string().optional().describe("Directory to save exported files. Defaults to an auto-generated directory in the current working directory."),
-    ignored_fields: z.array(z.string()).optional().describe("Optional list of custom field names or system names to ignore/exclude from export (e.g. ['custom_review_status', 'review_status']). Supports both full system_name and stripped field names. Core metadata attributes (case_id, title, section, priority, references, labels) cannot be ignored."),
+    ignored_fields: z.array(z.string()).optional().describe("Optional list of custom field names or system names to ignore/exclude from export (e.g. ['custom_review_status', 'review_status']). Supports both full system_name and stripped field names. Core metadata attributes (case_id, revision_id, title, section, priority, references, labels) cannot be ignored."),
 };
 
 function formatStepsSeparated(steps: any[]): string {
@@ -157,10 +157,12 @@ function buildMetadataAttributes(
     testCase: Case,
     sectionName: string,
     priority: string,
-    metadataFields: Array<{ key: string; value: any; fieldDef?: CaseField }>
+    metadataFields: Array<{ key: string; value: any; fieldDef?: CaseField }>,
+    revisionId: number | null
 ): Record<string, any> {
     const metadataAttributes: Record<string, any> = {
         case_id: testCase.id,
+        revision_id: revisionId,
         title: testCase.title,
         section: sectionName,
         priority: priority,
@@ -255,8 +257,18 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
             );
             const { markdownFields, metadataFields } = categorizeCustomFields(testCase, applicableFields, ignoredFieldsSet);
 
+            let revisionId: number | null = null;
+            try {
+                const history = await client.getCaseHistory(testCase.id);
+                if (history && history.length > 0) {
+                    revisionId = Math.max(...history.map(h => h.id));
+                }
+            } catch {
+                revisionId = null;
+            }
+
             const markdownContent = buildMarkdownBody(testCase, sectionName, markdownFields);
-            const metadataAttributes = buildMetadataAttributes(testCase, sectionName, priority, metadataFields);
+            const metadataAttributes = buildMetadataAttributes(testCase, sectionName, priority, metadataFields, revisionId);
 
             const docFilename = `C${testCase.id}.md`;
             const metaFilename = `C${testCase.id}.md.metadata.json`;
