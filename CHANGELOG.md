@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.9.0]
 
 ### Added
 - Include test case `revision_id` in `export_cases_for_rag` companion `.md.metadata.json` sidecars. This enables Knowledge Base ingestion pipelines to:
