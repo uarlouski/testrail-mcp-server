@@ -16,6 +16,7 @@
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.9-blue.svg" alt="TypeScript"></a>
   <a href="https://github.com/uarlouski/testrail-mcp-server"><img src="https://img.shields.io/github/stars/uarlouski/testrail-mcp-server.svg?style=social&label=Star" alt="GitHub stars"></a>
   <a href="https://glama.ai/mcp/servers/uarlouski/testrail-mcp-server"><img src="https://glama.ai/mcp/servers/uarlouski/testrail-mcp-server/badges/score.svg" alt="Score Badge"></a>
+  <a href="https://m8ven.ai/mcp/uarlouski/testrail-mcp-server"><img src="https://m8ven.ai/badge/mcp/uarlouski/testrail-mcp-server" alt="M8ven Score"></a>
 </p>
 
 <p align="center">
