@@ -10,10 +10,14 @@ hero:
       text: Get Started
       link: /guide/getting-started
     - theme: alt
-      text: View Configuration
-      link: /guide/configuration
+      text: CLI & CI/CD
+      link: /guide/cli
 
 features:
+  - title: 🖥️ CLI & CI/CD Automation
+    details: Run any TestRail tool directly from scripts and CI/CD pipelines with zero LLM overhead.
+    link: /guide/cli
+    linkText: View CLI Guide
   - title: 🔍 Discovery & Navigation
     details: Browse projects, test suites, and sections to automatically map your QA organization.
     link: /reference/discovery

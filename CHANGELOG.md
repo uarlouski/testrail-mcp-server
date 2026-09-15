@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Execute any TestRail tool directly from shell scripts, terminals, and automated CI/CD pipelines without LLM overhead or requiring an active MCP host.
+
 ## [2.9.0]
 
 ### Added

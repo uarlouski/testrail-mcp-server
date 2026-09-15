@@ -139,7 +139,62 @@ Once configured, turbo-charge your QA workflow by asking your AI assistant:
 - *"Show me all test cases in section 5 of project 3."*
 - *"Create a comprehensive test case for 'Login Validation' with detailed steps."*
 - *"Start a new test run containing cases from section 5."*
-- *"Mark test case ID 1042 as passed with the comment 'Tested successfully on staging'."*
+---
+
+## 🖥️ Command Line Interface (CLI) & CI/CD Automation
+
+In addition to interacting via AI assistants, you can invoke any TestRail tool directly from shell scripts, terminal environments, and automated CI/CD pipelines (GitHub Actions, GitLab CI, Jenkins) using **`testrail-cli`** or **`npx`** — with zero LLM overhead.
+
+- **Deterministic Execution**: Returns standard Unix exit codes (`0` on success, `1` on error).
+- **Pipeline-Native Output**: Emits clean JSON to `stdout` for piping into tools like `jq`, while diagnostics and errors go to `stderr`.
+- **Zero Duplication**: Reuses the exact same API client, retry logic, and validation schemas as the MCP server.
+
+### Invocation Methods
+
+```bash
+# Method 1: Direct npx subcommand (Recommended)
+npx @uarlouski/testrail-mcp-server cli <command> [flags]
+
+# Method 2: Global or local binary
+testrail-cli <command> [flags]
+
+# Method 3: Via package runner
+npx -p @uarlouski/testrail-mcp-server testrail-cli <command> [flags]
+```
+
+### Examples
+
+#### Query Projects (`query_project`)
+```bash
+# List all active projects
+npx @uarlouski/testrail-mcp-server cli query_project --action many
+
+# Query a single project by ID
+npx @uarlouski/testrail-mcp-server cli query_project --action one --project_id 1
+```
+
+#### Export Cases for Knowledge Base / RAG (`export_cases_for_rag`)
+```bash
+# Export all cases for a project into Markdown & metadata sidecars
+npx @uarlouski/testrail-mcp-server cli export_cases_for_rag \
+  --project_id 1 \
+  --output_dir ./rag_exports
+
+# Export specific cases by ID (comma-separated list)
+npx @uarlouski/testrail-mcp-server cli export_cases_for_rag \
+  --case_ids C101,C102,103 \
+  --output_dir ./rag_exports
+```
+
+#### Command Discovery & Flag Documentation
+```bash
+# List all available commands
+npx @uarlouski/testrail-mcp-server cli --help
+
+# Show parameter options for a specific tool
+npx @uarlouski/testrail-mcp-server cli query_project --help
+npx @uarlouski/testrail-mcp-server cli export_cases_for_rag --help
+```
 
 ---
 

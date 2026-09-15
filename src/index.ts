@@ -8,6 +8,19 @@ import { getToolsToRegister } from "./tools/registry.js";
 import { removeNullish } from "./utils/sanitizer.js";
 import z from "zod";
 
+// Allow delegating to CLI directly when invoked via 'cli' subcommand (e.g. npx @uarlouski/testrail-mcp-server cli ...)
+const isDirectExecution = process.argv[1] && (
+    process.argv[1].endsWith("/index.js") ||
+    process.argv[1].endsWith("/index.ts") ||
+    process.argv[1].endsWith("/testrail-mcp-server")
+);
+
+if (isDirectExecution && process.argv[2] === "cli") {
+    const { runCli } = await import("./cli.js");
+    const code = await runCli(process.argv.slice(3));
+    process.exit(code);
+}
+
 const EnvSchema = z.object({
     TESTRAIL_INSTANCE_URL: z.url('Must be a valid TestRail URL'),
     TESTRAIL_USERNAME: z.email('Must be a valid email address'),
