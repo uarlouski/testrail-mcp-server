@@ -22,6 +22,8 @@ describe('index.ts environment validation', () => {
             }))
         }));
 
+        jest.mock('dotenv/config', () => ({}));
+
         jest.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
             StdioServerTransport: jest.fn()
         }));
@@ -161,6 +163,33 @@ describe('index.ts environment validation', () => {
             'Invalid TestRail environment configuration:',
             expect.stringContaining('Cannot disable non-existent tool(s): fake_tool_one, fake_tool_two')
         );
+    });
+
+    test('delegates to cli when argv[2] is cli', async () => {
+        const originalArgv = process.argv;
+        process.argv = ['node', '/workspace/dist/index.js', 'cli', '--version'];
+
+        try {
+            await import('../src/index.js');
+        } catch (e) {
+            // ignore
+        } finally {
+            process.argv = originalArgv;
+        }
+
+        expect(exitMock).toHaveBeenCalledWith(0);
+    });
+
+    test('handles read and write operations disabled via environment variables', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        process.env.TESTRAIL_ALLOW_WRITE_OPERATIONS = 'false';
+        process.env.TESTRAIL_ALLOW_READ_OPERATIONS = 'false';
+        process.env.TESTRAIL_ALLOW_DELETE_OPERATIONS = 'true';
+
+        await import('../src/index.js');
+        expect(exitMock).not.toHaveBeenCalled();
     });
 });
 

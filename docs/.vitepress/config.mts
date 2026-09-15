@@ -18,7 +18,8 @@ export default defineConfig({
         text: 'Introduction',
         items: [
           { text: 'Getting Started', link: '/guide/getting-started' },
-          { text: 'Configuration', link: '/guide/configuration' }
+          { text: 'Configuration', link: '/guide/configuration' },
+          { text: 'CLI & CI/CD Automation', link: '/guide/cli' }
         ]
       },
       {
