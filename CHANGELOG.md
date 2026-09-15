@@ -5,6 +5,10 @@
 ### Added
 - Execute any TestRail tool directly from shell scripts, terminals, and automated CI/CD pipelines without LLM overhead or requiring an active MCP host.
 
+### Changed
+- Bump `@modelcontextprotocol/sdk` from `1.29.0` to `1.30.0`
+- Bump `zod` from `4.4.3` to `4.6.5`
+
 ## [2.9.0]
 
 ### Added
