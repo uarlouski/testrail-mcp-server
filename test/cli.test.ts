@@ -1,6 +1,7 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from "@jest/globals";
 import { runCli } from "../src/cli.js";
 import { TestRailClient } from "../src/client/testrail.js";
+import { VERSION } from "../src/version.js";
 
 describe("cli execution", () => {
     let logSpy: any;
@@ -31,7 +32,7 @@ describe("cli execution", () => {
     it("should print version and exit with 0 when --version is passed", async () => {
         const exitCode = await runCli(["--version"], mockEnv);
         expect(exitCode).toBe(0);
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("testrail-cli v"));
+        expect(logSpy).toHaveBeenCalledWith(`testrail-cli v${VERSION}`);
     });
 
     it("should print error and exit with 1 when no command is provided", async () => {
