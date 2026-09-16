@@ -9,6 +9,9 @@
 - Bump `@modelcontextprotocol/sdk` from `1.29.0` to `1.30.0`
 - Bump `zod` from `4.4.3` to `4.6.5`
 
+### Fixed
+- Allow `status_id` to be `null` in results schema to support TestRail audit, reassignment, and comment-only history entries.
+
 ## [2.9.0]
 
 ### Added

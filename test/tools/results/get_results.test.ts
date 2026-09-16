@@ -41,4 +41,24 @@ describe('get_results tool', () => {
         expect(result.results[0].id).toBe(100);
         expect(mockClient.getResults).toHaveBeenCalledWith(1);
     });
+
+    test('handler handles results with null status_id (reassignment / audit history entry)', async () => {
+        const resultsWithNullStatus: Result[] = [
+            {
+                id: 101,
+                test_id: 1,
+                status_id: null,
+                comment: null,
+                defects: null
+            }
+        ];
+        getResultsMock.mockResolvedValue(resultsWithNullStatus);
+
+        const result = await getResultsTool.handler({ test_id: 1 }, mockClient);
+
+        expect(result).toBeDefined();
+        expect(result.results).toHaveLength(1);
+        expect(result.results[0].id).toBe(101);
+        expect(result.results[0].status_id).toBeNull();
+    });
 });
