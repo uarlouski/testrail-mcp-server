@@ -9,6 +9,7 @@
 ### Changed
 - Bump `@modelcontextprotocol/sdk` from `1.29.0` to `1.30.0`
 - Bump `zod` from `4.4.3` to `4.6.5`
+- Replace `revision_id` with `updated_on` in `export_cases_for_rag` sidecar metadata. The timestamp is already present on `get_case` / `get_cases` responses, so export no longer calls `get_history_for_case` per case. Incremental sync pipelines should compare `updated_on` (and can use the `updated_after` filter) instead of fetching case history.
 
 ### Fixed
 - Allow `status_id` to be `null` in results schema to support TestRail audit, reassignment, and comment-only history entries.

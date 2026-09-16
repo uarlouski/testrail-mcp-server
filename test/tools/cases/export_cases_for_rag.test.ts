@@ -17,7 +17,6 @@ describe('export_cases_for_rag tool', () => {
     let getCaseTypesMock: jest.Mock<() => Promise<CaseType[]>>;
     let getPrioritiesMock: jest.Mock<() => Promise<Priority[]>>;
     let getCaseFieldsMock: jest.Mock<() => Promise<CaseField[]>>;
-    let getCaseHistoryMock: jest.Mock<(caseId: number) => Promise<any[]>>;
     let tempDirs: string[] = [];
 
     const mockCaseFields: CaseField[] = [
@@ -43,7 +42,6 @@ describe('export_cases_for_rag tool', () => {
             { id: 2, name: 'High', short_name: 'H', priority: 2, is_default: false },
         ]);
         getCaseFieldsMock = jest.fn<() => Promise<CaseField[]>>().mockResolvedValue(mockCaseFields);
-        getCaseHistoryMock = jest.fn<(caseId: number) => Promise<any[]>>().mockResolvedValue([]);
 
         mockClient = {
             getCase: getCaseMock,
@@ -53,7 +51,6 @@ describe('export_cases_for_rag tool', () => {
             getCaseTypes: getCaseTypesMock,
             getPriorities: getPrioritiesMock,
             getCaseFields: getCaseFieldsMock,
-            getCaseHistory: getCaseHistoryMock,
         } as unknown as jest.Mocked<TestRailClient>;
     });
 
@@ -147,7 +144,7 @@ describe('export_cases_for_rag tool', () => {
         expect(metaContent).toEqual({
             metadataAttributes: {
                 case_id: 101,
-                revision_id: null,
+                updated_on: 1700005000,
                 title: 'Verify User Login with Valid Credentials',
                 section: 'Authentication Suite',
                 priority: 'High',
@@ -352,7 +349,7 @@ describe('export_cases_for_rag tool', () => {
         const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C501.md.metadata.json'), 'utf-8'));
         expect(metaContent.metadataAttributes).toEqual({
             case_id: 501,
-            revision_id: null,
+            updated_on: 1700005000,
             title: 'Auto Routing Case',
             section: 'General',
             priority: 'High',
@@ -913,6 +910,7 @@ describe('export_cases_for_rag tool', () => {
 
         const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C908.md.metadata.json'), 'utf-8'));
         expect(metaContent.metadataAttributes.case_id).toBe(908);
+        expect(metaContent.metadataAttributes.updated_on).toBe(1700005000);
         expect(metaContent.metadataAttributes.title).toBe('Ignored Fields Case');
         expect(metaContent.metadataAttributes.section).toBe('Section 10');
         expect(metaContent.metadataAttributes.priority).toBe('Low');
@@ -1086,13 +1084,13 @@ describe('export_cases_for_rag tool', () => {
         expect(result.message).toContain('Successfully exported 0 test case(s)');
     });
 
-    test('resolves revision_id from client.getCaseHistory with multiple revisions', async () => {
-        const testTempDir = path.join(os.tmpdir(), `rag_test_history_${Date.now()}`);
+    test('includes updated_on from the case payload without fetching case history', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_updated_on_${Date.now()}`);
         tempDirs.push(testTempDir);
 
         const mockCase: Case = {
             id: 888,
-            title: 'History Test Case',
+            title: 'Updated On Test Case',
             section_id: 10,
             template_id: 1,
             type_id: 1,
@@ -1106,11 +1104,8 @@ describe('export_cases_for_rag tool', () => {
             labels: [],
         };
         getCaseMock.mockResolvedValue(mockCase);
-        getCaseHistoryMock.mockResolvedValue([
-            { id: 101, created_on: 1700001000 },
-            { id: 38381, created_on: 1700005000 },
-            { id: 250, created_on: 1700002000 },
-        ]);
+        const getCaseHistoryMock = jest.fn<(caseId: number) => Promise<any[]>>().mockRejectedValue(new Error('getCaseHistory should not be called'));
+        (mockClient as any).getCaseHistory = getCaseHistoryMock;
 
         const result = await exportCasesForRagTool.handler(
             { case_ids: [888], output_dir: testTempDir },
@@ -1118,44 +1113,12 @@ describe('export_cases_for_rag tool', () => {
         );
 
         expect(result.success).toBe(true);
-        expect(getCaseHistoryMock).toHaveBeenCalledWith(888);
+        expect(getCaseHistoryMock).not.toHaveBeenCalled();
 
         const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C888.md.metadata.json'), 'utf-8'));
         expect(metaContent.metadataAttributes.case_id).toBe(888);
-        expect(metaContent.metadataAttributes.revision_id).toBe(38381);
-    });
-
-
-    test('gracefully sets revision_id to null when getCaseHistory fails or is empty', async () => {
-        const testTempDir = path.join(os.tmpdir(), `rag_test_rev_fail_${Date.now()}`);
-        tempDirs.push(testTempDir);
-
-        const mockCase: Case = {
-            id: 777,
-            title: 'Failing History Case',
-            section_id: 10,
-            template_id: 1,
-            type_id: 1,
-            priority_id: 1,
-            milestone_id: null,
-            refs: null,
-            created_on: 1700000000,
-            updated_on: 1700005000,
-            estimate: null,
-            suite_id: 1,
-            labels: [],
-        };
-        getCaseMock.mockResolvedValue(mockCase);
-        getCaseHistoryMock.mockRejectedValue(new Error('History API disabled'));
-
-        const result = await exportCasesForRagTool.handler(
-            { case_ids: [777], output_dir: testTempDir },
-            mockClient
-        );
-
-        expect(result.success).toBe(true);
-        const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C777.md.metadata.json'), 'utf-8'));
-        expect(metaContent.metadataAttributes.revision_id).toBeNull();
+        expect(metaContent.metadataAttributes.updated_on).toBe(1700005000);
+        expect(metaContent.metadataAttributes.revision_id).toBeUndefined();
     });
 });
 
