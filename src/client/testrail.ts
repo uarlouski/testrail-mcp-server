@@ -282,7 +282,7 @@ export class TestRailClient {
         return this._executeRequest<Attachment>('POST', `${API_BASE_V2}/add_attachment_to_${entityType}/${entityId}`, headers, formData);
     }
 
-    async getAttachments(entityType: AttachmentEntityType, entityId: number): Promise<AttachmentItem[]> {
+    async getAttachments(entityType: "case" | "run", entityId: number): Promise<AttachmentItem[]> {
         const url = `${API_BASE_V2}/get_attachments_for_${entityType}/${entityId}`;
         return this.paginateAll<AttachmentItem>(url, 'attachments');
     }

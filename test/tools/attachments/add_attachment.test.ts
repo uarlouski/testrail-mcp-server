@@ -115,4 +115,71 @@ describe('addAttachmentTool', () => {
         const calledZipPath = mockClient.addAttachment.mock.calls[0][2];
         expect(fs.existsSync(calledZipPath)).toBe(false);
     });
+
+    test('attaches a regular file to a result with numeric ID', async () => {
+        const filePath = path.join(testTempDir, 'result_screenshot.png');
+        fs.writeFileSync(filePath, 'result screenshot data');
+
+        const mockResult = { attachment_id: 401 };
+        mockClient.addAttachment.mockResolvedValue(mockResult as any);
+
+        const result = await addAttachmentTool.handler({
+            entity_type: 'result',
+            entity_id: 555,
+            file_path: filePath,
+        }, mockClient);
+
+        expect(mockClient.addAttachment).toHaveBeenCalledWith('result', 555, filePath, 'result_screenshot.png');
+        expect(result).toEqual(mockResult);
+    });
+
+    test('attaches a regular file to a result with string ID', async () => {
+        const filePath = path.join(testTempDir, 'failure.log');
+        fs.writeFileSync(filePath, 'traceback failure');
+
+        const mockResult = { attachment_id: 402 };
+        mockClient.addAttachment.mockResolvedValue(mockResult as any);
+
+        const result = await addAttachmentTool.handler({
+            entity_type: 'result',
+            entity_id: '888',
+            file_path: filePath,
+        }, mockClient);
+
+        expect(mockClient.addAttachment).toHaveBeenCalledWith('result', 888, filePath, 'failure.log');
+        expect(result).toEqual(mockResult);
+    });
+
+    test('zips and attaches a directory to a result', async () => {
+        const dirPath = path.join(testTempDir, 'result-logs');
+        fs.mkdirSync(dirPath, { recursive: true });
+        fs.writeFileSync(path.join(dirPath, 'error.log'), 'error logs');
+
+        const mockResult = { attachment_id: 403 };
+        mockClient.addAttachment.mockResolvedValue(mockResult as any);
+
+        const result = await addAttachmentTool.handler({
+            entity_type: 'result',
+            entity_id: 999,
+            file_path: dirPath,
+        }, mockClient);
+
+        expect(mockClient.addAttachment).toHaveBeenCalledWith(
+            'result',
+            999,
+            expect.stringMatching(/result-logs-\d+\.zip$/),
+            'result-logs.zip'
+        );
+        expect(result).toEqual(mockResult);
+
+        const calledZipPath = mockClient.addAttachment.mock.calls[0][2];
+        expect(fs.existsSync(calledZipPath)).toBe(false);
+    });
+
+    test('schema validates entity_type enum correctly', () => {
+        expect(() => addAttachmentTool.parameters.entity_type.parse('case')).not.toThrow();
+        expect(() => addAttachmentTool.parameters.entity_type.parse('run')).not.toThrow();
+        expect(() => addAttachmentTool.parameters.entity_type.parse('result')).not.toThrow();
+        expect(() => addAttachmentTool.parameters.entity_type.parse('invalid')).toThrow();
+    });
 });

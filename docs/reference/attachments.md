@@ -4,8 +4,8 @@ Tools for attaching files (like screenshots and logs) to your TestRail instances
 
 ### `add_attachment`
 Upload an attachment to a specific TestRail entity. 
-- You specify the `entity_type` (either `"case"` or `"run"`).
-- You provide the `entity_id` and the local `file_path`.
+- You specify the `entity_type` (`"case"`, `"run"`, or `"result"`).
+- You provide the `entity_id` (test case ID, run ID, or test result ID) and the local `file_path`.
 - **Directory Support**: If the provided `file_path` points to a directory instead of a single file, the MCP server will automatically zip the entire directory into an archive and upload it for you.
 
 ### `query_attachment`
