@@ -12,6 +12,7 @@
 
 ### Fixed
 - Allow `status_id` to be `null` in results schema to support TestRail audit, reassignment, and comment-only history entries.
+- Fix Windows build portability by replacing shell `chmod` with a cross-platform executable permissions handler.
 
 ## [2.9.0]
 

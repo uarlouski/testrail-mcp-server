@@ -8,12 +8,16 @@ on:
 
 jobs:
   build-and-test:
-    name: Build and Test (Node ${{ matrix.node-version }})
-    runs-on: ubuntu-latest
+    name: Build and Test (${{ matrix.os }}, Node ${{ matrix.node-version }})
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest]
         node-version: [22.x, 24.x]
+        exclude:
+          - os: windows-latest
+            node-version: 24.x
 
     steps:
       - name: Checkout code
@@ -35,6 +39,7 @@ jobs:
         run: pnpm test
 
       - name: Run tests with coverage
+        if: matrix.os == 'ubuntu-latest'
         run: pnpm run test:coverage
 
       - name: Build project
@@ -42,21 +47,21 @@ jobs:
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
-        if: matrix.node-version == '22.x'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
         with:
           name: coverage-report
           path: coverage/
           retention-days: 7
 
       - name: Create MCP bundle
-        if: matrix.node-version == '22.x'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
         run: |
           pnpm dlx @anthropic-ai/mcpb validate manifest.json
           pnpm dlx @anthropic-ai/mcpb pack . testrail-mcp-server.mcpb
 
       - name: Upload MCP bundle artifact
         uses: actions/upload-artifact@v4
-        if: matrix.node-version == '22.x'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
         with:
           name: mcp-bundle
           path: testrail-mcp-server.mcpb

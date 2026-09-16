@@ -14,7 +14,7 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "rimraf dist && tsc && chmod +x dist/index.js dist/cli.js",
+    "build": "rimraf dist && tsc && node -e \"if (process.platform !== 'win32') { ['dist/index.js', 'dist/cli.js'].forEach(f => require('fs').chmodSync(f, 0o755)); }\"",
     "start": "node dist/index.js",
     "cli": "ts-node src/cli.ts",
     "dev": "ts-node src/index.ts",
