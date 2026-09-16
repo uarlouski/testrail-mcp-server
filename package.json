@@ -14,6 +14,8 @@
   ],
   "type": "module",
   "scripts": {
+    "version:sync": "node scripts/sync-version.mjs",
+    "prebuild": "pnpm version:sync",
     "build": "rimraf dist && tsc && node -e \"if (process.platform !== 'win32') { ['dist/index.js', 'dist/cli.js'].forEach(f => require('fs').chmodSync(f, 0o755)); }\"",
     "start": "node dist/index.js",
     "cli": "ts-node src/cli.ts",

@@ -7,8 +7,7 @@ import { ALL_TOOLS } from "./tools/registry.js";
 import { removeNullish } from "./utils/sanitizer.js";
 import { ToolDefinition } from "./types/custom.js";
 import { parseArgs, ParsedCliArgs, coerceFlagsForTool, formatGeneralHelp, formatToolHelp } from "./adapters/cli_parser.js";
-
-const CLI_VERSION = "2.9.0";
+import { VERSION } from "./version.js";
 
 const CredentialSchema = z.object({
     url: z.url("Must be a valid TestRail URL (e.g. https://example.testrail.io)"),
@@ -87,7 +86,7 @@ export async function runCli(
     const { command, flags, globalOptions } = parseArgs(argv);
 
     if (globalOptions.version) {
-        console.log(`testrail-cli v${CLI_VERSION}`);
+        console.log(`testrail-cli v${VERSION}`);
         return 0;
     }
 

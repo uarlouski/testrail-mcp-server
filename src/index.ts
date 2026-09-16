@@ -6,6 +6,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { TestRailClient } from "./client/testrail.js";
 import { getToolsToRegister } from "./tools/registry.js";
 import { removeNullish } from "./utils/sanitizer.js";
+import { VERSION } from "./version.js";
 import z from "zod";
 
 // Allow delegating to CLI directly when invoked via 'cli' subcommand (e.g. npx @uarlouski/testrail-mcp-server cli ...)
@@ -60,7 +61,7 @@ const {
 
 const server = new McpServer({
     name: "TestRail MCP Server",
-    version: "2.9.0",
+    version: VERSION,
 });
 
 
