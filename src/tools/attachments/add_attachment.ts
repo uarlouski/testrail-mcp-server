@@ -5,13 +5,13 @@ import { ToolDefinition } from "../../types/custom.js";
 import { normalizeEntityId, prepareUploadFile } from "../../utils/attachment_helper.js";
 
 const parameters = {
-    entity_type: z.enum(["case", "run"]).describe("The type of entity to attach the file to ('case' or 'run')"),
-    entity_id: z.union([z.number(), z.string()]).describe("The ID of the entity to attach the file to (e.g. 123 or 'C123' for cases, or numeric run ID)"),
+    entity_type: z.enum(["case", "run", "result"]).describe("The type of entity to attach the file to ('case', 'run', or 'result')"),
+    entity_id: z.union([z.number(), z.string()]).describe("The ID of the entity to attach the file to (e.g. 123 or 'C123' for cases, or numeric run / result ID)"),
     file_path: z.string().describe("The path to the file or directory to attach. Directories will be automatically zipped."),
 };
 
 const description = `
-Add an attachment to a test case or test run in TestRail.
+Add an attachment to a test case, test run, or test result in TestRail.
 If the file_path points to a directory, it will be automatically zipped before uploading.
 Maximum upload size is 256MB.
 `;

@@ -3,7 +3,8 @@
 ## [Unreleased]
 
 ### Added
-- Execute any TestRail tool directly from shell scripts, terminals, and automated CI/CD pipelines without LLM overhead or requiring an active MCP host.
+- Support uploading attachments directly to TestRail test results via `add_attachment` by specifying `entity_type: "result"` with a numeric test result ID.
+- Execute any TestRail tool directly from shell scripts, terminals, and automated CI/CD pipelines without LLM overhead or requiring an active MCP host (`testrail-cli`).
 
 ### Changed
 - Bump `@modelcontextprotocol/sdk` from `1.29.0` to `1.30.0`

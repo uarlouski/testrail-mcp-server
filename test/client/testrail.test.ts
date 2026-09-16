@@ -1562,6 +1562,33 @@ describe('TestRailClient', () => {
         );
     });
 
+    test('addAttachment uploads file for result using FormData', async () => {
+        const mockAttachment = { attachment_id: 999 };
+        const mockFileBuffer = Buffer.from('result log content');
+
+        jest.spyOn(fs.promises, 'readFile').mockResolvedValue(mockFileBuffer);
+
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockAttachment
+        });
+
+        const result = await client.addAttachment('result', 456, '/path/to/result.log', 'result.log');
+
+        expect(result).toEqual(mockAttachment);
+        expect(fs.promises.readFile).toHaveBeenCalledWith('/path/to/result.log');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/add_attachment_to_result/456',
+            expect.objectContaining({
+                method: 'POST',
+                headers: expect.objectContaining({
+                    'Authorization': expect.stringContaining('Basic')
+                }),
+                body: expect.any(FormData)
+            })
+        );
+    });
+
     test('getAttachments for case returns attachments array with pagination', async () => {
         const mockAttachments = [
             { id: 1, filename: 'file1.png', size: 100 }

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export type AttachmentEntityType = "case" | "run";
+export type AttachmentEntityType = "case" | "run" | "result";
 
 export const AttachmentSchema = z.object({
     attachment_id: z.union([z.number(), z.string()]),
@@ -19,8 +19,8 @@ export const AttachmentItemSchema = z.object({
 export type AttachmentItem = z.infer<typeof AttachmentItemSchema>;
 
 export const AddAttachmentSchema = z.object({
-    entity_type: z.enum(["case", "run"]).describe("The type of entity to attach the file to ('case' or 'run')"),
-    entity_id: z.union([z.number(), z.string()]).describe("The ID of the entity to attach the file to (e.g. 123 or 'C123' for cases, or numeric run ID)"),
+    entity_type: z.enum(["case", "run", "result"]).describe("The type of entity to attach the file to ('case', 'run', or 'result')"),
+    entity_id: z.union([z.number(), z.string()]).describe("The ID of the entity to attach the file to (e.g. 123 or 'C123' for cases, or numeric run / result ID)"),
     file_path: z.string().describe("The path to the file or directory to attach. Directories will be automatically zipped."),
 });
 
