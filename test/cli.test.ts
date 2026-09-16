@@ -125,12 +125,11 @@ describe("cli execution", () => {
         const mockClient = {
             getProject: jest.fn<any>().mockResolvedValue({ id: 1, name: "Project Alpha", suite_mode: 1 }),
             getCases: jest.fn<any>().mockResolvedValue([
-                { id: 101, title: "Login Smoke Test", section_id: 5, priority_id: 2, template_id: 1 }
+                { id: 101, title: "Login Smoke Test", section_id: 5, priority_id: 2, template_id: 1, updated_on: 1700005000 }
             ]),
             getSection: jest.fn<any>().mockResolvedValue({ id: 5, name: "Auth" }),
             getPriorities: jest.fn<any>().mockResolvedValue([{ id: 2, name: "High" }]),
             getCaseFields: jest.fn<any>().mockResolvedValue([]),
-            getCaseHistory: jest.fn<any>().mockResolvedValue([{ id: 501 }]),
         } as unknown as TestRailClient;
 
         const exitCode = await runCli([
