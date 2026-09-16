@@ -3,7 +3,7 @@ import { z } from "zod";
 export const ResultSchema = z.object({
     id: z.number(),
     test_id: z.number(),
-    status_id: z.number(),
+    status_id: z.number().nullable(),
     comment: z.string().nullable(),
     defects: z.string().nullable(),
 });
