@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.10.0]
 
 ### Added
 - Support uploading attachments to TestRail test results via `add_attachment` tool.
