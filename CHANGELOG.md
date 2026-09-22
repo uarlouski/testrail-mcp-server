@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [3.0.0]
 
 ### Removed
 - Permanently removed deprecated `add_attachment_to_run` tool. Use `add_attachment` with `entity_type: "run"` instead.
