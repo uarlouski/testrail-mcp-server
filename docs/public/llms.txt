@@ -1,0 +1,38 @@
+# TestRail MCP Server
+
+> TestRail MCP Server is an open-source Model Context Protocol (MCP) server that connects AI assistants — Claude Desktop, Cursor, Windsurf, VS Code, and any MCP-compliant client — directly to the TestRail API v2. It lets an AI assistant browse projects, suites, and sections; read, create, update, and bulk-edit test cases; create test runs; submit results by `test_id` or `case_id`; upload attachments; manage shared steps; and export test cases as Markdown for retrieval-augmented generation. The same tools are callable from shell scripts and CI/CD pipelines through the bundled `testrail-cli` binary, with no LLM involved.
+
+Key facts:
+
+- Package: `@uarlouski/testrail-mcp-server` on npm. Run with `npx -y @uarlouski/testrail-mcp-server@latest`.
+- Transport: stdio. Runtime: Node.js 18 or newer, TypeScript, ESM.
+- Tested baseline: TestRail 10.6.2 (API v2). Older instances, including pre-7.x pagination, work via built-in backward compatibility.
+- Authentication: `TESTRAIL_INSTANCE_URL`, `TESTRAIL_USERNAME`, and `TESTRAIL_API_KEY` environment variables. The API key is created in TestRail under My Settings, then API Keys.
+- Safety model: tools declare a mode of `read`, `write`, or `delete`. Read and write are enabled by default; delete operations are disabled unless `TESTRAIL_ALLOW_DELETE_OPERATIONS=true`.
+- Licence: Apache 2.0. Free and open source.
+
+## Documentation
+
+- [Getting Started](https://uarlouski.github.io/testrail-mcp-server/guide/getting-started.html): Install the server and configure Claude Desktop, Cursor, Windsurf, VS Code, or any MCP client.
+- [Configuration](https://uarlouski.github.io/testrail-mcp-server/guide/configuration.html): Every environment variable, permission toggle, feature flag, and per-tool allowlist.
+- [CLI and CI/CD Automation](https://uarlouski.github.io/testrail-mcp-server/guide/cli.html): Call any tool from bash, GitHub Actions, GitLab CI, or Jenkins with `testrail-cli`.
+- [FAQ](https://uarlouski.github.io/testrail-mcp-server/guide/faq.html): Direct answers about setup, permissions, compatibility, security, and pricing.
+
+## Tool reference
+
+- [All tools](https://uarlouski.github.io/testrail-mcp-server/reference/): Single index of every tool with its mode and feature flag.
+- [Discovery and Navigation](https://uarlouski.github.io/testrail-mcp-server/reference/discovery.html): `query_project`, `query_suite`, `mutate_suite`, `query_section`, `mutate_section`, `get_users`.
+- [Test Case Management](https://uarlouski.github.io/testrail-mcp-server/reference/cases.html): `get_case`, `get_cases`, `get_case_history`, `add_case`, `update_case`, `update_cases`, `get_case_fields`, `resolve_case_field`, `export_cases_for_rag`.
+- [Test Execution and Tracking](https://uarlouski.github.io/testrail-mcp-server/reference/execution.html): `query_run`, `mutate_run`, `get_tests`, `get_results`, `add_results`, `add_results_for_cases`.
+- [Attachments and Media](https://uarlouski.github.io/testrail-mcp-server/reference/attachments.html): `add_attachment`, `query_attachment`.
+- [Shared Steps](https://uarlouski.github.io/testrail-mcp-server/reference/shared-steps.html): `get_shared_step`, `get_shared_steps`, `get_shared_step_history`, `add_shared_step`, `update_shared_step`.
+- [Deletion](https://uarlouski.github.io/testrail-mcp-server/reference/deletion.html): `delete_entity`.
+- [System Metadata](https://uarlouski.github.io/testrail-mcp-server/reference/metadata.html): `get_statuses`, `get_priorities`, `get_case_fields`, `get_templates`, `get_labels`, `get_configurations`.
+
+## Optional
+
+- [Full documentation as a single file](https://uarlouski.github.io/testrail-mcp-server/llms-full.txt): Every documentation page concatenated into one plain-text document.
+- [GitHub repository](https://github.com/uarlouski/testrail-mcp-server): Source code, issue tracker, and contribution guide.
+- [npm package](https://www.npmjs.com/package/@uarlouski/testrail-mcp-server): Release history and install instructions.
+- [Changelog](https://github.com/uarlouski/testrail-mcp-server/blob/main/CHANGELOG.md): Version-by-version list of changes.
+- [Model Context Protocol specification](https://modelcontextprotocol.io): The open protocol this server implements.
