@@ -18,7 +18,7 @@ export async function validateSuiteId(client: TestRailClient, projectId: number,
     if (project.suite_mode === SUITE_MODE_MULTI || project.suite_mode === SUITE_MODE_SINGLE_WITH_BASELINES) {
         throw new Error(
             `Project "${project.name}" (id: ${project.id}) uses multiple test suites/baselines (suite_mode=${project.suite_mode}). ` +
-            `The suite_id parameter is required. Use get_suites to find available suites for this project.`
+            `The suite_id parameter is required. Use query_suite to find available suites for this project.`
         );
     }
 }
