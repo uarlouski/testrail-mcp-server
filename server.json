@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.uarlouski/testrail-mcp-server",
-  "description": "Model Context Protocol (MCP) server for TestRail platform, enabling LLMs to manage test artifacts.",
+  "description": "Connect AI assistants to TestRail: manage test cases, suites, runs, results, and attachments.",
   "repository": {
     "url": "https://github.com/uarlouski/testrail-mcp-server",
     "source": "github"
