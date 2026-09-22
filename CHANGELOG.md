@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Removed
+- Permanently removed deprecated `add_attachment_to_run` tool. Use `add_attachment` with `entity_type: "run"` instead.
+- Permanently removed deprecated `get_sections` tool. Use `query_section` with `action: "many"` instead.
+
 ## [2.10.0]
 
 ### Added

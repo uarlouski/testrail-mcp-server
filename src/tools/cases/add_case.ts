@@ -5,7 +5,7 @@ import { validateCaseFields } from "../../utils/validator.js";
 import { CASE_FIELDS_PARAM_DESCRIPTION } from "./get_case_fields.js";
 
 const parameters = {
-    section_id: z.number().describe("The ID of the section where the case should be created. Use get_sections to find available sections"),
+    section_id: z.number().describe("The ID of the section where the case should be created. Use query_section (action: \"many\") to find available sections"),
     title: z.string().describe("The title of the test case"),
     fields: z.record(z.string(), z.any()).optional().describe(CASE_FIELDS_PARAM_DESCRIPTION),
 };

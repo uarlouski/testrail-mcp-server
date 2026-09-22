@@ -27,12 +27,6 @@ Retrieves section information using a discriminated union action.
 - **Action "one"**: Fetch detailed information for a single section by its `section_id`. Set `include_child: true` (along with `project_id` and optional `suite_id`) to retrieve the section as a recursive hierarchical tree with all its nested child sections.
 - **Action "many"**: Retrieve sections for a `project_id` (and optional `suite_id`). Supports filtering by name via regex with `name_pattern` (e.g. `'auth.*'` or `'login|signup'`) and direct filesystem export via `output_file`.
 
-### `get_sections`
-> [!WARNING]
-> **Deprecated**: Prefer using `query_section` with `action: "many"` instead.
-
-Navigate the precise folder/section hierarchy of any test suite. This is highly useful for mapping out the exact location where test cases should be added or retrieved.
-
 ### `get_users`
 Retrieve active users in your TestRail instance. You can optionally provide a `project_id` to filter users specific to a project.
 

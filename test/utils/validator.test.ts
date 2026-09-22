@@ -136,7 +136,7 @@ describe("validateSuiteId", () => {
 
         await expect(validateSuiteId(mockClient, 50, undefined)).rejects.toThrow(
             'Project "Baseline Project" (id: 50) uses multiple test suites/baselines (suite_mode=2). ' +
-            'The suite_id parameter is required. Use get_suites to find available suites for this project.'
+            'The suite_id parameter is required. Use query_suite to find available suites for this project.'
         );
         expect(mockClient.getProject).toHaveBeenCalledWith(50);
     });
@@ -151,7 +151,7 @@ describe("validateSuiteId", () => {
 
         await expect(validateSuiteId(mockClient, 10, undefined)).rejects.toThrow(
             'Project "Sandbox" (id: 10) uses multiple test suites/baselines (suite_mode=3). ' +
-            'The suite_id parameter is required. Use get_suites to find available suites for this project.'
+            'The suite_id parameter is required. Use query_suite to find available suites for this project.'
         );
         expect(mockClient.getProject).toHaveBeenCalledWith(10);
     });

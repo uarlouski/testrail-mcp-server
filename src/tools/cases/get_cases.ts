@@ -6,13 +6,13 @@ import { Case, CaseField } from "./types.js";
 import { validateCaseFields, validateSuiteId } from "../../utils/validator.js";
 
 const parameters = {
-    project_id: z.number().describe("The ID of the project. Use get_projects to find available projects"),
-    suite_id: z.number().optional().describe("The ID of the test suite (required for multi-suite projects, i.e. suite_mode=3). Use get_suites to find available suites"),
+    project_id: z.number().describe("The ID of the project. Use query_project to find available projects"),
+    suite_id: z.number().optional().describe("The ID of the test suite (required for multi-suite projects, i.e. suite_mode=3). Use query_suite to find available suites"),
     section: z.object({
         id: z.number(),
         recursive: z.boolean().optional().default(false).describe("If true, fetches cases from the section and all its child sections"),
         excludes: z.array(z.string()).optional().describe("List of section names to exclude from the recursive search"),
-    }).optional().describe("Section filter configuration. Use get_sections to find available sections"),
+    }).optional().describe("Section filter configuration. Use query_section to find available sections"),
     filter: z.record(z.string(), z.string()).optional().describe("Optional API-side filters (more efficient for large datasets). Supported: priority_id, type_id, created_by, updated_by, milestone_id, refs, created_after, created_before, updated_after, updated_before. Use comma-separated values for IDs. Example: {\"priority_id\": \"1,2\", \"type_id\": \"3\"}"),
     where: z.record(z.string(), z.any()).optional().describe("Optional client-side filter for any field including custom fields (filters after fetching all cases). Supports exact value matching. Example: {\"custom_automation_status\": 1, \"priority_id\": 2}"),
     fields: z.array(z.string()).optional().describe("Additional fields to include in response beyond id, title, and suite_id. Use get_case_fields to see available fields. Example: [\"priority_id\", \"type_id\", \"custom_automation_status\"]"),
