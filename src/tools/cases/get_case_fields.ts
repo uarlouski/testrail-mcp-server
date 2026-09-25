@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TestRailClient } from "../../client/testrail.js";
 import { ToolDefinition } from "../../types/custom.js";
 import { CaseField } from "./types.js";
-import { CaseFieldTypeId, FieldType, FIELD_TYPES, getFieldType, FieldSchema, SYSTEM_FIELDS } from "./fields.js";
+import { CaseFieldTypeId, FieldType, FIELD_TYPES, getFieldType, FieldSchema, SYSTEM_FIELDS, READONLY_CASE_FIELDS } from "./fields.js";
 import { parseDropdownOptions } from "../../utils/mapper.js";
 import { isActive } from "../../utils/sanitizer.js";
 
@@ -20,7 +20,7 @@ Call get_case_fields with project_id first if field names are not already known.
 Using an unknown field name (e.g. 'label_ids') will result in an error.
 `;
 
-export { CaseFieldTypeId, FieldType, FIELD_TYPES, getFieldType, FieldSchema, SYSTEM_FIELDS };
+export { CaseFieldTypeId, FieldType, FIELD_TYPES, getFieldType, FieldSchema, SYSTEM_FIELDS, READONLY_CASE_FIELDS };
 
 function isFieldRequired(field: CaseField): boolean {
     return field.configs.some(config => config.options?.is_required === true);

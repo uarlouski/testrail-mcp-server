@@ -21,7 +21,7 @@ export const updateCasesTool: ToolDefinition<typeof parameters, TestRailClient> 
     description: description.trim(),
     parameters,
     handler: async ({ case_ids, fields }, client) => {
-        validateCaseFields(fields, await client.getCaseFields());
+        validateCaseFields(fields, await client.getCaseFields(), { allowReadonly: false });
 
         const caseData = await client.getCase(case_ids[0]);
         const updatedCases = await client.updateCases(caseData.suite_id, case_ids, fields);

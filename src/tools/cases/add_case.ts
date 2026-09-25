@@ -22,7 +22,7 @@ export const addCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
     parameters,
     handler: async ({ section_id, title, fields }, client) => {
         if (fields) {
-            validateCaseFields(fields, await client.getCaseFields());
+            validateCaseFields(fields, await client.getCaseFields(), { allowReadonly: false });
         }
 
         const caseData = {

@@ -42,10 +42,14 @@ export const CaseSchema = z.object({
     priority_id: z.number(),
     milestone_id: z.number().nullable(),
     refs: z.string().nullable(),
+    created_by: z.number().optional(),
     created_on: z.number(),
+    updated_by: z.number().optional(),
     updated_on: z.number(),
     estimate: z.string().nullable(),
+    estimate_forecast: z.string().nullable().optional(),
     suite_id: z.number(),
+    is_deleted: z.number().optional(),
     labels: z.array(LabelSchema),
 }).loose();
 
