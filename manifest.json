@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.2",
   "name": "@uarlouski/testrail-mcp-server",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Model Context Protocol (MCP) server connecting AI assistants directly to TestRail to manage test cases, runs, suites, sections, results, and attachments.",
   "long_description": "An open-source Model Context Protocol (MCP) server connecting AI assistants (Claude, Cursor, Windsurf, VS Code, and more) directly to TestRail API v2. It exposes 34 tools, runs locally over the MCP stdio transport, and is tested against TestRail 10.6.2 with backward compatibility for older instances.\n\n### Key Features\n- **Intelligent Discovery**: Browse projects, test suites, sections, and active users.\n- **Comprehensive Case Management**: Retrieve, create, update, and bulk-edit test cases with schema-aware custom field validation, so the model cannot invent fields your instance does not have.\n- **Test Execution & Tracking**: Create runs, submit test results by `test_id` or `case_id`, and monitor statuses.\n- **Attachments & Media**: Upload screenshots/logs (with directory auto-zipping) and download attachments.\n- **Shared Steps**: Manage reusable shared test steps and audit history.\n- **Knowledge Base & RAG Export**: Export test cases as Markdown with sidecar metadata for AI knowledge retrieval.\n- **Configurable Security**: Per-mode read, write, and delete permissions plus per-tool allowlisting. Destructive deletes are disabled by default.\n- **CLI for CI/CD**: The bundled `testrail-cli` runs every tool from shell scripts and pipelines with no LLM overhead.\n\nDocumentation: https://uarlouski.github.io/testrail-mcp-server/",
   "author": {

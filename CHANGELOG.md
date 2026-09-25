@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [3.1.0]
 
 ### Added
 - Support requesting read-only system metadata fields in get_cases tool via fields selector and filtering them via where clause.
