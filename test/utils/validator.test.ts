@@ -92,6 +92,33 @@ describe("validateCaseFields", () => {
         expect(() => validateCaseFields(fields, mockCaseFields)).not.toThrow();
     });
 
+    it("should allow read-only system metadata fields by default (query context)", () => {
+        const fields = ["updated_on", "created_on", "created_by", "updated_by", "estimate_forecast", "is_deleted"];
+        expect(() => validateCaseFields(fields, mockCaseFields)).not.toThrow();
+    });
+
+    it("should reject read-only system metadata fields when allowReadonly is false (mutation context)", () => {
+        const fields = {
+            title: "Valid Title",
+            updated_on: 1700000000,
+        };
+        expect(() => validateCaseFields(fields, mockCaseFields, { allowReadonly: false })).toThrow(/Invalid fields provided: 'updated_on'/);
+    });
+
+    it("should reject id and suite_id when allowReadonly is false", () => {
+        const fields = ["id", "suite_id"];
+        expect(() => validateCaseFields(fields, mockCaseFields, { allowReadonly: false })).toThrow(/Invalid fields provided: 'id', 'suite_id'/);
+    });
+
+    it("should succeed with writable system fields and active custom fields when allowReadonly is false", () => {
+        const fields = {
+            title: "Valid Title",
+            priority_id: 1,
+            custom_automation_priority: 2,
+        };
+        expect(() => validateCaseFields(fields, mockCaseFields, { allowReadonly: false })).not.toThrow();
+    });
+
     it("should accumulate multiple invalid fields in the error message", () => {
         const fields = ["title", "invalid_1", "invalid_2"];
         expect(() => validateCaseFields(fields, mockCaseFields)).toThrow(/Invalid fields provided: 'invalid_1', 'invalid_2'/);

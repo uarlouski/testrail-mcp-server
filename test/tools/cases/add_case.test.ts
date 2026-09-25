@@ -99,4 +99,13 @@ describe('add_case tool', () => {
             )
         ).rejects.toThrow('API Error');
     });
+
+    test('rejects read-only fields like updated_on', async () => {
+        await expect(
+            addCaseTool.handler(
+                { section_id: 1, title: 'Test', fields: { updated_on: 1700000000 } },
+                mockClient
+            )
+        ).rejects.toThrow(/Invalid fields provided: 'updated_on'/);
+    });
 });

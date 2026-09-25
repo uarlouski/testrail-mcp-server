@@ -15,7 +15,7 @@ const parameters = {
     }).optional().describe("Section filter configuration. Use query_section to find available sections"),
     filter: z.record(z.string(), z.string()).optional().describe("Optional API-side filters (more efficient for large datasets). Supported: priority_id, type_id, created_by, updated_by, milestone_id, refs, created_after, created_before, updated_after, updated_before. Use comma-separated values for IDs. Example: {\"priority_id\": \"1,2\", \"type_id\": \"3\"}"),
     where: z.record(z.string(), z.any()).optional().describe("Optional client-side filter for any field including custom fields (filters after fetching all cases). Supports exact value matching. Example: {\"custom_automation_status\": 1, \"priority_id\": 2}"),
-    fields: z.array(z.string()).optional().describe("Additional fields to include in response beyond id, title, and suite_id. Use get_case_fields to see available fields. Example: [\"priority_id\", \"type_id\", \"custom_automation_status\"]"),
+    fields: z.array(z.string()).optional().describe("Additional fields to include in response beyond id, title, and suite_id (supports system fields such as updated_on, created_on, created_by, updated_by, as well as custom fields). Example: [\"updated_on\", \"priority_id\", \"custom_automation_status\"]"),
     output_file: z.string().optional().describe("Absolute file path to save the JSON response to. Use this for large datasets to avoid blowing up context limits."),
 };
 

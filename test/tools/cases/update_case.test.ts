@@ -97,4 +97,13 @@ describe('update_case tool', () => {
             )
         ).rejects.toThrow('API Error');
     });
+
+    test('rejects read-only fields like updated_on', async () => {
+        await expect(
+            updateCaseTool.handler(
+                { case_id: '123', fields: { updated_on: 1700000000 } },
+                mockClient
+            )
+        ).rejects.toThrow(/Invalid fields provided: 'updated_on'/);
+    });
 });

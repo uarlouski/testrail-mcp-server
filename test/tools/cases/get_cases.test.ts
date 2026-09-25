@@ -134,6 +134,23 @@ describe('get_cases tool', () => {
         });
     });
 
+    test('supports system metadata fields such as updated_on and created_on in fields parameter', async () => {
+        const result = await getCasesTool.handler(
+            { project_id: 1, fields: ['updated_on', 'created_on', 'updated_by'] },
+            mockClient
+        );
+
+        expect(result.cases).toHaveLength(3);
+        expect(result.cases[0]).toEqual({
+            id: 1,
+            title: 'Login test',
+            suite_id: 1,
+            updated_on: 1700000000,
+            created_on: 1700000000,
+            updated_by: 1,
+        });
+    });
+
     test('saves output to file if output_file is provided', async () => {
         const result = await getCasesTool.handler(
             { project_id: 1, output_file: '/tmp/test_cases.json' },

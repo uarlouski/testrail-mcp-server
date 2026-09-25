@@ -1,5 +1,5 @@
 import { describe, test, expect } from "@jest/globals";
-import { CaseFieldTypeId, FIELD_TYPES, getFieldType, SYSTEM_FIELDS } from "../../../src/tools/cases/fields.js";
+import { CaseFieldTypeId, FIELD_TYPES, getFieldType, SYSTEM_FIELDS, READONLY_CASE_FIELDS } from "../../../src/tools/cases/fields.js";
 
 describe("Field Types, Schema & Helpers", () => {
     test("defines CaseFieldTypeId constants correctly", () => {
@@ -50,5 +50,17 @@ describe("Field Types, Schema & Helpers", () => {
         expect(systemNames).toContain("milestone_id");
         expect(systemNames).toContain("refs");
         expect(systemNames).toContain("labels");
+    });
+
+    test("READONLY_CASE_FIELDS contains all expected read-only case metadata fields", () => {
+        expect(READONLY_CASE_FIELDS).toContain("id");
+        expect(READONLY_CASE_FIELDS).toContain("suite_id");
+        expect(READONLY_CASE_FIELDS).toContain("created_on");
+        expect(READONLY_CASE_FIELDS).toContain("updated_on");
+        expect(READONLY_CASE_FIELDS).toContain("created_by");
+        expect(READONLY_CASE_FIELDS).toContain("updated_by");
+        expect(READONLY_CASE_FIELDS).toContain("estimate_forecast");
+        expect(READONLY_CASE_FIELDS).toContain("is_deleted");
+        expect(READONLY_CASE_FIELDS).not.toContain("display_order");
     });
 });

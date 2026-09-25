@@ -22,7 +22,7 @@ export const updateCaseTool: ToolDefinition<typeof parameters, TestRailClient> =
     description: description.trim(),
     parameters,
     handler: async ({ case_id, fields }, client) => {
-        validateCaseFields(fields, await client.getCaseFields());
+        validateCaseFields(fields, await client.getCaseFields(), { allowReadonly: false });
 
         const id = normalizeEntityId(case_id);
         const updatedCase = await client.updateCase(id, fields);

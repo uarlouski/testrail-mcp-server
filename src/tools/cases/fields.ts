@@ -68,3 +68,16 @@ export const SYSTEM_FIELDS: FieldSchema[] = [
     { system_name: "refs", label: "References", type: getFieldType(CaseFieldTypeId.String).name, is_required: false, project_scope: { scope: "global" } },
     { system_name: "labels", label: "Labels", type: getFieldType(CaseFieldTypeId.List).name, is_required: false, project_scope: { scope: "global" }, description: "Use get_labels tool to get available labels/tags." },
 ];
+
+export const READONLY_CASE_FIELDS: readonly string[] = [
+    "id",
+    "suite_id",
+    "created_on",
+    "updated_on",
+    "created_by",
+    "updated_by",
+    "estimate_forecast",
+    "is_deleted",
+];
+
+
