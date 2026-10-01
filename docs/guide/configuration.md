@@ -1,12 +1,12 @@
 ---
 title: Configuration
-description: Every TestRail MCP Server environment variable explained — credentials, read/write/delete permissions, feature flags, and per-tool allowlisting.
+description: Every TestRail MCP Server environment variable explained — credentials, network timeouts, read/write/delete permissions, feature flags, and per-tool allowlisting.
 faq: true
 ---
 
 # TestRail MCP Server configuration reference
 
-The TestRail MCP Server is configured entirely through environment variables. There are **ten** of them: three credentials and seven that control which of the 34 tools get registered. This page documents all of them, then shows ready-made configurations for the most common setups.
+The TestRail MCP Server is configured entirely through environment variables: credentials, network timeouts, permissions, and feature flags that control which of the 34 tools get registered. This page documents all of them, then shows ready-made configurations for the most common setups.
 
 Variables are validated with [Zod](https://zod.dev) when the server starts. Invalid values cause an immediate, descriptive failure rather than a confusing error later — see [validation behaviour](#what-happens-if-a-variable-is-invalid).
 
@@ -19,6 +19,17 @@ Variables are validated with [Zod](https://zod.dev) when the server starts. Inva
 | `TESTRAIL_API_KEY` | An API key generated in TestRail under **My Settings → API Keys**. |
 
 All three are mandatory. The server exits with a validation error if any is missing or malformed.
+
+## Network and timeouts
+
+| Variable | Default | Description |
+| --- | :---: | --- |
+| `TESTRAIL_REQUEST_TIMEOUT_MS` | `30000` | Timeout in milliseconds for individual TestRail HTTP requests. Must be a positive integer. |
+
+When TestRail or intermediate networks fail to respond, requests are aborted after the configured timeout. Timeouts fail immediately and are **not** retried as general network errors, preventing hung requests from multiplying hang time against unresponsive servers.
+
+> [!NOTE]
+> `TESTRAIL_REQUEST_TIMEOUT_MS` applies to each individual HTTP request, not the entire duration of a multi-page tool call (such as large `get_cases` traversals). If your instance is slow on heavy queries, raise this timeout accordingly.
 
 ## Permission toggles
 

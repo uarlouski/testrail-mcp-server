@@ -92,6 +92,13 @@
           "format": "string",
           "isSecret": false,
           "name": "TESTRAIL_DISABLED_TOOLS"
+        },
+        {
+          "description": "Timeout in milliseconds for TestRail HTTP requests (defaults to 30000ms)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "TESTRAIL_REQUEST_TIMEOUT_MS"
         }
       ]
     }

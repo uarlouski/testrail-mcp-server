@@ -39,7 +39,18 @@ export function resolveClient(
         return null;
     }
 
-    return new TestRailClient(credResult.data.url, credResult.data.username, credResult.data.apiKey);
+    const timeoutEnv = env.TESTRAIL_REQUEST_TIMEOUT_MS;
+    let timeoutMs: number | undefined;
+    if (timeoutEnv) {
+        const parsed = parseInt(timeoutEnv, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+            timeoutMs = parsed;
+        }
+    }
+
+    return new TestRailClient(credResult.data.url, credResult.data.username, credResult.data.apiKey, {
+        timeoutMs,
+    });
 }
 
 export function validateToolArgs(

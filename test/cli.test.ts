@@ -1,5 +1,5 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from "@jest/globals";
-import { runCli } from "../src/cli.js";
+import { runCli, resolveClient } from "../src/cli.js";
 import { TestRailClient } from "../src/client/testrail.js";
 import { VERSION } from "../src/version.js";
 
@@ -172,5 +172,25 @@ describe("cli execution", () => {
         if (originalUrl) {
             process.env.TESTRAIL_INSTANCE_URL = originalUrl;
         }
+    });
+
+    it("should resolve client with custom timeoutMs from TESTRAIL_REQUEST_TIMEOUT_MS", () => {
+        const client = resolveClient({}, {
+            ...mockEnv,
+            TESTRAIL_REQUEST_TIMEOUT_MS: "12345",
+        });
+        expect(client).toBeInstanceOf(TestRailClient);
+        expect((client as any).timeoutMs).toBe(12345);
+    });
+
+    it("should resolve client with default timeout when TESTRAIL_REQUEST_TIMEOUT_MS is not set or invalid", () => {
+        const defaultClient = resolveClient({}, mockEnv);
+        expect((defaultClient as any).timeoutMs).toBe(30000);
+
+        const invalidClient = resolveClient({}, {
+            ...mockEnv,
+            TESTRAIL_REQUEST_TIMEOUT_MS: "invalid",
+        });
+        expect((invalidClient as any).timeoutMs).toBe(30000);
     });
 });

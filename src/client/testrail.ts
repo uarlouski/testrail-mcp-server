@@ -30,10 +30,15 @@ interface PaginatedSectionsResponse {
 const API_INDEX = '/index.php?';
 const API_BASE_V2 = `${API_INDEX}/api/v2`;
 
+export interface TestRailClientOptions {
+    timeoutMs?: number;
+}
+
 export class TestRailClient {
     private baseUrl: string;
     private headers: HeadersInit;
     private auth: string;
+    private timeoutMs: number;
     private prioritiesPromise: Promise<Priority[]> | null = null;
     private caseTypesPromise: Promise<CaseType[]> | null = null;
     private caseFieldsPromise: Promise<CaseField[]> | null = null;
@@ -42,7 +47,7 @@ export class TestRailClient {
     private templatesPromiseMap: Map<string, Promise<Template[]>> = new Map();
     private sectionsPromiseMap: Map<string, Promise<Section>> = new Map();
 
-    constructor(baseUrl: string, email: string, apiKey: string) {
+    constructor(baseUrl: string, email: string, apiKey: string, options?: TestRailClientOptions) {
         this.baseUrl = baseUrl.replace(/\/$/, "");
         const auth = Buffer.from(`${email}:${apiKey}`).toString('base64');
         this.auth = `Basic ${auth}`;
@@ -50,6 +55,7 @@ export class TestRailClient {
             "Content-Type": "application/json",
             "Authorization": this.auth,
         };
+        this.timeoutMs = options?.timeoutMs ?? 30_000;
     }
 
     async getCase(caseId: number): Promise<Case> {
@@ -406,12 +412,6 @@ export class TestRailClient {
         responseType: 'json' | 'text' | 'buffer' = 'json'
     ): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
-        const params: RequestInit = {
-            method,
-            headers,
-            body,
-        };
-
         const maxRetries = 3;
         const baseDelayMs = 1000;
         let attempt = 0;
@@ -419,6 +419,15 @@ export class TestRailClient {
         while (attempt <= maxRetries) {
             console.error(`[TestRailClient] Executing ${method} request to ${endpoint}${attempt > 0 ? ` (Attempt ${attempt + 1})` : ''}`);
             const startTime = Date.now();
+
+            const signal = AbortSignal.timeout(this.timeoutMs);
+
+            const params: RequestInit = {
+                method,
+                headers,
+                body,
+                signal,
+            };
 
             try {
                 const response = await fetch(url, params);
@@ -459,11 +468,23 @@ export class TestRailClient {
                 }
 
                 return await response.text() as T;
-            } catch (error) {
-                const networkError = error instanceof Error && !error.message.startsWith('TestRail API Error');
+            } catch (error: any) {
+                const errName = error?.name;
+                const errMsg = typeof error?.message === 'string' ? error.message : '';
+                const isTimeout = signal.aborted ||
+                    errName === 'TimeoutError' ||
+                    (signal.reason as any)?.name === 'TimeoutError';
+
+                if (isTimeout) {
+                    const timeoutMessage = `TestRail request timed out after ${this.timeoutMs}ms: ${method} ${endpoint}`;
+                    console.error(`[TestRailClient] Request Failed: ${method} ${endpoint} - ${timeoutMessage}`);
+                    throw new Error(timeoutMessage);
+                }
+
+                const networkError = !errMsg.startsWith('TestRail API Error');
                 if (networkError && attempt < maxRetries) {
                     const delayMs = baseDelayMs * Math.pow(2, attempt);
-                    console.error(`[TestRailClient] Network error (${error.message}). Retrying in ${delayMs}ms...`);
+                    console.error(`[TestRailClient] Network error (${errMsg}). Retrying in ${delayMs}ms...`);
                     await this.delay(delayMs);
                     attempt++;
                     continue;
