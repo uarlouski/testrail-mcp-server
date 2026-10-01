@@ -33,7 +33,12 @@ const EnvSchema = z.object({
     TESTRAIL_ALLOW_READ_OPERATIONS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
     TESTRAIL_ALLOW_DELETE_OPERATIONS: z.string().optional().transform(val => val === 'true'),
     TESTRAIL_ENABLE_DEPRECATED_TOOLS: z.string().optional().transform(val => val === undefined ? true : val === 'true'),
-    TESTRAIL_DISABLED_TOOLS: z.string().optional().transform(val => val ? val.split(',').map(s => s.trim()).filter(Boolean) : [])
+    TESTRAIL_DISABLED_TOOLS: z.string().optional().transform(val => val ? val.split(',').map(s => s.trim()).filter(Boolean) : []),
+    TESTRAIL_REQUEST_TIMEOUT_MS: z.string().optional().refine(val => {
+        if (!val) return true;
+        const num = Number(val);
+        return Number.isInteger(num) && num > 0;
+    }, { message: 'Must be a positive integer' }).transform(val => val ? parseInt(val, 10) : undefined),
 });
 
 const parseResult = EnvSchema.safeParse(process.env);
@@ -56,7 +61,8 @@ const {
     TESTRAIL_ALLOW_READ_OPERATIONS,
     TESTRAIL_ALLOW_DELETE_OPERATIONS,
     TESTRAIL_ENABLE_DEPRECATED_TOOLS,
-    TESTRAIL_DISABLED_TOOLS
+    TESTRAIL_DISABLED_TOOLS,
+    TESTRAIL_REQUEST_TIMEOUT_MS,
 } = parseResult.data;
 
 const server = new McpServer({
@@ -65,7 +71,9 @@ const server = new McpServer({
 });
 
 
-const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY);
+const client = new TestRailClient(TESTRAIL_INSTANCE_URL, TESTRAIL_USERNAME, TESTRAIL_API_KEY, {
+    timeoutMs: TESTRAIL_REQUEST_TIMEOUT_MS,
+});
 
 let tools;
 try {

@@ -92,6 +92,40 @@ describe('TestRailClient', () => {
         delaySpy.mockRestore();
     });
 
+    test('aborts and fails when request exceeds timeoutMs without retrying', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const timeoutClient = new TestRailClient('https://testrail.io', 'user', 'apikey', { timeoutMs: 25 });
+
+        fetchMock.mockImplementation((_url: string, params: any) => new Promise((_, reject) => {
+            params.signal?.addEventListener('abort', () => {
+                reject(new DOMException('The operation was aborted due to timeout', 'TimeoutError'));
+            });
+        }));
+
+        await expect(timeoutClient.getCase(1)).rejects.toThrow(
+            'TestRail request timed out after 25ms: GET /index.php?/api/v2/get_case/1'
+        );
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining('[TestRailClient] Request Failed: GET /index.php?/api/v2/get_case/1 - TestRail request timed out after 25ms: GET /index.php?/api/v2/get_case/1')
+        );
+        expect(fetchMock).toHaveBeenCalledTimes(1); // Timeouts must not be retried
+        consoleSpy.mockRestore();
+    });
+
+    test('does not retry when fetch throws TimeoutError directly', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const timeoutClient = new TestRailClient('https://testrail.io', 'user', 'apikey', { timeoutMs: 50 });
+
+        const timeoutErr = new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+        fetchMock.mockRejectedValue(timeoutErr);
+
+        await expect(timeoutClient.getCase(1)).rejects.toThrow(
+            'TestRail request timed out after 50ms: GET /index.php?/api/v2/get_case/1'
+        );
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        consoleSpy.mockRestore();
+    });
+
     test('retries on 429 Too Many Requests and finally succeeds', async () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
         const delaySpy = jest.spyOn(client as any, 'delay').mockResolvedValue(undefined);

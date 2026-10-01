@@ -191,5 +191,34 @@ describe('index.ts environment validation', () => {
         await import('../src/index.js');
         expect(exitMock).not.toHaveBeenCalled();
     });
+
+    test('accepts valid TESTRAIL_REQUEST_TIMEOUT_MS', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        process.env.TESTRAIL_REQUEST_TIMEOUT_MS = '15000';
+
+        await import('../src/index.js');
+        expect(exitMock).not.toHaveBeenCalled();
+    });
+
+    test('exits with code 1 if TESTRAIL_REQUEST_TIMEOUT_MS is not a positive integer', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        process.env.TESTRAIL_REQUEST_TIMEOUT_MS = 'invalid-timeout';
+
+        try {
+            await import('../src/index.js');
+        } catch (e) {
+            // ignore
+        }
+
+        expect(exitMock).toHaveBeenCalledWith(1);
+        expect(errorMock).toHaveBeenCalledWith(
+            expect.stringContaining('Invalid TestRail environment configuration:'),
+            expect.stringContaining('TESTRAIL_REQUEST_TIMEOUT_MS')
+        );
+    });
 });
 

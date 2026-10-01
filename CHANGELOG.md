@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Configurable HTTP request timeout defaulting to 30,000ms via `TESTRAIL_REQUEST_TIMEOUT_MS` environment variable. Timeouts fail fast without retrying to prevent hung tool executions against unresponsive servers.
+
 ## [3.1.0]
 
 ### Added
