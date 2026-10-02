@@ -112,6 +112,40 @@ describe('get_case tool', () => {
         expect(mockClient.getPriorities).toHaveBeenCalled();
     });
 
+    test('handler resolves null checkbox custom fields as false', async () => {
+        const checkboxField: CaseField = {
+            id: 10,
+            name: 'is_automated',
+            system_name: 'custom_is_automated',
+            label: 'Is Automated',
+            type_id: 5,
+            template_ids: [],
+            include_all: true,
+            is_active: true,
+            description: null,
+            configs: []
+        };
+        getCaseFieldsMock.mockResolvedValue([...mockCaseFields.filter(f => f.system_name !== 'custom_is_automated'), checkboxField]);
+
+        const mockCase: Case = {
+            id: 123, title: 'My Case', template_id: 1,
+            section_id: 456, type_id: 2, priority_id: 3,
+            milestone_id: null, refs: null, created_on: 1700000000,
+            updated_on: 1700000000, estimate: null,
+            suite_id: 1, labels: [],
+            custom_is_automated: null
+        };
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 456, name: 'My Section', description: null, parent_id: null, suite_id: 1 });
+        getCaseTypesMock.mockResolvedValue([{ id: 2, name: 'Functional', is_default: true }]);
+        getPrioritiesMock.mockResolvedValue([{ id: 3, name: 'High', is_default: false }]);
+
+        const result = await getCaseTool.handler({ case_id: 'C123' }, mockClient);
+
+        expect(result.is_automated).toBe(false);
+    });
+
     test('handler throws error on failure', async () => {
         getCaseMock.mockRejectedValue(new Error('API Error'));
 

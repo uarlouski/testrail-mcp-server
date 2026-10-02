@@ -34,16 +34,26 @@ export function processCustomFields(
 
     for (const [key, value] of Object.entries(testCase)) {
         if (!key.startsWith("custom_")) continue;
-        if (value === null || value === undefined) continue;
 
         if (!fieldNameMap.has(key)) {
+            if (value === null || value === undefined) continue;
             console.error(`No field mapping found for: ${key}`);
             result[key] = value;
             continue;
         }
 
-        const outputKey = fieldNameMap.get(key)!;
         const field = applicableFields.find(f => f.system_name === key)!;
+        const isCheckbox = field.type_id === CaseFieldTypeId.Checkbox;
+
+        if (value === null || value === undefined) {
+            if (isCheckbox) {
+                const outputKey = fieldNameMap.get(key)!;
+                result[outputKey] = resolveCustomFieldValue(field, value);
+            }
+            continue;
+        }
+
+        const outputKey = fieldNameMap.get(key)!;
         const options = dropdownOptionsMap.get(key);
 
         result[outputKey] = resolveCustomFieldValue(field, value, options);
@@ -56,6 +66,7 @@ export function processCustomFields(
  * Resolves a custom field value against its field definition:
  * - Maps dropdown option IDs to their display labels
  * - Normalizes multi-select values into arrays
+ * - Normalizes checkbox / boolean values (defaults null/undefined to false)
  * - Sanitizes HTML formatting in strings
  */
 export function resolveCustomFieldValue(
@@ -63,6 +74,13 @@ export function resolveCustomFieldValue(
     value: any,
     optionsMap?: Map<string, string>
 ): any {
+    if (field.type_id === CaseFieldTypeId.Checkbox) {
+        if (value === null || value === undefined) {
+            return false;
+        }
+        return value === true || value === 1 || value === "1" || value === "true";
+    }
+
     if (value === null || value === undefined) {
         return value;
     }

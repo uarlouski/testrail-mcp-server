@@ -142,6 +142,47 @@ describe('processCustomFields', () => {
         expect(result.expected).toBeUndefined();
     });
 
+    test('resolves null or undefined checkbox fields as false', () => {
+        const checkboxFields: CaseField[] = [
+            { id: 10, name: 'is_automated', system_name: 'custom_is_automated', label: 'Is Automated', type_id: 5, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 11, name: 'is_flaky', system_name: 'custom_is_flaky', label: 'Is Flaky', type_id: 5, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 12, name: 'notes', system_name: 'custom_notes', label: 'Notes', type_id: 1, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+        ];
+        const input: Case = {
+            id: 1, title: 'Foo', template_id: 1,
+            custom_is_automated: null,
+            custom_is_flaky: undefined,
+            custom_notes: null,
+            section_id: 0, type_id: 0, priority_id: 0,
+            display_order: 1, suite_id: 1, created_on: 1, updated_on: 1,
+            is_deleted: 0, refs: null, labels: [],
+        } as unknown as Case;
+
+        const result = processCustomFields(input, checkboxFields);
+        expect(result.is_automated).toBe(false);
+        expect(result.is_flaky).toBe(false);
+        expect(result.notes).toBeUndefined();
+    });
+
+    test('resolves truthy and falsy checkbox values properly in processCustomFields', () => {
+        const checkboxFields: CaseField[] = [
+            { id: 10, name: 'is_automated', system_name: 'custom_is_automated', label: 'Is Automated', type_id: 5, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 11, name: 'is_flaky', system_name: 'custom_is_flaky', label: 'Is Flaky', type_id: 5, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+        ];
+        const input: Case = {
+            id: 1, title: 'Foo', template_id: 1,
+            custom_is_automated: 1,
+            custom_is_flaky: 0,
+            section_id: 0, type_id: 0, priority_id: 0,
+            display_order: 1, suite_id: 1, created_on: 1, updated_on: 1,
+            is_deleted: 0, refs: null, labels: [],
+        } as unknown as Case;
+
+        const result = processCustomFields(input, checkboxFields);
+        expect(result.is_automated).toBe(true);
+        expect(result.is_flaky).toBe(false);
+    });
+
     test('throws error when testCase is null', () => {
         expect(() => processCustomFields(null as any, mockCaseFields)).toThrow('Test case is undefined or null');
     });
@@ -245,9 +286,38 @@ describe('resolveCustomFieldValue', () => {
         configs: [{ options: { items: '1, Chrome\n2, Firefox\n3, Safari' } }],
     };
 
-    test('returns null/undefined as-is', () => {
+    const checkboxField: CaseField = {
+        id: 4,
+        name: 'is_automated',
+        system_name: 'custom_is_automated',
+        label: 'Is Automated',
+        type_id: 5,
+        template_ids: [],
+        include_all: true,
+        is_active: true,
+        description: null,
+        configs: [],
+    };
+
+    test('returns null/undefined as-is for non-checkbox fields', () => {
         expect(resolveCustomFieldValue(stringField, null)).toBeNull();
         expect(resolveCustomFieldValue(stringField, undefined)).toBeUndefined();
+    });
+
+    test('resolves checkbox field null and undefined to false', () => {
+        expect(resolveCustomFieldValue(checkboxField, null)).toBe(false);
+        expect(resolveCustomFieldValue(checkboxField, undefined)).toBe(false);
+    });
+
+    test('resolves checkbox field truthy and falsy values to boolean', () => {
+        expect(resolveCustomFieldValue(checkboxField, true)).toBe(true);
+        expect(resolveCustomFieldValue(checkboxField, 1)).toBe(true);
+        expect(resolveCustomFieldValue(checkboxField, '1')).toBe(true);
+        expect(resolveCustomFieldValue(checkboxField, 'true')).toBe(true);
+        expect(resolveCustomFieldValue(checkboxField, false)).toBe(false);
+        expect(resolveCustomFieldValue(checkboxField, 0)).toBe(false);
+        expect(resolveCustomFieldValue(checkboxField, '0')).toBe(false);
+        expect(resolveCustomFieldValue(checkboxField, 'false')).toBe(false);
     });
 
     test('resolves dropdown numeric option to label', () => {

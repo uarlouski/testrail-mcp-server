@@ -102,9 +102,6 @@ function categorizeCustomFields(
         if (!systemName.startsWith("custom_")) {
             continue;
         }
-        if (rawValue === null || rawValue === undefined || rawValue === "" || (Array.isArray(rawValue) && rawValue.length === 0)) {
-            continue;
-        }
         const strippedName = systemName.replace(/^custom_/, "");
         if (ignoredFieldsSet.has(systemName) || ignoredFieldsSet.has(strippedName)) {
             continue;
@@ -112,6 +109,11 @@ function categorizeCustomFields(
 
         const fieldDef = fieldDefMap.get(systemName);
         if (!fieldDef) {
+            continue;
+        }
+
+        const isCheckbox = fieldDef.type_id === CaseFieldTypeId.Checkbox;
+        if (!isCheckbox && (rawValue === null || rawValue === undefined || rawValue === "" || (Array.isArray(rawValue) && rawValue.length === 0))) {
             continue;
         }
 
