@@ -759,6 +759,49 @@ describe('export_cases_for_rag tool', () => {
         expect(typeof metaContent.metadataAttributes.score).toBe('number');
     });
 
+    test('exports null checkbox fields as false (string "false") in metadataAttributes', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_bool_null_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const customFieldsSchema: CaseField[] = [
+            { id: 1, name: 'is_automated', system_name: 'custom_is_automated', label: 'Is Automated', type_id: 5, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(customFieldsSchema);
+
+        const mockCase: Case = {
+            id: 907,
+            title: 'Null Checkbox Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+            custom_is_automated: null,
+        } as any;
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                case_ids: [907],
+                output_dir: testTempDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C907.md.metadata.json'), 'utf-8'));
+        expect(metaContent.metadataAttributes.is_automated).toBe('false');
+    });
+
     test('correctly handles fields with duplicate labels without collisions using unique system_name', async () => {
         const testTempDir = path.join(os.tmpdir(), `rag_test_dup_labels_${Date.now()}`);
         tempDirs.push(testTempDir);
