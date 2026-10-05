@@ -8,6 +8,7 @@ import { sharedStepsTools } from "./shared_steps/index.js";
 import { resultsTools } from "./results/index.js";
 import { commonsTools } from "./commons/index.js";
 import { attachmentsTools } from "./attachments/index.js";
+import { testsTools } from "./tests/index.js";
 
 export interface ToolRegistrationConfig {
     enableSharedSteps?: boolean;
@@ -28,6 +29,7 @@ export const ALL_TOOLS: ToolDefinition<any, any>[] = [
     exportCasesForRagTool as any,
     ...sectionsTools,
     ...runsTools,
+    ...testsTools,
     ...resultsTools,
     ...attachmentsTools,
     ...commonsTools,
@@ -50,6 +52,7 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
         ...casesTools,
         ...sectionsTools,
         ...runsTools,
+        ...testsTools,
         ...resultsTools,
         ...attachmentsTools,
         ...commonsTools,

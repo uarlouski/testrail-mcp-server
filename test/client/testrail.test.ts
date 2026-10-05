@@ -763,6 +763,21 @@ describe('TestRailClient', () => {
         );
     });
 
+    test('getTest fetches single test by test_id', async () => {
+        const mockTest = { id: 10, case_id: 1, status_id: 1, title: 'Test 10', run_id: 1, assignedto_id: 5 };
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => mockTest,
+        } as Response);
+
+        const testResult = await client.getTest(10);
+        expect(testResult).toEqual(mockTest);
+        expect(fetchMock).toHaveBeenCalledWith(
+            expect.stringContaining('/get_test/10'),
+            expect.any(Object)
+        );
+    });
+
     test('getStatuses caches result', async () => {
         const mockStatuses = [{ id: 1, name: 'passed', label: 'Passed' }];
         fetchMock.mockResolvedValue({

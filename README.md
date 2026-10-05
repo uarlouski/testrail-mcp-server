@@ -279,19 +279,19 @@ See the [CLI & CI/CD guide](https://uarlouski.github.io/testrail-mcp-server/guid
 | `TESTRAIL_ENABLE_DEPRECATED_TOOLS` | Preserved for backward compatibility with existing host configurations. | | `true` |
 | `TESTRAIL_DISABLED_TOOLS` | Comma-separated list of specific tool names to disable (e.g., `mutate_suite,delete_entity`). Fails if invalid tool names are specified. | | - |
 
-With only the three required credentials, **26 of the 34 tools** are registered. Ready-made read-only and least-privilege configurations are in the [Configuration guide](https://uarlouski.github.io/testrail-mcp-server/guide/configuration).
+With only the three required credentials, **27 of the 35 tools** are registered. Ready-made read-only and least-privilege configurations are in the [Configuration guide](https://uarlouski.github.io/testrail-mcp-server/guide/configuration).
 
 ---
 
 ## 🧰 Available Tools
 
-All 34 tools, grouped by area. Each declares a `read`, `write`, or `delete` mode, which the server surfaces to clients as MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`).
+All 35 tools, grouped by area. Each declares a `read`, `write`, or `delete` mode, which the server surfaces to clients as MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`).
 
 | Area | Tools | Reference |
 |------|-------|-----------|
 | **Discovery & Navigation** | `query_project`, `query_suite`, `mutate_suite`, `query_section`, `mutate_section`, `get_users` | [Docs](https://uarlouski.github.io/testrail-mcp-server/reference/discovery) |
 | **Test Case Management** | `get_case`, `get_cases`, `add_case`, `update_case`, `update_cases`, `get_case_fields`, `resolve_case_field`, `get_case_history`, `export_cases_for_rag` | [Docs](https://uarlouski.github.io/testrail-mcp-server/reference/cases) |
-| **Execution & Tracking** | `query_run`, `mutate_run`, `get_tests`, `get_results`, `add_results`, `add_results_for_cases` | [Docs](https://uarlouski.github.io/testrail-mcp-server/reference/execution) |
+| **Execution & Tracking** | `query_run`, `mutate_run`, `query_test`, `get_tests`, `get_results`, `add_results`, `add_results_for_cases` | [Docs](https://uarlouski.github.io/testrail-mcp-server/reference/execution) |
 | **Attachments & Media** | `add_attachment`, `query_attachment` | [Docs](https://uarlouski.github.io/testrail-mcp-server/reference/attachments) |
 | **Shared Steps** | `get_shared_step`, `get_shared_steps`, `get_shared_step_history`, `add_shared_step`, `update_shared_step` | [Docs](https://uarlouski.github.io/testrail-mcp-server/reference/shared-steps) |
 | **System Metadata** | `get_statuses`, `get_priorities`, `get_case_fields`, `get_templates`, `get_labels`, `get_configurations` | [Docs](https://uarlouski.github.io/testrail-mcp-server/reference/metadata) |

@@ -233,6 +233,18 @@ describe('normalizeEntityId', () => {
         expect(normalizeEntityId('  C100  ')).toBe(100);
     });
 
+    test('strips "T" or "t" test prefix and trims whitespace', () => {
+        expect(normalizeEntityId('T789')).toBe(789);
+        expect(normalizeEntityId('t789')).toBe(789);
+        expect(normalizeEntityId('  T100  ')).toBe(100);
+    });
+
+    test('strips "R" or "r" run prefix and trims whitespace', () => {
+        expect(normalizeEntityId('R789')).toBe(789);
+        expect(normalizeEntityId('r789')).toBe(789);
+        expect(normalizeEntityId('  R100  ')).toBe(100);
+    });
+
     test('throws error for invalid non-numeric string', () => {
         expect(() => normalizeEntityId('invalid')).toThrow('Invalid entity ID: invalid');
     });
