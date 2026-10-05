@@ -6,7 +6,7 @@ faq: true
 
 # TestRail MCP Server configuration reference
 
-The TestRail MCP Server is configured entirely through environment variables: credentials, network timeouts, permissions, and feature flags that control which of the 34 tools get registered. This page documents all of them, then shows ready-made configurations for the most common setups.
+The TestRail MCP Server is configured entirely through environment variables: credentials, network timeouts, permissions, and feature flags that control which of the 35 tools get registered. This page documents all of them, then shows ready-made configurations for the most common setups.
 
 Variables are validated with [Zod](https://zod.dev) when the server starts. Invalid values cause an immediate, descriptive failure rather than a confusing error later — see [validation behaviour](#what-happens-if-a-variable-is-invalid).
 

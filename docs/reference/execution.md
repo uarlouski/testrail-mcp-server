@@ -1,18 +1,19 @@
 ---
 title: Test Execution & Tracking Tools
-description: TestRail MCP tools for creating test runs and reporting results — query_run, mutate_run, get_tests, get_results, add_results, and add_results_for_cases.
+description: TestRail MCP tools for creating test runs and reporting results — query_run, mutate_run, query_test, get_results, add_results, and add_results_for_cases.
 faq: true
 ---
 
 # Test execution and tracking tools
 
-These six tools cover the execution half of TestRail: creating test runs, inspecting the tests inside them, and reporting pass/fail results. They are what turn "the regression suite finished" into a recorded, auditable run — whether the report comes from a chat message or from a CI job using the [CLI](../guide/cli.md).
+These tools cover the execution half of TestRail: creating test runs, inspecting the tests inside them, and reporting pass/fail results. They are what turn "the regression suite finished" into a recorded, auditable run — whether the report comes from a chat message or from a CI job using the [CLI](../guide/cli.md).
 
 | Tool | Mode | Purpose |
 | --- | --- | --- |
 | [`query_run`](#query-run) | `read` | One run by ID, or a filtered list of runs |
 | [`mutate_run`](#mutate-run) | `write` | Create or update a run |
-| [`get_tests`](#get-tests) | `read` | The tests inside a run |
+| [`query_test`](#query-test) | `read` | One test by ID, or the tests inside a run |
+| [`get_tests`](#get-tests) | `read` | *Deprecated* — the tests inside a run |
 | [`get_results`](#get-results) | `read` | Execution history for one test |
 | [`add_results`](#add-results) | `write` | Report results by `test_id` |
 | [`add_results_for_cases`](#add-results-for-cases) | `write` | Report results by `case_id` |
@@ -40,11 +41,23 @@ TestRail's `include_all` flag is derived for you rather than being a parameter:
 - Supply neither `case_ids` nor `suite_id` and the run includes every case.
 - Supply `case_ids` without a `suite_id` and the suite is resolved automatically by looking up the first case — so you do not have to know the suite ID to build a targeted run.
 
-## `get_tests`
+## `query_test`
 
-Lists the individual tests inside a run. Pass an optional `status_id` to filter, which is the quickest way to answer "what failed in run 88?" or "what is still untested?" without pulling the whole run.
+Retrieves tests — the per-run instances of test cases.
+
+- **`action: "one"`** — fetch a single test by `test_id`. Both `123` and `'T123'` are accepted, matching how the TestRail UI displays test IDs.
+- **`action: "many"`** — list the tests inside a `run_id`. Pass an optional `status_id` array to filter, which is the quickest way to answer "what failed in run 88?" or "what is still untested?" without pulling the whole run.
+
+Each test in a list is returned with `id`, `case_id`, `status_id`, `title`, and `run_id`. Add more with `fields`, for example `["assignedto_id", "priority_id", "refs"]`, and pass `output_file` to write large runs to disk instead of the model's context.
 
 Combine it with [`get_statuses`](./metadata.md#get-statuses) to map status IDs to their names, since they are configurable per instance.
+
+## `get_tests`
+
+> [!WARNING]
+> Deprecated in favour of `query_test` with `action: "many"`, and scheduled for removal in 4.0.0. Set `TESTRAIL_ENABLE_DEPRECATED_TOOLS=false` to hide it now and save context tokens.
+
+Lists the individual tests inside a run, optionally filtered by `status_id`.
 
 ## `get_results`
 
@@ -52,7 +65,7 @@ Returns the result history for a single test, newest first and fully paginated. 
 
 ## `add_results`
 
-Submits results for tests in a run, addressed by `test_id`. Each result can carry a `status_id`, a `comment`, an elapsed time, a version, and defect references. Use this when you already hold the `test_id`, for example after calling `get_tests`.
+Submits results for tests in a run, addressed by `test_id`. Each result can carry a `status_id`, a `comment`, an elapsed time, a version, and defect references. Use this when you already hold the `test_id`, for example after calling `query_test`.
 
 ## `add_results_for_cases`
 
@@ -87,4 +100,4 @@ Call `mutate_run` with `action: "create"` and pass the case IDs in `case_ids`. T
 
 ### How do I find out which tests failed in a run?
 
-Call `get_tests` with the `run_id` and a `status_id` filter for the failed status in your instance, which you can look up with `get_statuses`. For the history of one specific test across its executions, use `get_results` with that test's ID.
+Call `query_test` with `action: "many"`, the `run_id`, and a `status_id` filter for the failed status in your instance, which you can look up with `get_statuses`. For the history of one specific test across its executions, use `get_results` with that test's ID.

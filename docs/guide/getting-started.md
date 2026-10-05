@@ -158,7 +158,7 @@ With the connection working, these prompts all run out of the box:
 
 - **Turn on the optional features you need.** Shared steps, test case history, and the RAG export are off by default. See [Configuration](./configuration.md).
 - **Tighten permissions.** Decide whether the assistant should be able to write or delete at all. Deletes are already off by default; the [Configuration guide](./configuration.md) covers read-only and least-privilege setups.
-- **Browse the tools.** The [tool reference](../reference/) lists all 34 tools with their parameters.
+- **Browse the tools.** The [tool reference](../reference/) lists all 35 tools with their parameters.
 - **Automate without an LLM.** The bundled [`testrail-cli`](./cli.md) runs the same tools from shell scripts and CI pipelines.
 
 ## Troubleshooting

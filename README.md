@@ -42,7 +42,7 @@
 
 The **TestRail MCP Server** is a free, open-source [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI assistants direct, structured access to a [TestRail](https://www.testrail.com/) instance through the TestRail API v2. Once configured, an assistant such as **Claude Desktop, Cursor, Windsurf, or GitHub Copilot in VS Code** can search test cases, draft new ones, start test runs, record results, and upload attachments on your behalf — without you leaving the chat window.
 
-It exposes **34 tools**, runs locally on **Node.js 18+** over the MCP stdio transport, and is licensed under **Apache 2.0**. There is nothing to host or deploy: your MCP client launches it on demand with `npx`.
+It exposes **35 tools**, runs locally on **Node.js 18+** over the MCP stdio transport, and is licensed under **Apache 2.0**. There is nothing to host or deploy: your MCP client launches it on demand with `npx`.
 
 **No context switching. No tedious copy-pasting. Just ask your AI.**
 
@@ -355,14 +355,13 @@ For a comprehensive guide, detailed configuration options, and a complete breakd
 
 - 🚀 **[Getting Started](https://uarlouski.github.io/testrail-mcp-server/guide/getting-started)**: Per-client setup for Claude, Cursor, Windsurf, and VS Code.
 - ⚙️ **[Configuration](https://uarlouski.github.io/testrail-mcp-server/guide/configuration)**: Every environment variable, permission, and feature flag.
-- 🧰 **[All Tools](https://uarlouski.github.io/testrail-mcp-server/reference/)**: All 34 tools with modes and feature flags in one table.
+- 🧰 **[All Tools](https://uarlouski.github.io/testrail-mcp-server/reference/)**: All 35 tools with modes and feature flags in one table.
 - 🔭 **[Discovery & Navigation](https://uarlouski.github.io/testrail-mcp-server/reference/discovery)**: Exploring projects, suites, and sections.
 - 📋 **[Test Case Management](https://uarlouski.github.io/testrail-mcp-server/reference/cases)**: Fetching, creating, and bulk-updating test cases.
 - ▶️ **[Execution & Tracking](https://uarlouski.github.io/testrail-mcp-server/reference/execution)**: Managing test runs and submitting test results.
 - 📎 **[Attachments](https://uarlouski.github.io/testrail-mcp-server/reference/attachments)**: Automatically zipping and uploading files or directories.
 - 🔗 **[Shared Steps](https://uarlouski.github.io/testrail-mcp-server/reference/shared-steps)**: Managing reusable step definitions.
 - 🖥️ **[CLI & CI/CD](https://uarlouski.github.io/testrail-mcp-server/guide/cli)**: Pipeline automation without an LLM.
-
 ---
 
 ## 🤝 Contributing

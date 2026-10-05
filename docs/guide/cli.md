@@ -18,7 +18,7 @@ That makes it useful in two situations: automating TestRail from a CI/CD pipelin
 - **No logic duplication.** The exponential-backoff retries, pagination handling, and strict Zod validation are shared with the MCP server, so behaviour cannot drift between the two.
 
 > [!NOTE]
-> The CLI exposes **all 34 tools**, including shared steps, case history, and the RAG export. The `TESTRAIL_ALLOW_*` permission toggles and `TESTRAIL_ENABLE_*` feature flags govern only what is registered with MCP clients; they do not restrict the CLI. In a pipeline, restrict access with the TestRail API key's own permissions instead.
+> The CLI exposes **all 35 tools**, including shared steps, case history, and the RAG export. The `TESTRAIL_ALLOW_*` permission toggles and `TESTRAIL_ENABLE_*` feature flags govern only what is registered with MCP clients; they do not restrict the CLI. In a pipeline, restrict access with the TestRail API key's own permissions instead.
 
 ## Installation and invocation
 
