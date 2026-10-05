@@ -89,6 +89,7 @@ export function getToolsToRegister(config: ToolRegistrationConfig): ToolDefiniti
             readOnlyHint: tool.mode === 'read',
             destructiveHint: tool.mode === 'delete',
             idempotentHint: tool.mode === 'read',
+            openWorldHint: false,
         };
 
         return {

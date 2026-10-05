@@ -141,19 +141,22 @@ describe('Tools Registry (getToolsToRegister)', () => {
                 expect(tool.annotations).toEqual({
                     readOnlyHint: true,
                     destructiveHint: false,
-                    idempotentHint: true
+                    idempotentHint: true,
+                    openWorldHint: false
                 });
             } else if (tool.mode === 'write') {
                 expect(tool.annotations).toEqual({
                     readOnlyHint: false,
                     destructiveHint: false,
-                    idempotentHint: false
+                    idempotentHint: false,
+                    openWorldHint: false
                 });
             } else if (tool.mode === 'delete') {
                 expect(tool.annotations).toEqual({
                     readOnlyHint: false,
                     destructiveHint: true,
-                    idempotentHint: false
+                    idempotentHint: false,
+                    openWorldHint: false
                 });
             }
         }

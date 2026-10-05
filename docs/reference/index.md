@@ -8,7 +8,7 @@ faq: true
 
 The TestRail MCP Server exposes **34 tools** to any connected MCP client. This page lists every one of them in a single table, along with its permission mode and the environment variable that enables it. Follow the group links for parameter-level detail and worked examples.
 
-Every tool declares one of three modes, which the server translates into MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`) so that clients can prompt for confirmation appropriately:
+Every tool declares one of three modes, which the server translates into MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) so that clients can prompt for confirmation appropriately:
 
 | Mode | Count | Enabled by default? | Controlled by |
 | --- | --- | --- | --- |
