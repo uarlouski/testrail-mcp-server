@@ -285,7 +285,7 @@ With only the three required credentials, **27 of the 35 tools** are registered.
 
 ## 🧰 Available Tools
 
-All 35 tools, grouped by area. Each declares a `read`, `write`, or `delete` mode, which the server surfaces to clients as MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`).
+All 35 tools, grouped by area. Each declares a `read`, `write`, or `delete` mode, which the server surfaces to clients as MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`).
 
 | Area | Tools | Reference |
 |------|-------|-----------|
