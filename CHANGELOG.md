@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [3.2.0]
 
 ### Added
 - Add consolidated `query_test` tool using discriminated union pattern (`action: "one"` | `"many"`):
