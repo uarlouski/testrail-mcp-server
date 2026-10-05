@@ -256,6 +256,10 @@ export class TestRailClient {
         return this.paginateAll<Label>(url, 'labels');
     }
 
+    async getTest(testId: number): Promise<Test> {
+        return this.get<Test>(`${API_BASE_V2}/get_test/${testId}`);
+    }
+
     async getTests(runId: number, statusId?: number[]): Promise<Test[]> {
         let url = `${API_BASE_V2}/get_tests/${runId}`;
 

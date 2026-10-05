@@ -39,17 +39,7 @@ export const StatusSchema = z.object({
 
 export type Status = z.infer<typeof StatusSchema>;
 
-export const TestSchema = z.object({
-    id: z.number(),
-    case_id: z.number(),
-    status_id: z.number(),
-    title: z.string(),
-    run_id: z.number(),
-});
-
-export const TestsSchema = z.array(TestSchema);
-
-export type Test = z.infer<typeof TestSchema>;
+export { TestSchema, TestsSchema, Test } from "../tests/types.js";
 
 export const UserSchema = z.object({
     id: z.number(),

@@ -1,7 +1,7 @@
 import { jest, describe, test, expect, beforeEach } from '@jest/globals';
-import { getTestsTool } from '../../../src/tools/commons/get_tests.js';
+import { getTestsTool } from '../../../src/tools/tests/get_tests.js';
 import { TestRailClient } from '../../../src/client/testrail.js';
-import { Test } from '../../../src/tools/commons/types.js';
+import { Test } from '../../../src/tools/tests/types.js';
 
 describe('get_tests tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
@@ -20,18 +20,27 @@ describe('get_tests tool', () => {
         } as unknown as jest.Mocked<TestRailClient>;
     });
 
-    test('exports correct tool definition', () => {
+    test('exports correct tool definition with deprecated: true', () => {
         expect(getTestsTool.name).toBe('get_tests');
         expect(getTestsTool.description).toBeDefined();
         expect(getTestsTool.parameters).toBeDefined();
+        expect(getTestsTool.deprecated).toBe(true);
+        expect(Object.keys(getTestsTool.parameters)).toEqual(['run_id', 'status_id']);
     });
 
-    test('handler fetches and returns tests', async () => {
+    test('handler fetches and returns default compact tests', async () => {
         const result = await getTestsTool.handler({ run_id: 1 }, mockClient);
 
         expect(result).toBeDefined();
         expect(result.tests).toBeDefined();
         expect(result.tests).toHaveLength(2);
+        expect(result.tests[0]).toEqual({
+            id: 1,
+            case_id: 101,
+            status_id: 1,
+            title: 'Test 1',
+            run_id: 1,
+        });
         expect(mockClient.getTests).toHaveBeenCalledWith(1, undefined);
     });
 

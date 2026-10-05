@@ -3,7 +3,14 @@
 ## [Unreleased]
 
 ### Added
+- Add consolidated `query_test` tool using discriminated union pattern (`action: "one"` | `"many"`):
+  - `action: "one"`: Fetch a single test by `test_id` (supports numeric ID or string with `T` prefix, e.g., `'T123'`).
+  - `action: "many"`: List tests for a test run (`run_id`), with optional `status_id` filter, field projection (`fields`, e.g., `assignedto_id`, `priority_id`, `refs`, custom fields), and direct filesystem export (`output_file`).
+- Support `'T'` (test) and `'R'` (run) entity ID prefixes in `normalizeEntityId` (e.g., `'T123'`, `'R456'`).
 - Configurable HTTP request timeout defaulting to 30,000ms via `TESTRAIL_REQUEST_TIMEOUT_MS` environment variable. Timeouts fail fast without retrying to prevent hung tool executions against unresponsive servers.
+
+### Deprecated
+- Deprecate `get_tests` tool in favor of the consolidated `query_test` tool (`action: "many"`). `get_tests` remains available for backward compatibility (controllable via `TESTRAIL_ENABLE_DEPRECATED_TOOLS` and scheduled for removal in 4.0.0).
 
 ### Fixed
 - Treat `null` and `undefined` values for Checkbox custom fields as `false` in `get_case` and `export_cases_for_rag` rather than omitting them.

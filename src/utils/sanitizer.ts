@@ -171,12 +171,15 @@ export function isActive(value: any): boolean {
 }
 
 /**
- * Normalizes an entity ID (e.g. case ID, run ID, attachment ID).
- * Handles string IDs with 'C' prefixes (e.g. 'C123' -> 123), numeric IDs, and trims whitespace.
+ * Normalizes an entity ID (e.g. case ID, test ID, run ID, attachment ID).
+ * Handles string IDs with 'C', 'T', or 'R' prefixes (e.g. 'C123' -> 123, 'T456' -> 456), numeric IDs, and trims whitespace.
  */
 export function normalizeEntityId(id: number | string): number {
     const idString = typeof id === "string" ? id.trim() : String(id);
-    const cleaned = idString.toUpperCase().startsWith("C") ? idString.substring(1) : idString;
+    const upper = idString.toUpperCase();
+    const cleaned = (upper.startsWith("C") || upper.startsWith("T") || upper.startsWith("R"))
+        ? idString.substring(1)
+        : idString;
     const parsed = Number(cleaned);
     if (isNaN(parsed)) {
         throw new Error(`Invalid entity ID: ${id}`);
