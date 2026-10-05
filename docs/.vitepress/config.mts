@@ -26,8 +26,7 @@ const LLMS_FULL_PAGES = [
   'guide/getting-started.md',
   'guide/configuration.md',
   'guide/cli.md',
-  'guide/faq.md',
-  'reference/index.md',
+  'guide/faq.md',  'reference/index.md',
   'reference/discovery.md',
   'reference/cases.md',
   'reference/execution.md',
@@ -180,7 +179,7 @@ export default defineConfig({
       {
         name: 'keywords',
         content:
-          'TestRail MCP server, TestRail Model Context Protocol, TestRail AI integration, TestRail API v2, MCP server for test management, Claude TestRail, Cursor TestRail, Windsurf TestRail, AI test case generation, QA automation, testrail-cli'
+          'TestRail MCP server, TestRail Model Context Protocol, TestRail AI integration, TestRail API v2, MCP server for test management, Claude TestRail, Cursor TestRail, Windsurf TestRail, GitHub Copilot TestRail, AI test case generation, QA automation, testrail-cli'
       }
     ],
     ['meta', { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1' }],

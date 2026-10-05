@@ -1,22 +1,22 @@
 ---
 title: All TestRail MCP Tools
-description: Complete reference of all 36 TestRail MCP Server tools, with each tool's permission mode and the environment variable that enables it.
+description: Complete reference of all 35 TestRail MCP Server tools, with each tool's permission mode and the environment variable that enables it.
 faq: true
 ---
 
 # TestRail MCP Server tool reference
 
-The TestRail MCP Server exposes **34 tools** to any connected MCP client. This page lists every one of them in a single table, along with its permission mode and the environment variable that enables it. Follow the group links for parameter-level detail and worked examples.
+The TestRail MCP Server exposes **35 tools** to any connected MCP client. This page lists every one of them in a single table, along with its permission mode and the environment variable that enables it. Follow the group links for parameter-level detail and worked examples.
 
 Every tool declares one of three modes, which the server translates into MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) so that clients can prompt for confirmation appropriately:
 
 | Mode | Count | Enabled by default? | Controlled by |
 | --- | --- | --- | --- |
-| `read` | 22 | Yes | `TESTRAIL_ALLOW_READ_OPERATIONS` |
+| `read` | 23 | Yes | `TESTRAIL_ALLOW_READ_OPERATIONS` |
 | `write` | 11 | Yes | `TESTRAIL_ALLOW_WRITE_OPERATIONS` |
 | `delete` | 1 | **No** | `TESTRAIL_ALLOW_DELETE_OPERATIONS` |
 
-With default settings, 26 of the 34 tools are registered. The remaining eight sit behind feature flags (five shared step tools, `get_case_history`, `export_cases_for_rag`) or the delete permission (`delete_entity`) — see the [Configuration guide](../guide/configuration.md).
+With default settings, 27 of the 35 tools are registered. The remaining eight sit behind feature flags (five shared step tools, `get_case_history`, `export_cases_for_rag`) or the delete permission (`delete_entity`) — see the [Configuration guide](../guide/configuration.md).
 
 ## Discovery & navigation
 
@@ -55,7 +55,8 @@ Create runs and report results. [Full details →](./execution.md)
 | --- | --- | --- |
 | `query_run` | `read` | Fetch one run by ID, or list runs in a project with filters |
 | `mutate_run` | `write` | Create or update a test run, including its case selection |
-| `get_tests` | `read` | List the tests inside a run, optionally filtered by status |
+| `query_test` | `read` | Fetch one test by ID, or list the tests inside a run with status filtering, field projection, and file export |
+| `get_tests` | `read` | *Deprecated* — use `query_test` with `action: "many"`. Controlled by `TESTRAIL_ENABLE_DEPRECATED_TOOLS` |
 | `get_results` | `read` | Read the execution history for a single test |
 | `add_results` | `write` | Submit results addressed by `test_id` |
 | `add_results_for_cases` | `write` | Submit results addressed by `case_id` |

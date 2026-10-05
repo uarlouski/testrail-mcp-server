@@ -12,7 +12,7 @@ Short, direct answers to the questions people ask most often about the TestRail 
 
 ### What is the TestRail MCP Server?
 
-The TestRail MCP Server is a free, open-source [Model Context Protocol](https://modelcontextprotocol.io) server that connects AI assistants to a TestRail instance through the TestRail API v2. It gives an assistant 34 tools for browsing projects and suites, reading and writing test cases, creating test runs, submitting results, and uploading attachments. It is published on npm as `@uarlouski/testrail-mcp-server` and licensed under Apache 2.0.
+The TestRail MCP Server is a free, open-source [Model Context Protocol](https://modelcontextprotocol.io) server that connects AI assistants to a TestRail instance through the TestRail API v2. It gives an assistant 35 tools for browsing projects and suites, reading and writing test cases, creating test runs, submitting results, and uploading attachments. It is published on npm as `@uarlouski/testrail-mcp-server` and licensed under Apache 2.0.
 
 ### What is the Model Context Protocol?
 
@@ -74,7 +74,7 @@ Set `TESTRAIL_ALLOW_WRITE_OPERATIONS=false` and leave `TESTRAIL_ALLOW_DELETE_OPE
 
 ### What can I actually ask the AI to do?
 
-Anything the 34 tools cover. Realistic examples: "list the active projects", "show every case in section 5 of project 3", "write a test case for password reset with detailed steps and add it to the Authentication section", "create a test run from the cases in section 5 and assign it to me", "mark C1042 as passed with a comment", "attach this screenshot folder to run 88". Browse the [tool reference](../reference/) to see the full surface.
+Anything the 35 tools cover. Realistic examples: "list the active projects", "show every case in section 5 of project 3", "write a test case for password reset with detailed steps and add it to the Authentication section", "create a test run from the cases in section 5 and assign it to me", "mark C1042 as passed with a comment", "attach this screenshot folder to run 88". Browse the [tool reference](../reference/) to see the full surface.
 
 ### How does it avoid inventing custom fields that do not exist?
 

@@ -98,13 +98,13 @@ Typical prompts that work out of the box:
 
 ## What can it do?
 
-The server exposes **34 MCP tools** across seven areas:
+The server exposes **35 MCP tools** across seven areas:
 
 | Area | What your AI assistant can do | Tools |
 | --- | --- | --- |
 | Discovery | Browse projects, suites, sections, and users | [6 tools](./reference/discovery.md) |
 | Test cases | Read, create, update, bulk-edit, and export cases | [9 tools](./reference/cases.md) |
-| Execution | Create and update runs, read tests, submit results | [6 tools](./reference/execution.md) |
+| Execution | Create and update runs, read tests, submit results | [7 tools](./reference/execution.md) |
 | Attachments | Upload and download files, auto-zip directories | [2 tools](./reference/attachments.md) |
 | Shared steps | Read, create, update, and audit shared steps | [5 tools](./reference/shared-steps.md) |
 | Metadata | Statuses, priorities, fields, templates, labels, configs | [6 tools](./reference/metadata.md) |
@@ -128,7 +128,7 @@ Read the [Configuration guide](./guide/configuration.md) for the full permission
 
 - **[Getting Started](./guide/getting-started.md)** — get a TestRail API key and configure your MCP client.
 - **[Configuration](./guide/configuration.md)** — every environment variable, permission, and feature flag.
-- **[Tool Reference](./reference/)** — all 34 tools, grouped by what they do.
+- **[Tool Reference](./reference/)** — all 35 tools, grouped by what they do.
 - **[CLI & CI/CD](./guide/cli.md)** — run TestRail operations from pipelines without an LLM.
 - **[FAQ](./guide/faq.md)** — short answers to common setup and security questions.
 

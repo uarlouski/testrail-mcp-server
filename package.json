@@ -33,6 +33,8 @@
     "testrail",
     "testrail-api",
     "testrail-mcp",
+    "testrail-mcp-server",
+    "mcp-testrail",
     "testrail-integration",
     "test-management",
     "test-case-management",
@@ -51,10 +53,14 @@
     "ai-agents",
     "llm",
     "claude",
+    "claude-desktop",
+    "claude-code",
     "cursor",
     "windsurf",
     "vscode",
     "copilot",
+    "github-copilot",
+    "test-case-generation",
     "rag",
     "typescript",
     "cli"
@@ -67,7 +73,7 @@
   "bugs": {
     "url": "https://github.com/uarlouski/testrail-mcp-server/issues"
   },
-  "homepage": "https://github.com/uarlouski/testrail-mcp-server#readme",
+  "homepage": "https://uarlouski.github.io/testrail-mcp-server/",
   "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
