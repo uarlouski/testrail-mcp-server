@@ -1,11 +1,14 @@
-name: Publish to NPM
+name: Publish
 
 on:
   release:
     types: [published]
 
+permissions: {}
+
 jobs:
-  publish:
+  publish-npm:
+    name: Publish to NPM
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,3 +39,42 @@ jobs:
         run: pnpm publish --no-git-checks --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-smithery:
+    name: Publish to Smithery
+    needs: publish-npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Install dependencies
+        run: pnpm ci
+
+      - name: Build package
+        run: pnpm run build
+
+      - name: Create MCP bundle
+        run: |
+          pnpm dlx @anthropic-ai/mcpb validate manifest.json
+          pnpm dlx @anthropic-ai/mcpb pack . testrail-mcp-server.mcpb
+
+      - name: Publish MCP bundle
+        env:
+          SMITHERY_API_KEY: ${{ secrets.SMITHERY_API_KEY }}
+        run: |
+          if [ -z "$SMITHERY_API_KEY" ]; then
+            echo "::error::SMITHERY_API_KEY secret is not set"
+            exit 1
+          fi
+          npx -y @smithery/cli mcp publish ./testrail-mcp-server.mcpb -n uarlouski/testrail-mcp-server
