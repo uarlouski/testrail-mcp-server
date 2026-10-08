@@ -76,7 +76,7 @@
   "homepage": "https://uarlouski.github.io/testrail-mcp-server/",
   "license": "Apache-2.0",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "archiver": "^7.0.1",
     "dotenv": "^17.4.2",
     "zod": "^4.6.5"
