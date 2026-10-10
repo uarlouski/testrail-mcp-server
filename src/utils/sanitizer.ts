@@ -13,6 +13,32 @@ function decodeHtmlEntities(str: string): string {
         .replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCharCode(parseInt(code, 16)));
 }
 
+const KNOWN_HTML_TAGS = new Set([
+    'a', 'abbr', 'address', 'area', 'article', 'aside', 'audio',
+    'b', 'base', 'bdi', 'bdo', 'blockquote', 'body', 'br', 'button',
+    'canvas', 'caption', 'cite', 'code', 'col', 'colgroup',
+    'data', 'datalist', 'dd', 'del', 'details', 'dfn', 'dialog', 'div', 'dl', 'dt',
+    'em', 'embed',
+    'fieldset', 'figcaption', 'figure', 'footer', 'form',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hgroup', 'hr', 'html',
+    'i', 'iframe', 'img', 'input', 'ins',
+    'kbd',
+    'label', 'legend', 'li', 'link',
+    'main', 'map', 'mark', 'menu', 'meta', 'meter',
+    'nav', 'noscript',
+    'object', 'ol', 'optgroup', 'option', 'output',
+    'p', 'picture', 'pre', 'progress',
+    'q',
+    'rp', 'rt', 'ruby',
+    's', 'samp', 'script', 'search', 'section', 'select', 'slot', 'small', 'source', 'span', 'strong', 'style', 'sub',
+    'summary', 'sup', 'svg',
+    'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'track',
+    'u', 'ul',
+    'var', 'video',
+    'wbr',
+    'font', 'center', 'strike', 'tt', 'big', 'marquee', 'nobr', 'o:p'
+]);
+
 /**
  * Converts TestRail HTML markup to clean, structured Markdown / plain text.
  */
@@ -94,8 +120,22 @@ export function htmlToMarkdown(html: string): string {
         return `\n${items}\n`;
     });
 
-    // Strip remaining HTML tags
-    text = text.replace(/<[^>]+>/g, '');
+    // Strip scripts and styles along with their content
+    text = text.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '');
+    text = text.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+
+    // Strip HTML comments, CDATA, and DOCTYPE declarations
+    text = text.replace(/<!--[\s\S]*?-->/g, '');
+    text = text.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1');
+    text = text.replace(/<!DOCTYPE[^>]*>/gi, '');
+
+    // Strip remaining known HTML tags while preserving comparison signs and non-HTML angle brackets
+    text = text.replace(/<\/?([a-zA-Z][a-zA-Z0-9:-]*)(?:\s+[a-zA-Z_:@][-a-zA-Z0-9_:.]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'>]+))?)*\s*\/?>/gi, (match, tagName) => {
+        if (KNOWN_HTML_TAGS.has(tagName.toLowerCase())) {
+            return '';
+        }
+        return match;
+    });
 
     // Decode HTML entities
     text = decodeHtmlEntities(text);
