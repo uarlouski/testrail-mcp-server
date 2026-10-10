@@ -5,6 +5,9 @@
 ### Changed
 - Bump `@modelcontextprotocol/sdk` from `1.30.0` to `1.32.1`
 
+### Fixed
+- Prevent HTML sanitizer from stripping literal comparison operators (`<`, `>`, `<=`, `>=`), code comparisons, generic types, and placeholder tags in test cases and RAG exports.
+
 ## [3.2.0]
 
 ### Added
