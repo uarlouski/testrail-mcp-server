@@ -104,6 +104,67 @@ describe('htmlToMarkdown & sanitizeValue', () => {
         expect(sanitizeValue(true)).toBe(true);
         expect(sanitizeValue(null)).toBe(null);
     });
+
+    test('preserves literal comparison operators without stripping content (issue #128)', () => {
+        expect(htmlToMarkdown('Field accepts <= 100 and > 0 characters'))
+            .toBe('Field accepts <= 100 and > 0 characters');
+
+        expect(htmlToMarkdown('Value <10 or >100 is rejected'))
+            .toBe('Value <10 or >100 is rejected');
+
+        expect(htmlToMarkdown('Condition: x < 5 and y > 10'))
+            .toBe('Condition: x < 5 and y > 10');
+
+        expect(htmlToMarkdown('SELECT * FROM t WHERE val < 10 AND other > 20'))
+            .toBe('SELECT * FROM t WHERE val < 10 AND other > 20');
+
+        expect(htmlToMarkdown('Timeout < 5s or > 30s'))
+            .toBe('Timeout < 5s or > 30s');
+
+        expect(htmlToMarkdown('x < a && y > b'))
+            .toBe('x < a && y > b');
+    });
+
+    test('preserves placeholders and type generics in angle brackets', () => {
+        expect(htmlToMarkdown('List<String> items and Map<String, Object>'))
+            .toBe('List<String> items and Map<String, Object>');
+
+        expect(htmlToMarkdown('Enter <username> and <password> in the form'))
+            .toBe('Enter <username> and <password> in the form');
+
+        expect(htmlToMarkdown('Expected token <access_token> or <refresh-token>'))
+            .toBe('Expected token <access_token> or <refresh-token>');
+    });
+
+    test('preserves literal comparison signs while converting surrounding HTML tags and entities', () => {
+        const input = '<p>Ensure size is &gt; 5 and &lt;= 100, or raw <10 and >50.</p>';
+        expect(htmlToMarkdown(input))
+            .toBe('Ensure size is > 5 and <= 100, or raw <10 and >50.');
+
+        const codeInput = '<code>if (x < y && z > 0)</code>';
+        expect(htmlToMarkdown(codeInput))
+            .toBe('`if (x < y && z > 0)`');
+    });
+
+    test('strips styles, scripts, comments, doctype, and table markup cleanly', () => {
+        expect(htmlToMarkdown('<style>body { color: red; }</style><p>Content</p>'))
+            .toBe('Content');
+
+        expect(htmlToMarkdown('<script>alert("xss");</script><p>Safe content</p>'))
+            .toBe('Safe content');
+
+        expect(htmlToMarkdown('<!-- comment -->Visible content'))
+            .toBe('Visible content');
+
+        expect(htmlToMarkdown('<!DOCTYPE html><p>Document</p>'))
+            .toBe('Document');
+
+        expect(htmlToMarkdown('<table border="1"><tr><td>Cell 1</td><td>Cell 2</td></tr></table>'))
+            .toBe('Cell 1Cell 2');
+
+        expect(htmlToMarkdown('<span title="a > b">Content with title</span>'))
+            .toBe('Content with title');
+    });
 });
 
 describe('removeNullish', () => {
