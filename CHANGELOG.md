@@ -4,6 +4,10 @@
 
 ### Changed
 - Bump `@modelcontextprotocol/sdk` from `1.30.0` to `1.32.1`
+- `export_cases_for_rag` now writes the full section hierarchy into the Markdown body (`**Section**: Section A > Section B > Section C`) instead of only the leaf name.
+
+### Added
+- `export_cases_for_rag` metadata sidecar now includes `section_path`, an ordered root-to-leaf list of section names, enabling filtering by any ancestor section. `section` remains the leaf name.
 
 ### Fixed
 - Prevent HTML sanitizer from stripping literal comparison operators (`<`, `>`, `<=`, `>=`), code comparisons, generic types, and placeholder tags in test cases and RAG exports.

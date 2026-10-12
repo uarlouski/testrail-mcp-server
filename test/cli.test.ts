@@ -129,6 +129,7 @@ describe("cli execution", () => {
                 { id: 101, title: "Login Smoke Test", section_id: 5, priority_id: 2, template_id: 1, updated_on: 1700005000 }
             ]),
             getSection: jest.fn<any>().mockResolvedValue({ id: 5, name: "Auth" }),
+            getSections: jest.fn<any>().mockResolvedValue([{ id: 5, name: "Auth", suite_id: 1, parent_id: null }]),
             getPriorities: jest.fn<any>().mockResolvedValue([{ id: 2, name: "High" }]),
             getCaseFields: jest.fn<any>().mockResolvedValue([]),
         } as unknown as TestRailClient;
