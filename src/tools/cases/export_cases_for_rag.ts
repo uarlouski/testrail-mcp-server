@@ -9,6 +9,8 @@ import { ToolDefinition } from "../../types/custom.js";
 import { Case, CaseField } from "./types.js";
 import { CaseFieldTypeId, getFieldType } from "./fields.js";
 import { fetchFilteredCases } from "./get_cases.js";
+import { Section } from "../sections/types.js";
+import { createSectionLookup, formatSectionPath, resolveSectionPath } from "../../utils/section_path.js";
 
 const parameters = {
     case_ids: z.array(z.union([z.string(), z.number()])).optional().describe("List of test case IDs (e.g. ['C123', 456]). Provide either case_ids OR project_id."),
@@ -17,7 +19,7 @@ const parameters = {
     filter: z.record(z.string(), z.string()).optional().describe("Optional API-side filters (e.g. priority_id, type_id, milestone_id, refs, created_after, etc.)."),
     where: z.record(z.string(), z.any()).optional().describe("Optional client-side filter for any field including custom fields (filters after fetching cases). Supports exact value matching. Example: {\"custom_automation_status\": 1}"),
     output_dir: z.string().optional().describe("Directory to save exported files. Defaults to an auto-generated directory in the current working directory."),
-    ignored_fields: z.array(z.string()).optional().describe("Optional list of custom field names or system names to ignore/exclude from export (e.g. ['custom_review_status', 'review_status']). Supports both full system_name and stripped field names. Core metadata attributes (case_id, updated_on, title, section, priority, references, labels) cannot be ignored."),
+    ignored_fields: z.array(z.string()).optional().describe("Optional list of custom field names or system names to ignore/exclude from export (e.g. ['custom_review_status', 'review_status']). Supports both full system_name and stripped field names. Core metadata attributes (case_id, updated_on, title, section, section_path, priority, references, labels) cannot be ignored."),
 };
 
 function formatStepsSeparated(steps: any[]): string {
@@ -133,13 +135,13 @@ function categorizeCustomFields(
 
 function buildMarkdownBody(
     testCase: Case,
-    sectionName: string,
+    sectionPath: string[],
     markdownFields: Array<{ header: string; value: any; fieldDef?: CaseField }>
 ): string {
     const mdLines: string[] = [];
     mdLines.push(`# [C${testCase.id}] ${sanitizeValue(testCase.title)}`);
     mdLines.push("");
-    mdLines.push(`**Section**: ${sectionName}`);
+    mdLines.push(`**Section**: ${sectionPath.length > 0 ? formatSectionPath(sectionPath) : "Unknown"}`);
     mdLines.push("");
 
     for (const { header, value, fieldDef } of markdownFields) {
@@ -157,7 +159,7 @@ function buildMarkdownBody(
 
 function buildMetadataAttributes(
     testCase: Case,
-    sectionName: string,
+    sectionPath: string[],
     priority: string,
     metadataFields: Array<{ key: string; value: any; fieldDef?: CaseField }>
 ): Record<string, any> {
@@ -165,9 +167,13 @@ function buildMetadataAttributes(
         case_id: testCase.id,
         updated_on: testCase.updated_on,
         title: testCase.title,
-        section: sectionName,
+        section: sectionPath.length > 0 ? sectionPath[sectionPath.length - 1] : "Unknown",
         priority: priority,
     };
+
+    if (sectionPath.length > 0) {
+        metadataAttributes.section_path = sectionPath;
+    }
 
     if (testCase.refs) {
         metadataAttributes.references = testCase.refs;
@@ -240,16 +246,18 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
             }
         }
 
+        let preloadedSections: Section[] = [];
+        if (testCases.length > 0) {
+            preloadedSections = await client.getSections(project_id!, suite_id).catch(() => []);
+        }
+        const sectionLookup = createSectionLookup(client, preloadedSections);
+
         const writtenFiles: string[] = [];
 
         for (const testCase of testCases) {
-            let sectionName = "Unknown";
-            if (testCase.section_id) {
-                const section = await client.getSection(Number(testCase.section_id)).catch(() => null);
-                if (section?.name) {
-                    sectionName = section.name;
-                }
-            }
+            const sectionPath = testCase.section_id
+                ? await resolveSectionPath(Number(testCase.section_id), sectionLookup)
+                : [];
 
             const priority = priorities.find(p => p.id === testCase.priority_id)?.name || "Unknown";
             const templateId = testCase.template_id;
@@ -258,8 +266,8 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
             );
             const { markdownFields, metadataFields } = categorizeCustomFields(testCase, applicableFields, ignoredFieldsSet);
 
-            const markdownContent = buildMarkdownBody(testCase, sectionName, markdownFields);
-            const metadataAttributes = buildMetadataAttributes(testCase, sectionName, priority, metadataFields);
+            const markdownContent = buildMarkdownBody(testCase, sectionPath, markdownFields);
+            const metadataAttributes = buildMetadataAttributes(testCase, sectionPath, priority, metadataFields);
 
             const docFilename = `C${testCase.id}.md`;
             const metaFilename = `C${testCase.id}.md.metadata.json`;

@@ -14,6 +14,7 @@ describe('export_cases_for_rag tool', () => {
     let getCasesMock: jest.Mock<(projectId: number, sectionId?: number, filter?: Record<string, string>) => Promise<Case[]>>;
     let getProjectMock: jest.Mock<(projectId: number) => Promise<any>>;
     let getSectionMock: jest.Mock<(id: number) => Promise<Section>>;
+    let getSectionsMock: jest.Mock<(projectId: number, suiteId?: number) => Promise<Section[]>>;
     let getCaseTypesMock: jest.Mock<() => Promise<CaseType[]>>;
     let getPrioritiesMock: jest.Mock<() => Promise<Priority[]>>;
     let getCaseFieldsMock: jest.Mock<() => Promise<CaseField[]>>;
@@ -33,6 +34,7 @@ describe('export_cases_for_rag tool', () => {
         getCasesMock = jest.fn<(projectId: number, sectionId?: number, filter?: Record<string, string>) => Promise<Case[]>>();
         getProjectMock = jest.fn<(projectId: number) => Promise<any>>().mockResolvedValue({ id: 1, name: 'Default Project', suite_mode: 1 });
         getSectionMock = jest.fn<(id: number) => Promise<Section>>().mockResolvedValue({ id: 10, name: 'General', description: '', suite_id: 1, parent_id: null, depth: 0, display_order: 1 });
+        getSectionsMock = jest.fn<(projectId: number, suiteId?: number) => Promise<Section[]>>().mockResolvedValue([]);
         getCaseTypesMock = jest.fn<() => Promise<CaseType[]>>().mockResolvedValue([
             { id: 1, name: 'Automated', is_default: false },
             { id: 2, name: 'Functional', is_default: true },
@@ -48,6 +50,7 @@ describe('export_cases_for_rag tool', () => {
             getCases: getCasesMock,
             getProject: getProjectMock,
             getSection: getSectionMock,
+            getSections: getSectionsMock,
             getCaseTypes: getCaseTypesMock,
             getPriorities: getPrioritiesMock,
             getCaseFields: getCaseFieldsMock,
@@ -147,6 +150,7 @@ describe('export_cases_for_rag tool', () => {
                 updated_on: 1700005000,
                 title: 'Verify User Login with Valid Credentials',
                 section: 'Authentication Suite',
+                section_path: ['Authentication Suite'],
                 priority: 'High',
                 references: 'AUTH-101',
                 automation_type: 'Automated',
@@ -352,6 +356,7 @@ describe('export_cases_for_rag tool', () => {
             updated_on: 1700005000,
             title: 'Auto Routing Case',
             section: 'General',
+            section_path: ['General'],
             priority: 'High',
             references: 'REF-501',
             labels: ['Regression'],
@@ -1162,6 +1167,152 @@ describe('export_cases_for_rag tool', () => {
         expect(metaContent.metadataAttributes.case_id).toBe(888);
         expect(metaContent.metadataAttributes.updated_on).toBe(1700005000);
         expect(metaContent.metadataAttributes.revision_id).toBeUndefined();
+    });
+
+    describe('section hierarchy', () => {
+        const sectionTree: Section[] = [
+            { id: 1, name: 'Section A', suite_id: 1, parent_id: null },
+            { id: 2, name: 'Section B', suite_id: 1, parent_id: 1 },
+            { id: 3, name: 'Section C', suite_id: 1, parent_id: 2 },
+        ];
+
+        const makeCase = (id: number, sectionId: number | null): Case => ({
+            id,
+            title: `Case ${id}`,
+            section_id: sectionId as any,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: null,
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [],
+        });
+
+        const makeTempDir = (suffix: string) => {
+            const dir = path.join(os.tmpdir(), `rag_test_section_${suffix}_${Date.now()}`);
+            tempDirs.push(dir);
+            return dir;
+        };
+
+        const readOutputs = async (dir: string, caseId: number) => ({
+            md: await fs.promises.readFile(path.join(dir, `C${caseId}.md`), 'utf-8'),
+            meta: JSON.parse(await fs.promises.readFile(path.join(dir, `C${caseId}.md.metadata.json`), 'utf-8')).metadataAttributes,
+        });
+
+        test('query export writes full path using a single getSections call', async () => {
+            const dir = makeTempDir('query');
+            getCasesMock.mockResolvedValue([makeCase(701, 3), makeCase(702, 2)]);
+            getSectionsMock.mockResolvedValue(sectionTree);
+
+            await exportCasesForRagTool.handler({ project_id: 1, suite_id: 5, output_dir: dir }, mockClient);
+
+            expect(getSectionsMock).toHaveBeenCalledTimes(1);
+            expect(getSectionsMock).toHaveBeenCalledWith(1, 5);
+            expect(getSectionMock).not.toHaveBeenCalled();
+
+            const c701 = await readOutputs(dir, 701);
+            expect(c701.md).toContain('**Section**: Section A > Section B > Section C');
+            expect(c701.meta.section).toBe('Section C');
+            expect(c701.meta.section_path).toEqual(['Section A', 'Section B', 'Section C']);
+
+            const c702 = await readOutputs(dir, 702);
+            expect(c702.md).toContain('**Section**: Section A > Section B');
+            expect(c702.meta.section).toBe('Section B');
+        });
+
+        test('case_ids export walks up via getSection and fetches shared ancestors once', async () => {
+            const dir = makeTempDir('ids');
+            const byId = new Map(sectionTree.map(s => [s.id, s]));
+            getCaseMock.mockImplementation(async (id: number) => makeCase(id, id === 801 ? 3 : 2));
+            getSectionMock.mockImplementation(async (id: number) => byId.get(id)!);
+
+            await exportCasesForRagTool.handler({ case_ids: ['C801', 802], output_dir: dir }, mockClient);
+
+            expect(getSectionMock.mock.calls.map(c => c[0]).sort()).toEqual([1, 2, 3]);
+
+            const c801 = await readOutputs(dir, 801);
+            expect(c801.md).toContain('**Section**: Section A > Section B > Section C');
+            expect(c801.meta.section).toBe('Section C');
+            expect(c801.meta.section_path).toEqual(['Section A', 'Section B', 'Section C']);
+        });
+
+        test('falls back to the leaf name when an ancestor cannot be resolved', async () => {
+            const dir = makeTempDir('fallback');
+            getCaseMock.mockResolvedValue(makeCase(901, 3));
+            getSectionMock.mockImplementation(async (id: number) => {
+                if (id === 3) return sectionTree[2];
+                if (id === 2) return sectionTree[1];
+                throw new Error('403 Forbidden');
+            });
+
+            await exportCasesForRagTool.handler({ case_ids: [901], output_dir: dir }, mockClient);
+
+            const { md, meta } = await readOutputs(dir, 901);
+            expect(md).toContain('**Section**: Section C\n');
+            expect(meta.section).toBe('Section C');
+            expect(meta.section_path).toEqual(['Section C']);
+        });
+
+        test('falls back to the leaf name when the hierarchy contains a cycle', async () => {
+            const dir = makeTempDir('cycle');
+            const cyclic = new Map<number, Section>([
+                [3, { id: 3, name: 'Section C', suite_id: 1, parent_id: 2 }],
+                [2, { id: 2, name: 'Section B', suite_id: 1, parent_id: 3 }],
+            ]);
+            getCaseMock.mockResolvedValue(makeCase(902, 3));
+            getSectionMock.mockImplementation(async (id: number) => cyclic.get(id)!);
+
+            await exportCasesForRagTool.handler({ case_ids: [902], output_dir: dir }, mockClient);
+
+            const { md, meta } = await readOutputs(dir, 902);
+            expect(md).toContain('**Section**: Section C\n');
+            expect(meta.section_path).toEqual(['Section C']);
+        });
+
+        test('writes Unknown and omits section_path when the case has no section', async () => {
+            const dir = makeTempDir('none');
+            getCaseMock.mockResolvedValue(makeCase(903, null));
+
+            await exportCasesForRagTool.handler({ case_ids: [903], output_dir: dir }, mockClient);
+
+            const { md, meta } = await readOutputs(dir, 903);
+            expect(md).toContain('**Section**: Unknown');
+            expect(meta.section).toBe('Unknown');
+            expect(meta.section_path).toBeUndefined();
+            expect(getSectionMock).not.toHaveBeenCalled();
+        });
+
+        test('escapes > in section names in Markdown but keeps raw names in metadata', async () => {
+            const dir = makeTempDir('escape');
+            getCasesMock.mockResolvedValue([makeCase(904, 12)]);
+            getSectionsMock.mockResolvedValue([
+                { id: 11, name: 'A > B', suite_id: 1, parent_id: null },
+                { id: 12, name: 'Leaf', suite_id: 1, parent_id: 11 },
+            ]);
+
+            await exportCasesForRagTool.handler({ project_id: 1, output_dir: dir }, mockClient);
+
+            const { md, meta } = await readOutputs(dir, 904);
+            expect(md).toContain('**Section**: A \\> B > Leaf');
+            expect(meta.section_path).toEqual(['A > B', 'Leaf']);
+        });
+
+        test('falls back to lazy getSection when getSections fails', async () => {
+            const dir = makeTempDir('sections_fail');
+            const byId = new Map(sectionTree.map(s => [s.id, s]));
+            getCasesMock.mockResolvedValue([makeCase(905, 3)]);
+            getSectionsMock.mockRejectedValue(new Error('500'));
+            getSectionMock.mockImplementation(async (id: number) => byId.get(id)!);
+
+            await exportCasesForRagTool.handler({ project_id: 1, output_dir: dir }, mockClient);
+
+            const { md } = await readOutputs(dir, 905);
+            expect(md).toContain('**Section**: Section A > Section B > Section C');
+        });
     });
 });
 
