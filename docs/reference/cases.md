@@ -108,7 +108,7 @@ Exports test cases as clean Markdown documents with companion JSON metadata side
 Each exported case becomes two files:
 
 - **`<case>.md`** — the title, section header, preconditions, numbered steps with their expected results, and any unstructured text fields, formatted as readable Markdown.
-- **`<case>.md.metadata.json`** — a sidecar of structured `metadataAttributes` for filtering and retrieval: case ID, `updated_on`, title, section, priority, references, resolved multi-select tag strings, dropdowns, and checkboxes.
+- **`<case>.md.metadata.json`** — a sidecar of structured `metadataAttributes` for filtering and retrieval: case ID, `updated_on`, title, section, `section_path`, priority, references, resolved multi-select tag strings, dropdowns, checkboxes, and `content_hash`.
 
 ### Why the sidecar carries `updated_on`
 
@@ -117,6 +117,16 @@ The `updated_on` timestamp already comes back from `get_case` and `get_cases`, a
 - **Incremental sync.** An ingestion pipeline compares `updated_on` against the stored sidecar, or uses TestRail's `updated_after` filter on `get_cases`, to find changed cases — no full-text hashing or diffing, and no `get_case_history` call per case.
 - **Stale vector eviction.** As soon as a case's `updated_on` changes, the pipeline knows to invalidate the old embedding.
 - **Version citations.** The assistant can state when the steps it is citing were last updated.
+
+### Content hashing for deterministic sync
+
+The sidecar includes a `content_hash` attribute (`sha256:<hex>`), computed as:
+
+```text
+sha256( markdown body + "\n" + canonical JSON of metadataAttributes, excluding content_hash )
+```
+
+While `updated_on` catches changes saved directly to the test case entity in TestRail, `content_hash` additionally detects changes that leave `updated_on` untouched — such as renamed parent sections, edited dropdown labels or priority names, modified `ignored_fields`, or exporter version formatting updates. Pipelines can compare `content_hash` against stored metadata to pinpoint documents needing re-indexing.
 
 ### Export modes
 
@@ -135,7 +145,7 @@ The `updated_on` timestamp already comes back from `get_case` and `get_cases`, a
 | `output_dir` | Destination directory for the `.md` and `.metadata.json` files |
 | `ignored_fields` | Custom fields to exclude, by `system_name` or its stripped form |
 
-`ignored_fields` accepts either the full system name or the name without the `custom_` prefix, so `custom_review_status` and `review_status` both work. The core attributes — `case_id`, `updated_on`, `title`, `section`, `priority`, `references`, `labels` — cannot be excluded, because ingestion pipelines depend on them.
+`ignored_fields` accepts either the full system name or the name without the `custom_` prefix, so `custom_review_status` and `review_status` both work. The core attributes — `case_id`, `updated_on`, `title`, `section`, `section_path`, `priority`, `references`, `labels`, `content_hash` — cannot be excluded, because ingestion pipelines depend on them.
 
 > [!TIP]
 > **Always set `output_dir`.** Without it, the tool creates a timestamped `rag_export_<timestamp>` folder in the detected project directory. When the server is registered in a global or user-level MCP configuration, its working directory may be `/` or your home directory, in which case the export lands in `~/rag_export_<timestamp>` — probably not where you expected. Pass `output_dir` explicitly, or tell your assistant to use a path like `./rag_export`.
