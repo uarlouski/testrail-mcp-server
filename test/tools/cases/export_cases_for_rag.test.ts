@@ -7,6 +7,7 @@ import { TestRailClient } from '../../../src/client/testrail.js';
 import { Case, CaseField } from '../../../src/tools/cases/types.js';
 import { Section } from '../../../src/tools/sections/types.js';
 import { CaseType, Priority } from '../../../src/types/testrail.js';
+import { computeContentHash } from '../../../src/utils/content_hash.js';
 
 describe('export_cases_for_rag tool', () => {
     let mockClient: jest.Mocked<TestRailClient>;
@@ -154,6 +155,7 @@ describe('export_cases_for_rag tool', () => {
                 priority: 'High',
                 references: 'AUTH-101',
                 automation_type: 'Automated',
+                content_hash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
             },
         });
     });
@@ -362,6 +364,7 @@ describe('export_cases_for_rag tool', () => {
             labels: ['Regression'],
             automation_type: 'Automated', // type 6 Dropdown auto-routed to metadata
             feature_tags: ['feat.checkout'], // type 12 Multi-select auto-routed to metadata as list of strings
+            content_hash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
         });
     });
 
@@ -1312,6 +1315,114 @@ describe('export_cases_for_rag tool', () => {
 
             const { md } = await readOutputs(dir, 905);
             expect(md).toContain('**Section**: Section A > Section B > Section C');
+        });
+    });
+
+    describe('content_hash in export', () => {
+        test('computes exact content_hash matching exported markdown body and sidecar metadata', async () => {
+            const testTempDir = path.join(os.tmpdir(), `rag_test_hash_exact_${Date.now()}`);
+            tempDirs.push(testTempDir);
+
+            const mockCase: Case = {
+                id: 1101,
+                title: 'Hash Verification Case',
+                section_id: 10,
+                template_id: 1,
+                type_id: 1,
+                priority_id: 2,
+                milestone_id: null,
+                refs: 'JIRA-100',
+                created_on: 1700000000,
+                updated_on: 1700005000,
+                estimate: null,
+                suite_id: 1,
+                labels: [{ id: 1, title: 'Auth' }],
+            };
+            getCaseMock.mockResolvedValue(mockCase);
+            getSectionMock.mockResolvedValue({ id: 10, name: 'Security', description: '', suite_id: 1, parent_id: null, depth: 0, display_order: 1 });
+
+            await exportCasesForRagTool.handler(
+                { case_ids: [1101], output_dir: testTempDir },
+                mockClient
+            );
+
+            const mdContent = await fs.promises.readFile(path.join(testTempDir, 'C1101.md'), 'utf-8');
+            const metaJson = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C1101.md.metadata.json'), 'utf-8'));
+            const sidecarAttributes = metaJson.metadataAttributes;
+
+            expect(sidecarAttributes.content_hash).toMatch(/^sha256:[a-f0-9]{64}$/);
+
+            const expectedHash = computeContentHash(mdContent, sidecarAttributes);
+            expect(sidecarAttributes.content_hash).toBe(expectedHash);
+        });
+
+        test('detects changes when section hierarchy changes even when case updated_on is unchanged', async () => {
+            const dir1 = path.join(os.tmpdir(), `rag_test_hash_sec1_${Date.now()}`);
+            const dir2 = path.join(os.tmpdir(), `rag_test_hash_sec2_${Date.now()}`);
+            tempDirs.push(dir1, dir2);
+
+            const mockCase: Case = {
+                id: 1102,
+                title: 'Section Hierarchy Change Case',
+                section_id: 20,
+                template_id: 1,
+                type_id: 1,
+                priority_id: 1,
+                milestone_id: null,
+                refs: null,
+                created_on: 1700000000,
+                updated_on: 1700005000,
+                estimate: null,
+                suite_id: 1,
+                labels: [],
+            };
+            getCaseMock.mockResolvedValue(mockCase);
+
+            getSectionMock.mockResolvedValue({ id: 20, name: 'Old Section', description: '', suite_id: 1, parent_id: null, depth: 0, display_order: 1 });
+            await exportCasesForRagTool.handler({ case_ids: [1102], output_dir: dir1 }, mockClient);
+            const meta1 = JSON.parse(await fs.promises.readFile(path.join(dir1, 'C1102.md.metadata.json'), 'utf-8'));
+
+            getSectionMock.mockResolvedValue({ id: 20, name: 'Renamed Section', description: '', suite_id: 1, parent_id: null, depth: 0, display_order: 1 });
+            await exportCasesForRagTool.handler({ case_ids: [1102], output_dir: dir2 }, mockClient);
+            const meta2 = JSON.parse(await fs.promises.readFile(path.join(dir2, 'C1102.md.metadata.json'), 'utf-8'));
+
+            expect(meta1.metadataAttributes.updated_on).toBe(meta2.metadataAttributes.updated_on);
+            expect(meta1.metadataAttributes.content_hash).not.toBe(meta2.metadataAttributes.content_hash);
+        });
+
+        test('cannot be excluded by ignored_fields', async () => {
+            const testTempDir = path.join(os.tmpdir(), `rag_test_hash_ignored_${Date.now()}`);
+            tempDirs.push(testTempDir);
+
+            const mockCase: Case = {
+                id: 1103,
+                title: 'Immune Hash Case',
+                section_id: 10,
+                template_id: 1,
+                type_id: 1,
+                priority_id: 1,
+                milestone_id: null,
+                refs: null,
+                created_on: 1700000000,
+                updated_on: 1700005000,
+                estimate: null,
+                suite_id: 1,
+                labels: [],
+            };
+            getCaseMock.mockResolvedValue(mockCase);
+            getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+            await exportCasesForRagTool.handler(
+                {
+                    case_ids: [1103],
+                    output_dir: testTempDir,
+                    ignored_fields: ['content_hash', 'custom_content_hash'],
+                },
+                mockClient
+            );
+
+            const metaJson = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C1103.md.metadata.json'), 'utf-8'));
+            expect(metaJson.metadataAttributes.content_hash).toMatch(/^sha256:[a-f0-9]{64}$/);
         });
     });
 });

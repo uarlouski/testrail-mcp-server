@@ -8,6 +8,7 @@
 
 ### Added
 - `export_cases_for_rag` metadata sidecar now includes `section_path`, an ordered root-to-leaf list of section names, enabling filtering by any ancestor section. `section` remains the leaf name.
+- `export_cases_for_rag` metadata sidecar now includes `content_hash` (`sha256:<hex>`), computed from the exported Markdown body and canonical metadata JSON, enabling accurate incremental sync when parent sections, metadata options, or export settings change without modifying the test case's `updated_on`.
 
 ### Fixed
 - Prevent HTML sanitizer from stripping literal comparison operators (`<`, `>`, `<=`, `>=`), code comparisons, generic types, and placeholder tags in test cases and RAG exports.

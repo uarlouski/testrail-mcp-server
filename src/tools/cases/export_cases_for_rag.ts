@@ -11,6 +11,7 @@ import { CaseFieldTypeId, getFieldType } from "./fields.js";
 import { fetchFilteredCases } from "./get_cases.js";
 import { Section } from "../sections/types.js";
 import { createSectionLookup, formatSectionPath, resolveSectionPath } from "../../utils/section_path.js";
+import { computeContentHash } from "../../utils/content_hash.js";
 
 const parameters = {
     case_ids: z.array(z.union([z.string(), z.number()])).optional().describe("List of test case IDs (e.g. ['C123', 456]). Provide either case_ids OR project_id."),
@@ -19,7 +20,7 @@ const parameters = {
     filter: z.record(z.string(), z.string()).optional().describe("Optional API-side filters (e.g. priority_id, type_id, milestone_id, refs, created_after, etc.)."),
     where: z.record(z.string(), z.any()).optional().describe("Optional client-side filter for any field including custom fields (filters after fetching cases). Supports exact value matching. Example: {\"custom_automation_status\": 1}"),
     output_dir: z.string().optional().describe("Directory to save exported files. Defaults to an auto-generated directory in the current working directory."),
-    ignored_fields: z.array(z.string()).optional().describe("Optional list of custom field names or system names to ignore/exclude from export (e.g. ['custom_review_status', 'review_status']). Supports both full system_name and stripped field names. Core metadata attributes (case_id, updated_on, title, section, section_path, priority, references, labels) cannot be ignored."),
+    ignored_fields: z.array(z.string()).optional().describe("Optional list of custom field names or system names to ignore/exclude from export (e.g. ['custom_review_status', 'review_status']). Supports both full system_name and stripped field names. Core metadata attributes (case_id, updated_on, title, section, section_path, priority, references, labels, content_hash) cannot be ignored."),
 };
 
 function formatStepsSeparated(steps: any[]): string {
@@ -268,6 +269,7 @@ export const exportCasesForRagTool: ToolDefinition<typeof parameters, TestRailCl
 
             const markdownContent = buildMarkdownBody(testCase, sectionPath, markdownFields);
             const metadataAttributes = buildMetadataAttributes(testCase, sectionPath, priority, metadataFields);
+            metadataAttributes.content_hash = computeContentHash(markdownContent, metadataAttributes);
 
             const docFilename = `C${testCase.id}.md`;
             const metaFilename = `C${testCase.id}.md.metadata.json`;
