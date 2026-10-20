@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [3.3.0]
 
 ### Changed
 - Bump `@modelcontextprotocol/sdk` from `1.30.0` to `1.32.1`
