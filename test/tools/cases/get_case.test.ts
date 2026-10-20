@@ -146,6 +146,49 @@ describe('get_case tool', () => {
         expect(result.is_automated).toBe(false);
     });
 
+    test('handler preserves native labels and custom_labels without collision', async () => {
+        const customLabelsField: CaseField = {
+            id: 20,
+            name: 'labels',
+            system_name: 'custom_labels',
+            label: 'Labels',
+            type_id: 12,
+            template_ids: [],
+            include_all: true,
+            is_active: true,
+            description: null,
+            configs: [{ options: { items: '24, MVP\n25, Smoke' } }],
+        };
+        getCaseFieldsMock.mockResolvedValue([...mockCaseFields, customLabelsField]);
+
+        const mockCase: Case = {
+            id: 123,
+            title: 'My Case with Labels',
+            template_id: 1,
+            section_id: 456,
+            type_id: 2,
+            priority_id: 3,
+            milestone_id: null,
+            refs: 'BC-19235',
+            created_on: 1700000000,
+            updated_on: 1700000000,
+            estimate: null,
+            suite_id: 1,
+            labels: [{ id: 6, title: 'AQA' }],
+            custom_labels: [24],
+        } as any;
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 456, name: 'My Section', description: null, parent_id: null, suite_id: 1 });
+        getCaseTypesMock.mockResolvedValue([{ id: 2, name: 'Functional', is_default: true }]);
+        getPrioritiesMock.mockResolvedValue([{ id: 3, name: 'High', is_default: false }]);
+
+        const result = await getCaseTool.handler({ case_id: 'C123' }, mockClient);
+
+        expect(result.labels).toEqual([{ id: 6, title: 'AQA' }]);
+        expect(result.custom_labels).toEqual(['MVP']);
+    });
+
     test('handler throws error on failure', async () => {
         getCaseMock.mockRejectedValue(new Error('API Error'));
 

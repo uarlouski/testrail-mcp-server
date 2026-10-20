@@ -203,6 +203,32 @@ describe('processCustomFields', () => {
         const result = processCustomFields(input, mockCaseFields);
         expect(result.automation_priority).toBe(999); // Falls back to original value
     });
+
+    test('preserves system_name for custom fields that collide with reserved case response fields', () => {
+        const collidingFields: CaseField[] = [
+            { id: 20, name: 'labels', system_name: 'custom_labels', label: 'Labels', type_id: 12, template_ids: [], include_all: true, is_active: true, description: null, configs: [{ options: { items: '1, TagA\n24, MVP' } }] },
+            { id: 21, name: 'title', system_name: 'custom_title', label: 'Title', type_id: 1, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+            { id: 22, name: 'priority', system_name: 'custom_priority', label: 'Priority', type_id: 1, template_ids: [], include_all: true, is_active: true, description: null, configs: [] },
+        ];
+
+        const input: Case = {
+            id: 1, title: 'Real Title', template_id: 1,
+            section_id: 0, type_id: 0, priority_id: 0,
+            display_order: 1, suite_id: 1, created_on: 1, updated_on: 1,
+            is_deleted: 0, refs: null, labels: [],
+            custom_labels: [24],
+            custom_title: 'Custom Title Val',
+            custom_priority: 'P1',
+        } as unknown as Case;
+
+        const result = processCustomFields(input, collidingFields);
+        expect(result.custom_labels).toEqual(['MVP']);
+        expect(result.custom_title).toBe('Custom Title Val');
+        expect(result.custom_priority).toBe('P1');
+        expect(result.labels).toBeUndefined();
+        expect(result.title).toBeUndefined();
+        expect(result.priority).toBeUndefined();
+    });
 });
 
 describe('parseDropdownOptions', () => {

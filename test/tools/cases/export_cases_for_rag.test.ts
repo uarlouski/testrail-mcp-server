@@ -856,6 +856,61 @@ describe('export_cases_for_rag tool', () => {
         expect(metaContent.metadataAttributes.secondary_notes).toBe('Secondary note text');
     });
 
+    test('preserves core metadata attributes like labels when colliding with custom field named labels', async () => {
+        const testTempDir = path.join(os.tmpdir(), `rag_test_core_collision_${Date.now()}`);
+        tempDirs.push(testTempDir);
+
+        const customFieldsSchema: CaseField[] = [
+            {
+                id: 20,
+                name: 'labels',
+                system_name: 'custom_labels',
+                label: 'Labels',
+                type_id: 12,
+                template_ids: [],
+                include_all: true,
+                is_active: true,
+                description: null,
+                configs: [{ options: { items: '24, MVP\n25, Smoke' } }],
+            },
+        ];
+
+        getCaseFieldsMock.mockResolvedValue(customFieldsSchema);
+
+        const mockCase: Case = {
+            id: 907,
+            title: 'Core Collision Case',
+            section_id: 10,
+            template_id: 1,
+            type_id: 1,
+            priority_id: 1,
+            milestone_id: null,
+            refs: 'REF-1',
+            created_on: 1700000000,
+            updated_on: 1700005000,
+            estimate: null,
+            suite_id: 1,
+            labels: [{ id: 6, title: 'AQA' }],
+            custom_labels: [24],
+        } as any;
+
+        getCaseMock.mockResolvedValue(mockCase);
+        getSectionMock.mockResolvedValue({ id: 10, name: 'Section 10' } as any);
+
+        const result = await exportCasesForRagTool.handler(
+            {
+                case_ids: [907],
+                output_dir: testTempDir,
+            },
+            mockClient
+        );
+
+        expect(result.success).toBe(true);
+        const metaContent = JSON.parse(await fs.promises.readFile(path.join(testTempDir, 'C907.md.metadata.json'), 'utf-8'));
+        expect(metaContent.metadataAttributes.labels).toEqual(['AQA']);
+        expect(metaContent.metadataAttributes.custom_labels).toEqual(['MVP']);
+    });
+
     test('includes custom fields like review_status and reviewer by default when not in ignored_fields', async () => {
         const testTempDir = path.join(os.tmpdir(), `rag_test_default_custom_${Date.now()}`);
         tempDirs.push(testTempDir);

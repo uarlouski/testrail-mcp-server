@@ -184,12 +184,27 @@ function buildMetadataAttributes(
         metadataAttributes.labels = testCase.labels.map(l => l.title);
     }
 
+    const CORE_METADATA_KEYS = new Set([
+        "case_id",
+        "updated_on",
+        "title",
+        "section",
+        "section_path",
+        "priority",
+        "references",
+        "labels",
+        "content_hash",
+    ]);
+
     for (const { key, value, fieldDef } of metadataFields) {
+        const targetKey = CORE_METADATA_KEYS.has(key)
+            ? (fieldDef?.system_name || `custom_${key}`)
+            : key;
         if (fieldDef?.type_id === CaseFieldTypeId.MultiSelect) {
             const listVal = Array.isArray(value) ? value : [value];
-            metadataAttributes[key] = sanitizeMetadataValue(listVal.map(item => String(item)));
+            metadataAttributes[targetKey] = sanitizeMetadataValue(listVal.map(item => String(item)));
         } else {
-            metadataAttributes[key] = sanitizeMetadataValue(value);
+            metadataAttributes[targetKey] = sanitizeMetadataValue(value);
         }
     }
 

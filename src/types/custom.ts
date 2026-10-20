@@ -9,6 +9,7 @@ export interface TestCaseResponse {
     priority: string;
     labels: CaseLabel[];
     references: string | null;
+    updated_on?: number;
     [key: string]: any;
 }
 
