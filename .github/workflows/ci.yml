@@ -67,3 +67,18 @@ jobs:
           path: testrail-mcp-server.mcpb
           retention-days: 7
           if-no-files-found: error
+
+      - name: Package agent skill
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
+        run: |
+          cd skills
+          zip -r ../testrail-qa-skill.zip testrail-qa -x '.*'
+
+      - name: Upload agent skill artifact
+        uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
+        with:
+          name: testrail-qa-skill
+          path: testrail-qa-skill.zip
+          retention-days: 7
+          if-no-files-found: error

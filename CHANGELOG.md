@@ -9,6 +9,7 @@
 ### Added
 - `export_cases_for_rag` metadata sidecar now includes `section_path`, an ordered root-to-leaf list of section names, enabling filtering by any ancestor section. `section` remains the leaf name.
 - `export_cases_for_rag` metadata sidecar now includes `content_hash` (`sha256:<hex>`), computed from the exported Markdown body and canonical metadata JSON, enabling accurate incremental sync when parent sections, metadata options, or export settings change without modifying the test case's `updated_on`.
+- `skills/testrail-qa` agent skill (`SKILL.md` format) that teaches AI agents TestRail workflows on top of this server: schema-valid case creation, targeted run building, failure triage, and result reporting. Distributed separately from the npm package.
 
 ### Fixed
 - `get_labels` no longer fails with a validation error and now returns the project's labels. Each label is returned as `{ id, name }`; labels on a test case (`get_case`) still use `title`.

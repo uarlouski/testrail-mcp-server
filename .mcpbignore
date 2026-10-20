@@ -9,6 +9,10 @@ docs/
 AGENTS.md
 CHANGELOG.md
 
+# Agent skill (distributed separately as a GitHub release asset)
+skills/
+testrail-qa-skill.zip
+
 # Private and scratch files
 private/
 server.json
