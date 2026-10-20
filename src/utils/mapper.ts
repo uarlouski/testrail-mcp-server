@@ -1,5 +1,8 @@
 import { Case, CaseField, CaseFieldTypeId } from "../tools/cases/types.js";
+import { RESERVED_CASE_FIELDS } from "../tools/cases/fields.js";
 import { sanitizeValue } from "./sanitizer.js";
+
+export { RESERVED_CASE_FIELDS };
 
 /**
  * Processes custom fields from a test case, converting system names to human-readable labels
@@ -24,7 +27,9 @@ export function processCustomFields(
     const dropdownOptionsMap = new Map<string, Map<string, string>>();
 
     for (const field of applicableFields) {
-        fieldNameMap.set(field.system_name, toSnakeCase(field.label));
+        const snakeLabel = toSnakeCase(field.label);
+        const outputKey = RESERVED_CASE_FIELDS.has(snakeLabel) ? field.system_name : snakeLabel;
+        fieldNameMap.set(field.system_name, outputKey);
 
         const optionsMap = parseDropdownOptions(field);
         if (optionsMap.size > 0) {

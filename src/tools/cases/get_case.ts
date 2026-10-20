@@ -31,6 +31,7 @@ export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
         const customFields = processCustomFields(testCase, caseFields);
 
         const response: TestCaseResponse = {
+            ...customFields,
             id: testCase.id,
             title: testCase.title,
             section: section.name,
@@ -39,7 +40,6 @@ export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
             labels: (testCase.labels || []).map((label) => CaseLabelSchema.parse(label)),
             references: testCase.refs,
             updated_on: testCase.updated_on,
-            ...customFields
         };
 
         return response;

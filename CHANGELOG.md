@@ -13,6 +13,7 @@
 ### Fixed
 - `get_labels` no longer fails with a validation error and now returns the project's labels. Each label is returned as `{ id, name }`; labels on a test case (`get_case`) still use `title`.
 - Prevent HTML sanitizer from stripping literal comparison operators (`<`, `>`, `<=`, `>=`), code comparisons, generic types, and placeholder tags in test cases and RAG exports.
+- Prevent custom fields whose label collides with reserved core case attributes (such as `labels`, `title`, `priority`) from clobbering native fields in `get_case` and `export_cases_for_rag`. Custom fields that conflict with reserved field names retain their `system_name` (e.g. `custom_labels`).
 
 ## [3.2.0]
 

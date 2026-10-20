@@ -80,4 +80,16 @@ export const READONLY_CASE_FIELDS: readonly string[] = [
     "is_deleted",
 ];
 
+/**
+ * Standard case property names that must not be overwritten by custom fields.
+ * If a custom field's converted label collides with one of these names (e.g. "labels", "title"),
+ * the custom field retains its `system_name` (e.g. `custom_labels`, `custom_title`) to prevent collisions.
+ */
+export const RESERVED_CASE_FIELDS: ReadonlySet<string> = new Set([
+    ...SYSTEM_FIELDS.map(f => f.label.toLowerCase()),
+    ...SYSTEM_FIELDS.map(f => f.system_name),
+    ...READONLY_CASE_FIELDS,
+]);
+
+
 

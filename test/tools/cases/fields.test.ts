@@ -1,5 +1,5 @@
 import { describe, test, expect } from "@jest/globals";
-import { CaseFieldTypeId, FIELD_TYPES, getFieldType, SYSTEM_FIELDS, READONLY_CASE_FIELDS } from "../../../src/tools/cases/fields.js";
+import { CaseFieldTypeId, FIELD_TYPES, getFieldType, SYSTEM_FIELDS, READONLY_CASE_FIELDS, RESERVED_CASE_FIELDS } from "../../../src/tools/cases/fields.js";
 
 describe("Field Types, Schema & Helpers", () => {
     test("defines CaseFieldTypeId constants correctly", () => {
@@ -62,5 +62,15 @@ describe("Field Types, Schema & Helpers", () => {
         expect(READONLY_CASE_FIELDS).toContain("estimate_forecast");
         expect(READONLY_CASE_FIELDS).toContain("is_deleted");
         expect(READONLY_CASE_FIELDS).not.toContain("display_order");
+    });
+
+    test("RESERVED_CASE_FIELDS contains labels, system names, and readonly case fields", () => {
+        expect(RESERVED_CASE_FIELDS.has("labels")).toBe(true);
+        expect(RESERVED_CASE_FIELDS.has("title")).toBe(true);
+        expect(RESERVED_CASE_FIELDS.has("priority")).toBe(true);
+        expect(RESERVED_CASE_FIELDS.has("references")).toBe(true);
+        expect(RESERVED_CASE_FIELDS.has("id")).toBe(true);
+        expect(RESERVED_CASE_FIELDS.has("suite_id")).toBe(true);
+        expect(RESERVED_CASE_FIELDS.has("updated_on")).toBe(true);
     });
 });
