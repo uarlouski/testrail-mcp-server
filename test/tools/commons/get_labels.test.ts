@@ -8,10 +8,10 @@ describe('get_labels tool', () => {
     let getLabelsMock: jest.Mock<(projectId: number) => Promise<Label[]>>;
 
     const mockLabels: Label[] = [
-        { id: 1, title: 'backend' },
-        { id: 2, title: 'frontend' },
-        { id: 3, title: 'flaky' },
-        { id: 4, title: 'regression' },
+        { id: 1, name: 'backend' },
+        { id: 2, name: 'frontend' },
+        { id: 3, name: 'flaky' },
+        { id: 4, name: 'regression' },
     ];
 
     beforeEach(() => {
@@ -42,8 +42,24 @@ describe('get_labels tool', () => {
 
         expect(result.labels[0]).toEqual({
             id: 1,
-            title: 'backend',
+            name: 'backend',
         });
+    });
+
+    test('parses the real API shape and strips extra fields', async () => {
+        getLabelsMock.mockResolvedValue([
+            { id: 3, name: 'manual_only', created_by: 13, created_on: 1772801578 },
+        ] as unknown as Label[]);
+
+        const result = await getLabelsTool.handler({ project_id: 123 }, mockClient);
+
+        expect(result.labels).toEqual([{ id: 3, name: 'manual_only' }]);
+    });
+
+    test('throws when a label has no name', async () => {
+        getLabelsMock.mockResolvedValue([{ id: 3, title: 'oops' }] as unknown as Label[]);
+
+        await expect(getLabelsTool.handler({ project_id: 123 }, mockClient)).rejects.toThrow();
     });
 
     test('handler returns error on failure', async () => {

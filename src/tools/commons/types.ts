@@ -1,11 +1,20 @@
 import { z } from "zod";
 
+/** Label as returned by the `get_labels` endpoint (uses `name`). */
 export const LabelSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+});
+
+export type Label = z.infer<typeof LabelSchema>;
+
+/** Label as embedded in a case payload (`get_case`, `get_cases`); uses `title`. */
+export const CaseLabelSchema = z.object({
     id: z.number(),
     title: z.string(),
 });
 
-export type Label = z.infer<typeof LabelSchema>;
+export type CaseLabel = z.infer<typeof CaseLabelSchema>;
 
 export const PrioritySchema = z.object({
     id: z.number(),

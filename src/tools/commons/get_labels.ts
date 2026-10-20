@@ -10,7 +10,7 @@ const parameters = {
 export const getLabelsTool: ToolDefinition<typeof parameters, TestRailClient> = {
     name: "get_labels",
     mode: "read",
-    description: "Get all available test case labels (sometimes called tags) for a project. Returns label IDs and titles that can be used when creating or updating test cases.",
+    description: "Get all available test case labels (sometimes called tags) for a project. Returns label IDs and names that can be used when creating or updating test cases.",
     parameters,
     handler: async ({ project_id }, client) => {
         const labels = await client.getLabels(project_id);

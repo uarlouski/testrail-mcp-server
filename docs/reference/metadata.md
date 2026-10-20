@@ -42,6 +42,8 @@ Lists the case templates available in a project, such as **Test Case (Text)** an
 
 Returns the tags and labels available in a project, so labels applied to a case are ones that already exist rather than new free-text values.
 
+Each label has an `id` and a `name`, for example `{ "id": 3, "name": "manual_only" }`. To tag a case, pass the label `id` values in its `labels` array. Labels shown on a case returned by `get_case` use `title` instead of `name`.
+
 ## `get_configurations`
 
 Returns the configuration groups and their configurations for a project — for example a Browser group containing Chrome, Firefox, and Safari, or an OS group containing Windows and macOS. These are the values used to describe the environment a test run targets.

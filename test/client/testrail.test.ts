@@ -638,7 +638,7 @@ describe('TestRailClient', () => {
     });
 
     test('getLabels returns labels array', async () => {
-        const mockLabels = [{ id: 1, title: 'Label 1' }];
+        const mockLabels = [{ id: 1, name: 'Label 1', created_by: 1, created_on: 1700000000 }];
         fetchMock.mockResolvedValue({
             ok: true,
             json: async () => ({ labels: mockLabels })
