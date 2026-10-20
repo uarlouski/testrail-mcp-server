@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LabelSchema } from "../commons/types.js";
+import { CaseLabelSchema } from "../commons/types.js";
 import { CaseFieldTypeId } from "./fields.js";
 
 export { CaseFieldTypeId };
@@ -50,7 +50,7 @@ export const CaseSchema = z.object({
     estimate_forecast: z.string().nullable().optional(),
     suite_id: z.number(),
     is_deleted: z.number().optional(),
-    labels: z.array(LabelSchema),
+    labels: z.array(CaseLabelSchema),
 }).loose();
 
 export type Case = z.infer<typeof CaseSchema>;

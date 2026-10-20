@@ -3,7 +3,7 @@ import { processCustomFields } from "../../utils/mapper.js";
 import { normalizeEntityId } from "../../utils/sanitizer.js";
 import { TestRailClient } from "../../client/testrail.js";
 import { TestCaseResponse, ToolDefinition } from "../../types/custom.js";
-import { LabelSchema } from "../commons/types.js";
+import { CaseLabelSchema } from "../commons/types.js";
 
 const parameters = {
     case_id: z.string().describe("The ID of the test case (e.g. '123' or 'C123')"),
@@ -36,7 +36,7 @@ export const getCaseTool: ToolDefinition<typeof parameters, TestRailClient> = {
             section: section.name,
             type: caseType ? caseType.name : "Unknown",
             priority: priority ? priority.name : "Unknown",
-            labels: (testCase.labels || []).map((label) => LabelSchema.parse(label)),
+            labels: (testCase.labels || []).map((label) => CaseLabelSchema.parse(label)),
             references: testCase.refs,
             updated_on: testCase.updated_on,
             ...customFields

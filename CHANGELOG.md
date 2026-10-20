@@ -11,6 +11,7 @@
 - `export_cases_for_rag` metadata sidecar now includes `content_hash` (`sha256:<hex>`), computed from the exported Markdown body and canonical metadata JSON, enabling accurate incremental sync when parent sections, metadata options, or export settings change without modifying the test case's `updated_on`.
 
 ### Fixed
+- `get_labels` no longer fails with a validation error and now returns the project's labels. Each label is returned as `{ id, name }`; labels on a test case (`get_case`) still use `title`.
 - Prevent HTML sanitizer from stripping literal comparison operators (`<`, `>`, `<=`, `>=`), code comparisons, generic types, and placeholder tags in test cases and RAG exports.
 
 ## [3.2.0]

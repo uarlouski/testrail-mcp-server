@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Label } from "../tools/commons/types.js";
+import { CaseLabel } from "../tools/commons/types.js";
 
 export interface TestCaseResponse {
     id: number;
@@ -7,7 +7,7 @@ export interface TestCaseResponse {
     section: string;
     type: string;
     priority: string;
-    labels: Label[];
+    labels: CaseLabel[];
     references: string | null;
     [key: string]: any;
 }
