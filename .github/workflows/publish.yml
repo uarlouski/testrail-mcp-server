@@ -96,4 +96,4 @@ jobs:
             echo "::error::SMITHERY_API_KEY secret is not set"
             exit 1
           fi
-          npx -y @smithery/cli mcp publish ./testrail-mcp-server.mcpb -n uarlouski/testrail-mcp-server
+          pnpm dlx @smithery/cli mcp publish ./testrail-mcp-server.mcpb -n uarlouski/testrail-mcp-server
