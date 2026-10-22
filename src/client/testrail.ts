@@ -111,52 +111,93 @@ export class TestRailClient {
         return this.paginateAll<Case>(url, 'cases');
     }
 
-    async getSection(sectionId: number): Promise<Section> {
-        if (!this.sectionsPromiseMap.has(sectionId.toString())) {
-            this.sectionsPromiseMap.set(
-                sectionId.toString(),
-                this.get<Section>(`${API_BASE_V2}/get_section/${sectionId}`)
-            );
+    /**
+     * Shares one in-flight lookup among concurrent callers. A resolved value stays
+     * cached. A rejection is removed so the next call issues a new request.
+     */
+    private memoize<T>(
+        read: () => Promise<T> | null | undefined,
+        write: (next: Promise<T> | null) => void,
+        factory: () => Promise<T>,
+    ): Promise<T> {
+        const current = read();
+        if (current) {
+            return current;
         }
-        return this.sectionsPromiseMap.get(sectionId.toString())!;
+
+        let promise: Promise<T>;
+        promise = factory().catch((error: unknown) => {
+            if (read() === promise) {
+                write(null);
+            }
+            throw error;
+        });
+        write(promise);
+        return promise;
+    }
+
+    private memoizeMap<T>(map: Map<string, Promise<T>>, key: string, factory: () => Promise<T>): Promise<T> {
+        return this.memoize(
+            () => map.get(key),
+            (next) => {
+                if (next) {
+                    map.set(key, next);
+                } else {
+                    map.delete(key);
+                }
+            },
+            factory,
+        );
+    }
+
+    async getSection(sectionId: number): Promise<Section> {
+        const key = sectionId.toString();
+        return this.memoizeMap(
+            this.sectionsPromiseMap,
+            key,
+            () => this.get<Section>(`${API_BASE_V2}/get_section/${sectionId}`),
+        );
     }
 
     async getPriorities(): Promise<Priority[]> {
-        if (!this.prioritiesPromise) {
-            this.prioritiesPromise = this.get<Priority[]>(`${API_BASE_V2}/get_priorities`);
-        }
-        return this.prioritiesPromise;
+        return this.memoize(
+            () => this.prioritiesPromise,
+            (promise) => { this.prioritiesPromise = promise; },
+            () => this.get<Priority[]>(`${API_BASE_V2}/get_priorities`),
+        );
     }
 
     async getCaseTypes(): Promise<CaseType[]> {
-        if (!this.caseTypesPromise) {
-            this.caseTypesPromise = this.get<CaseType[]>(`${API_BASE_V2}/get_case_types`);
-        }
-        return this.caseTypesPromise;
+        return this.memoize(
+            () => this.caseTypesPromise,
+            (promise) => { this.caseTypesPromise = promise; },
+            () => this.get<CaseType[]>(`${API_BASE_V2}/get_case_types`),
+        );
     }
 
     async getCaseFields(): Promise<CaseField[]> {
-        if (!this.caseFieldsPromise) {
-            this.caseFieldsPromise = this.get<CaseField[]>(`${API_BASE_V2}/get_case_fields`);
-        }
-        return this.caseFieldsPromise;
+        return this.memoize(
+            () => this.caseFieldsPromise,
+            (promise) => { this.caseFieldsPromise = promise; },
+            () => this.get<CaseField[]>(`${API_BASE_V2}/get_case_fields`),
+        );
     }
 
     async getStatuses(): Promise<Status[]> {
-        if (!this.statusesPromise) {
-            this.statusesPromise = this.get<Status[]>(`${API_BASE_V2}/get_statuses`);
-        }
-        return this.statusesPromise;
+        return this.memoize(
+            () => this.statusesPromise,
+            (promise) => { this.statusesPromise = promise; },
+            () => this.get<Status[]>(`${API_BASE_V2}/get_statuses`),
+        );
     }
 
     async getTemplates(projectId: number): Promise<Template[]> {
-        if (!this.templatesPromiseMap.has(projectId.toString())) {
-            this.templatesPromiseMap.set(
-                projectId.toString(),
-                this.get<Template[]>(`${API_BASE_V2}/get_templates/${projectId}`)
-            );
-        }
-        return this.templatesPromiseMap.get(projectId.toString())!;
+        const key = projectId.toString();
+        return this.memoizeMap(
+            this.templatesPromiseMap,
+            key,
+            () => this.get<Template[]>(`${API_BASE_V2}/get_templates/${projectId}`),
+        );
     }
 
     async updateCase(caseId: number, fields: Record<string, any>): Promise<Case> {
@@ -245,10 +286,11 @@ export class TestRailClient {
     }
 
     async getProjects(): Promise<Project[]> {
-        if (!this.projectsPromise) {
-            this.projectsPromise = this.paginateAll<Project>(`${API_BASE_V2}/get_projects`, 'projects');
-        }
-        return this.projectsPromise;
+        return this.memoize(
+            () => this.projectsPromise,
+            (promise) => { this.projectsPromise = promise; },
+            () => this.paginateAll<Project>(`${API_BASE_V2}/get_projects`, 'projects'),
+        );
     }
 
     async getLabels(projectId: number): Promise<Label[]> {

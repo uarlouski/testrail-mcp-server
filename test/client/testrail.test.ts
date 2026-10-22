@@ -637,6 +637,117 @@ describe('TestRailClient', () => {
         expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
+    test.each([
+        ['getPriorities', (c: TestRailClient) => c.getPriorities()],
+        ['getCaseTypes', (c: TestRailClient) => c.getCaseTypes()],
+        ['getCaseFields', (c: TestRailClient) => c.getCaseFields()],
+        ['getStatuses', (c: TestRailClient) => c.getStatuses()],
+        ['getProjects', (c: TestRailClient) => c.getProjects()],
+    ])('%s issues a new request after a failed lookup', async (_name, call) => {
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: false,
+                status: 401,
+                statusText: 'Unauthorized',
+                text: async () => 'bad credentials',
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => (
+                    _name === 'getProjects'
+                        ? { projects: [{ id: 1, name: 'Project 1' }], _links: { next: null } }
+                        : [{ id: 1, name: 'Recovered' }]
+                ),
+            });
+
+        await expect(call(client)).rejects.toThrow('TestRail API Error: 401 Unauthorized');
+        await expect(call(client)).resolves.toEqual(
+            _name === 'getProjects'
+                ? [{ id: 1, name: 'Project 1' }]
+                : [{ id: 1, name: 'Recovered' }]
+        );
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    test('in-flight memoized lookups share one request and retry after it rejects', async () => {
+        let resolveFetch: (value: unknown) => void = () => {};
+        const pending = new Promise((resolve) => {
+            resolveFetch = resolve;
+        });
+        fetchMock.mockReturnValueOnce(pending);
+
+        const first = client.getPriorities();
+        const second = client.getPriorities();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+
+        resolveFetch({
+            ok: false,
+            status: 401,
+            statusText: 'Unauthorized',
+            text: async () => 'bad credentials',
+        });
+
+        await expect(first).rejects.toThrow('TestRail API Error: 401 Unauthorized');
+        await expect(second).rejects.toThrow('TestRail API Error: 401 Unauthorized');
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            json: async () => [{ id: 1, name: 'Low' }],
+        });
+        await expect(client.getPriorities()).resolves.toEqual([{ id: 1, name: 'Low' }]);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    test('getSection drops a rejected lookup without evicting other sections', async () => {
+        const kept = { id: 2, name: 'Kept' };
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: false,
+                status: 404,
+                statusText: 'Not Found',
+                text: async () => 'missing',
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => kept,
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({ id: 1, name: 'Recovered' }),
+            });
+
+        await expect(client.getSection(1)).rejects.toThrow('TestRail API Error: 404 Not Found');
+        await expect(client.getSection(2)).resolves.toEqual(kept);
+        await expect(client.getSection(2)).resolves.toEqual(kept);
+        await expect(client.getSection(1)).resolves.toEqual({ id: 1, name: 'Recovered' });
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
+    test('getTemplates drops a rejected lookup without evicting other projects', async () => {
+        const kept = [{ id: 2, name: 'Template 2' }];
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: false,
+                status: 404,
+                statusText: 'Not Found',
+                text: async () => 'missing',
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => kept,
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => [{ id: 1, name: 'Template 1' }],
+            });
+
+        await expect(client.getTemplates(1)).rejects.toThrow('TestRail API Error: 404 Not Found');
+        await expect(client.getTemplates(2)).resolves.toEqual(kept);
+        await expect(client.getTemplates(2)).resolves.toEqual(kept);
+        await expect(client.getTemplates(1)).resolves.toEqual([{ id: 1, name: 'Template 1' }]);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
     test('getLabels returns labels array', async () => {
         const mockLabels = [{ id: 1, name: 'Label 1', created_by: 1, created_on: 1700000000 }];
         fetchMock.mockResolvedValue({

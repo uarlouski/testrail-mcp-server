@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+- A failed request for projects, sections, templates, statuses, priorities, case types, or case fields no longer keeps those tools failing until the MCP server is restarted. Call the tool again once TestRail is reachable. Results that already loaded successfully are still reused for the rest of the session.
+
 ## [3.3.0]
 
 ### Changed
