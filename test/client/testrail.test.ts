@@ -223,7 +223,7 @@ describe('TestRailClient', () => {
         const result = await client.getCases(1);
         expect(result).toEqual(mockCases);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_cases/1',
+            'https://testrail.io/index.php?/api/v2/get_cases/1&limit=250',
             expect.objectContaining({ method: 'GET' })
         );
     });
@@ -257,11 +257,11 @@ describe('TestRailClient', () => {
         expect(result).toEqual([...page1Cases, ...page2Cases]);
         expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_cases/1',
+            'https://testrail.io/index.php?/api/v2/get_cases/1&limit=250',
             expect.any(Object)
         );
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_cases/1&offset=1',
+            'https://testrail.io/index.php?/api/v2/get_cases/1&offset=1&limit=250',
             expect.any(Object)
         );
     });
@@ -274,7 +274,7 @@ describe('TestRailClient', () => {
 
         await client.getCases(1, 5);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_cases/1&section_id=5',
+            'https://testrail.io/index.php?/api/v2/get_cases/1&section_id=5&limit=250',
             expect.any(Object)
         );
     });
@@ -287,7 +287,7 @@ describe('TestRailClient', () => {
 
         await client.getCases(1, undefined, { type_id: '1', priority_id: '2' });
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_cases/1&type_id=1&priority_id=2',
+            'https://testrail.io/index.php?/api/v2/get_cases/1&type_id=1&priority_id=2&limit=250',
             expect.any(Object)
         );
     });
@@ -313,7 +313,7 @@ describe('TestRailClient', () => {
         const result = await client.getCaseHistory(1);
         expect(result).toEqual(mockHistory);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_history_for_case/1',
+            'https://testrail.io/index.php?/api/v2/get_history_for_case/1&limit=250',
             expect.any(Object)
         );
     });
@@ -577,7 +577,7 @@ describe('TestRailClient', () => {
         const result = await client.getSections(1);
         expect(result).toEqual(mockSections);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_sections/1',
+            'https://testrail.io/index.php?/api/v2/get_sections/1&limit=250',
             expect.any(Object)
         );
     });
@@ -600,11 +600,11 @@ describe('TestRailClient', () => {
         expect(result).toEqual([...page1Sections, ...page2Sections]);
         expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_sections/1',
+            'https://testrail.io/index.php?/api/v2/get_sections/1&limit=250',
             expect.any(Object)
         );
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_sections/1&offset=1',
+            'https://testrail.io/index.php?/api/v2/get_sections/1&offset=1&limit=250',
             expect.any(Object)
         );
     });
@@ -619,7 +619,7 @@ describe('TestRailClient', () => {
         const result = await client.getProjects();
         expect(result).toEqual(mockProjects);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_projects',
+            'https://testrail.io/index.php?/api/v2/get_projects&limit=250',
             expect.any(Object)
         );
     });
@@ -758,7 +758,7 @@ describe('TestRailClient', () => {
         const result = await client.getLabels(1);
         expect(result).toEqual(mockLabels);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_labels/1',
+            'https://testrail.io/index.php?/api/v2/get_labels/1&limit=250',
             expect.any(Object)
         );
     });
@@ -1086,7 +1086,7 @@ describe('TestRailClient', () => {
         const result = await client.getSharedSteps(1, { refs: 'R1' });
         expect(result).toEqual(mockSteps);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_shared_steps/1&refs=R1',
+            'https://testrail.io/index.php?/api/v2/get_shared_steps/1&refs=R1&limit=250',
             expect.any(Object)
         );
     });
@@ -1240,7 +1240,7 @@ describe('TestRailClient', () => {
         expect(result[0].id).toBe(1);
         expect(result[1].id).toBe(2);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_users',
+            'https://testrail.io/index.php?/api/v2/get_users&limit=250',
             expect.any(Object)
         );
     });
@@ -1271,11 +1271,11 @@ describe('TestRailClient', () => {
         expect(result[1].id).toBe(4);
         expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_users/5',
+            'https://testrail.io/index.php?/api/v2/get_users/5&limit=250',
             expect.any(Object)
         );
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_users/5&offset=1',
+            'https://testrail.io/index.php?/api/v2/get_users/5&offset=1&limit=250',
             expect.any(Object)
         );
     });
@@ -1382,7 +1382,7 @@ describe('TestRailClient', () => {
 
         expect(result).toEqual(mockSuites);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_suites/1',
+            'https://testrail.io/index.php?/api/v2/get_suites/1&limit=250',
             expect.any(Object)
         );
     });
@@ -1414,7 +1414,7 @@ describe('TestRailClient', () => {
 
         expect(result).toEqual(mockRuns);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_runs/1&suite_id=5',
+            'https://testrail.io/index.php?/api/v2/get_runs/1&suite_id=5&limit=250',
             expect.any(Object)
         );
     });
@@ -1430,7 +1430,7 @@ describe('TestRailClient', () => {
 
         expect(result).toEqual(mockResults);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_results/2',
+            'https://testrail.io/index.php?/api/v2/get_results/2&limit=250',
             expect.any(Object)
         );
     });
@@ -1461,7 +1461,7 @@ describe('TestRailClient', () => {
         const result = await client.getSections(1, 10);
         expect(result).toEqual(mockSections);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_sections/1&suite_id=10',
+            'https://testrail.io/index.php?/api/v2/get_sections/1&suite_id=10&limit=250',
             expect.any(Object)
         );
     });
@@ -1474,7 +1474,7 @@ describe('TestRailClient', () => {
 
         await client.getCases(1, undefined, { suite_id: '5', priority_id: '2' });
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_cases/1&suite_id=5&priority_id=2',
+            'https://testrail.io/index.php?/api/v2/get_cases/1&suite_id=5&priority_id=2&limit=250',
             expect.any(Object)
         );
     });
@@ -1487,7 +1487,7 @@ describe('TestRailClient', () => {
 
         await client.getCases(1, 3, { suite_id: '7' });
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_cases/1&section_id=3&suite_id=7',
+            'https://testrail.io/index.php?/api/v2/get_cases/1&section_id=3&suite_id=7&limit=250',
             expect.any(Object)
         );
     });
@@ -1512,7 +1512,7 @@ describe('TestRailClient', () => {
 
         // Verify getSections was called with suite_id
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_sections/1&suite_id=5',
+            'https://testrail.io/index.php?/api/v2/get_sections/1&suite_id=5&limit=250',
             expect.any(Object)
         );
 
@@ -1542,7 +1542,7 @@ describe('TestRailClient', () => {
 
         // Verify getSections was called without suite_id
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_sections/1',
+            'https://testrail.io/index.php?/api/v2/get_sections/1&limit=250',
             expect.any(Object)
         );
     });
@@ -1570,6 +1570,100 @@ describe('TestRailClient', () => {
         const result = await client.getSuites(1);
         expect(result).toEqual(mockSuites);
         expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('paginateAll requests limit=250 and does not follow a limit=0 link at the same offset', async () => {
+        const projects = [{ id: 1, name: 'Project 1' }];
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                offset: 0,
+                limit: 0,
+                size: 0,
+                projects,
+                _links: { next: '/api/v2/get_projects&limit=0&offset=0', prev: null }
+            })
+        });
+
+        const result = await client.getProjects();
+
+        expect(result).toEqual(projects);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_projects&limit=250',
+            expect.any(Object)
+        );
+    });
+
+    test('paginateAll rewrites limit=0 on a next link that advances offset', async () => {
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    offset: 0,
+                    limit: 0,
+                    size: 250,
+                    cases: [{ id: 1, title: 'Case 1' }],
+                    _links: { next: '/api/v2/get_cases/1&limit=0&offset=250' }
+                })
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    offset: 250,
+                    limit: 250,
+                    size: 1,
+                    cases: [{ id: 2, title: 'Case 2' }],
+                    _links: { next: '/api/v2/get_cases/1&limit=0&offset=250' }
+                })
+            });
+
+        const result = await client.getCases(1);
+
+        expect(result).toEqual([{ id: 1, title: 'Case 1' }, { id: 2, title: 'Case 2' }]);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenNthCalledWith(
+            1,
+            'https://testrail.io/index.php?/api/v2/get_cases/1&limit=250',
+            expect.any(Object)
+        );
+        expect(fetchMock).toHaveBeenNthCalledWith(
+            2,
+            'https://testrail.io/index.php?/api/v2/get_cases/1&limit=250&offset=250',
+            expect.any(Object)
+        );
+    });
+
+    test('paginateAll stops when the reported page is shorter than its limit', async () => {
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                offset: 0,
+                limit: 250,
+                size: 1,
+                results: [{ id: 10, test_id: 2 }],
+                _links: { next: '/api/v2/get_results/2&limit=250&offset=250' }
+            })
+        });
+
+        const result = await client.getResults(2);
+
+        expect(result).toEqual([{ id: 10, test_id: 2 }]);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('paginateAll keeps an explicit positive limit', async () => {
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ cases: [], _links: { next: null } })
+        });
+
+        await client.getCases(1, undefined, { limit: '100' });
+
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_cases/1&limit=100',
+            expect.any(Object)
+        );
     });
 
     test('deleteCase sends POST request', async () => {
@@ -1636,7 +1730,7 @@ describe('TestRailClient', () => {
         const result = await client.getSharedSteps(1);
         expect(result).toEqual(mockSteps);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_shared_steps/1',
+            'https://testrail.io/index.php?/api/v2/get_shared_steps/1&limit=250',
             expect.any(Object)
         );
     });
@@ -1664,7 +1758,7 @@ describe('TestRailClient', () => {
         const result = await client.getRuns(1);
         expect(result).toEqual(mockRuns);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_runs/1',
+            'https://testrail.io/index.php?/api/v2/get_runs/1&limit=250',
             expect.any(Object)
         );
     });
@@ -1677,7 +1771,7 @@ describe('TestRailClient', () => {
 
         await client.getTests(1);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_tests/1',
+            'https://testrail.io/index.php?/api/v2/get_tests/1&limit=250',
             expect.any(Object)
         );
     });
@@ -1690,7 +1784,7 @@ describe('TestRailClient', () => {
 
         await client.getTests(1, []);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_tests/1',
+            'https://testrail.io/index.php?/api/v2/get_tests/1&limit=250',
             expect.any(Object)
         );
     });
@@ -1762,7 +1856,7 @@ describe('TestRailClient', () => {
         const result = await client.getAttachments('case', 123);
         expect(result).toEqual(mockAttachments);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_attachments_for_case/123',
+            'https://testrail.io/index.php?/api/v2/get_attachments_for_case/123&limit=250',
             expect.any(Object)
         );
     });
@@ -1780,7 +1874,7 @@ describe('TestRailClient', () => {
         const result = await client.getAttachments('run', 456);
         expect(result).toEqual(mockAttachments);
         expect(fetchMock).toHaveBeenCalledWith(
-            'https://testrail.io/index.php?/api/v2/get_attachments_for_run/456',
+            'https://testrail.io/index.php?/api/v2/get_attachments_for_run/456&limit=250',
             expect.any(Object)
         );
     });
