@@ -8,6 +8,7 @@ import { SharedStep, SharedStepHistory } from "../tools/shared_steps/types.js";
 import { Case, CaseField, CaseHistoryEntry } from "../tools/cases/types.js";
 import { Result } from "../tools/results/types.js";
 import { isActive } from "../utils/sanitizer.js";
+import { TestRailUrl } from "../utils/testrail_url.js";
 
 import * as fs from "fs";
 import * as path from "path";
@@ -408,10 +409,11 @@ export class TestRailClient {
 
     private async paginateAll<T>(url: string, dataKey: string): Promise<T[]> {
         const allItems: T[] = [];
-        let nextUrl: string | null = url;
+        let page: TestRailUrl | null = TestRailUrl.parse(url).withValidPageLimit();
 
-        while (nextUrl) {
-            const response: any = await this.get<any>(nextUrl);
+        while (page) {
+            const requestedUrl = page.toString();
+            const response: any = await this.get<any>(requestedUrl);
 
             // Handle older TestRail versions (pre-7.x) that return flat arrays
             // instead of paginated objects like { "suites": [...], "_links": {...} }
@@ -420,14 +422,12 @@ export class TestRailClient {
                 break;
             }
 
-            if (response[dataKey] && Array.isArray(response[dataKey])) {
+            if (response?.[dataKey] && Array.isArray(response[dataKey])) {
                 allItems.push(...response[dataKey]);
             }
 
-            nextUrl = response._links?.next || null;
-            if (nextUrl) {
-                nextUrl = `${API_INDEX}${nextUrl}`;
-            }
+            const rawNext = typeof response?._links?.next === 'string' ? response._links.next : '';
+            page = page.follow(rawNext, response?.limit, response?.size);
         }
 
         return allItems;
