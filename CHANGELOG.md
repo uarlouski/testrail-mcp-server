@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+- Bump `zod` from `4.6.5` to `4.6.7` so oversized arrays, sets, and maps are rejected before each element is validated ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)).
+
 ## [3.3.1]
 
 ### Fixed
