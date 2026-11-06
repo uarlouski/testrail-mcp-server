@@ -123,5 +123,19 @@ for (const tool of tools) {
     );
 }
 
+let apiVersion: string | undefined;
+let apiVersionNote = "";
+const apiVersionPromise = client.getApiVersion()
+    .then((version) => {
+        apiVersion = version;
+    })
+    .catch((error: unknown) => {
+        apiVersion = undefined;
+        const message = error instanceof Error ? error.message : String(error);
+        apiVersionNote = ` (${message})`;
+    });
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
+await apiVersionPromise;
+console.error(`[TestRail MCP Server] v${VERSION} started. TestRail API version: ${apiVersion ?? "undefined"}${apiVersionNote}`);

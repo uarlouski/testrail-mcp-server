@@ -6,6 +6,7 @@ import { z } from 'zod';
 const originalEnv = process.env;
 let exitMock: any;
 let errorMock: any;
+let fetchMock: any;
 
 describe('index.ts environment validation', () => {
     beforeEach(() => {
@@ -13,6 +14,12 @@ describe('index.ts environment validation', () => {
         process.env = { ...originalEnv };
         exitMock = jest.spyOn(process, 'exit').mockImplementation((() => { }) as any);
         errorMock = jest.spyOn(console, 'error').mockImplementation(() => { });
+        fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => ({ version: '10.9.0.1032' }),
+        } as any);
 
         // Mock the McpServer and other dependencies that run module-level code
         jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
@@ -93,7 +100,45 @@ describe('index.ts environment validation', () => {
         await import('../src/index.js');
 
         expect(exitMock).not.toHaveBeenCalled();
-        expect(errorMock).not.toHaveBeenCalled();
+        expect(errorMock).toHaveBeenCalledWith(
+            expect.stringContaining('TestRail API version: 10.9.0.1032')
+        );
+    });
+
+    test('logs undefined and still starts when get_version returns 404', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 404,
+            statusText: 'Not Found',
+            text: async () => 'Not Found',
+        });
+
+        await import('../src/index.js');
+
+        expect(exitMock).not.toHaveBeenCalled();
+        expect(errorMock).toHaveBeenCalledWith(
+            expect.stringContaining('TestRail API version: undefined')
+        );
+        expect(errorMock).not.toHaveBeenCalledWith(
+            expect.stringContaining('Error Details')
+        );
+    });
+
+    test('logs undefined and still starts when the version request fails', async () => {
+        process.env.TESTRAIL_INSTANCE_URL = 'https://testrail.com';
+        process.env.TESTRAIL_USERNAME = 'test@example.com';
+        process.env.TESTRAIL_API_KEY = 'secret';
+        fetchMock.mockRejectedValue(new Error('Network down'));
+
+        await import('../src/index.js');
+
+        expect(exitMock).not.toHaveBeenCalled();
+        expect(errorMock).toHaveBeenCalledWith(
+            expect.stringContaining('TestRail API version: undefined (Network down)')
+        );
     });
 
     test('loads shared steps tools when TESTRAIL_ENABLE_SHARED_STEPS is true', async () => {
