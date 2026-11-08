@@ -35,6 +35,13 @@ export interface TestRailClientOptions {
     timeoutMs?: number;
 }
 
+interface RequestOptions {
+    /** Resolve HTTP 404 as `undefined` instead of throwing. */
+    notFound?: 'undefined';
+    /** Overrides the default of 3. `0` tries once. */
+    maxRetries?: number;
+}
+
 export class TestRailClient {
     private baseUrl: string;
     private headers: HeadersInit;
@@ -57,6 +64,23 @@ export class TestRailClient {
             "Authorization": this.auth,
         };
         this.timeoutMs = options?.timeoutMs ?? 30_000;
+    }
+
+    /**
+     * TestRail build reported by `get_version`, for example `"10.9.0.1032"`.
+     * Returns `undefined` when the instance does not expose that endpoint (HTTP 404).
+     */
+    async getApiVersion(): Promise<string | undefined> {
+        const body = await this.get<{ version?: unknown } | undefined>(
+            `${API_BASE_V2}/get_version`,
+            { notFound: 'undefined', maxRetries: 0 },
+        );
+        const version = body?.version;
+        if (typeof version !== 'string') {
+            return undefined;
+        }
+        const trimmed = version.trim();
+        return trimmed.length > 0 ? trimmed : undefined;
     }
 
     async getCase(caseId: number): Promise<Case> {
@@ -433,21 +457,26 @@ export class TestRailClient {
         return allItems;
     }
 
-    private async get<T>(endpoint: string): Promise<T> {
-        return this.executeRequest<T>('GET', endpoint);
+    private async get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+        return this.executeRequest<T>('GET', endpoint, undefined, options);
     }
 
     private async post<T>(endpoint: string, data: Record<string, any>): Promise<T> {
         return this.executeRequest<T>('POST', endpoint, data);
     }
 
-    private async executeRequest<T>(method: 'GET' | 'POST', endpoint: string, data?: Record<string, any>): Promise<T> {
+    private async executeRequest<T>(
+        method: 'GET' | 'POST',
+        endpoint: string,
+        data?: Record<string, any>,
+        options?: RequestOptions,
+    ): Promise<T> {
         let jsonData = undefined;
         if (data) {
             jsonData = JSON.stringify(data);
         }
 
-        return this._executeRequest<T>(method, endpoint, this.headers, jsonData);
+        return this._executeRequest<T>(method, endpoint, this.headers, jsonData, 'json', options);
     }
 
     private async _executeRequest<T>(
@@ -455,10 +484,11 @@ export class TestRailClient {
         endpoint: string,
         headers: HeadersInit,
         body?: any,
-        responseType: 'json' | 'text' | 'buffer' = 'json'
+        responseType: 'json' | 'text' | 'buffer' = 'json',
+        options?: RequestOptions,
     ): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
-        const maxRetries = 3;
+        const maxRetries = options?.maxRetries ?? 3;
         const baseDelayMs = 1000;
         let attempt = 0;
 
@@ -482,6 +512,11 @@ export class TestRailClient {
                 console.error(`[TestRailClient] Received ${response.status} ${response.statusText} from ${method} ${endpoint} in ${duration}ms`);
 
                 if (!response.ok) {
+                    if (response.status === 404 && options?.notFound === 'undefined') {
+                        await response.text().catch(() => undefined);
+                        return undefined as T;
+                    }
+
                     if ([429, 500, 502, 503, 504].includes(response.status) && attempt < maxRetries) {
                         let delayMs = baseDelayMs * Math.pow(2, attempt);
 

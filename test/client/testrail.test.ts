@@ -390,6 +390,58 @@ describe('TestRailClient', () => {
         expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
+    test('getApiVersion returns the TestRail build', async () => {
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => ({ version: '10.9.0.1032' }),
+        });
+
+        const result = await client.getApiVersion();
+
+        expect(result).toBe('10.9.0.1032');
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://testrail.io/index.php?/api/v2/get_version',
+            expect.objectContaining({ method: 'GET' }),
+        );
+    });
+
+    test('getApiVersion returns undefined on 404 without logging an error', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        fetchMock.mockResolvedValue({
+            ok: false,
+            status: 404,
+            statusText: 'Not Found',
+            text: async () => 'Not Found',
+        });
+
+        await expect(client.getApiVersion()).resolves.toBeUndefined();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('Error Details'));
+        consoleSpy.mockRestore();
+    });
+
+    test('getApiVersion returns undefined when the payload has no version string', async () => {
+        fetchMock.mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json: async () => ({}),
+        });
+
+        await expect(client.getApiVersion()).resolves.toBeUndefined();
+    });
+
+    test('getApiVersion does not retry a failed request', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        fetchMock.mockRejectedValue(new Error('Network down'));
+
+        await expect(client.getApiVersion()).rejects.toThrow('Network down');
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        consoleSpy.mockRestore();
+    });
+
     test('getPriorities returns data on success', async () => {
         const mockData = [{
             id: 1,
